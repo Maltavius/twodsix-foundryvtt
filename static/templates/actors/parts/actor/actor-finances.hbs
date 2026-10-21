@@ -152,8 +152,10 @@
           {{/each}}
           {{#if finance.opening}}
           <tr class="fl-row fl-opening">
-            <td></td>
-            <td class="fl-col-desc" colspan="3"><span class="fl-desc-text">{{localize "TWODSIX.Actor.Finances.OPENING_BALANCE"}}</span></td>
+            <td class="fl-col-date"></td>
+            <td class="fl-col-desc"><span class="fl-desc-text">{{localize "TWODSIX.Actor.Finances.OPENING_BALANCE"}}</span></td>
+            <td class="fl-col-account"></td>
+            <td class="fl-col-amount"></td>
             <td class="fl-col-balance">{{finance.opening.text}}</td>
           </tr>
           {{/if}}
