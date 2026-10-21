@@ -1172,3 +1172,16 @@
 .finance-ledger .fl-totals {
   padding-right: 44px; /* room for the notes button */
 }
+
+/* The notes button is a yellow note pad */
+.finance-ledger .fl-notes-toggle {
+  color: #f6d44b;
+  background: color-mix(in srgb, #f6d44b 14%, transparent);
+  border-color: color-mix(in srgb, #f6d44b 55%, transparent);
+}
+
+.finance-ledger .fl-notes-toggle:hover,
+.finance-ledger .fl-notes-toggle.is-open {
+  background: color-mix(in srgb, #f6d44b 30%, transparent);
+  border-color: #f6d44b;
+}
