@@ -100,10 +100,22 @@ describe('addTransaction', () => {
     expect(actor.update).not.toHaveBeenCalled();
   });
 
-  test('decimal amounts do not leave floating point noise in balances', async () => {
+  test('decimal amounts are rounded up to whole Cr, away from zero', async () => {
+    const expense = makeActor({cash: 1000});
+    const spent = await addTransaction(expense, {amount: -199.2});
+    expect(spent.amount).toBe(-200);
+    expect(expense.update.mock.calls[0][0]['system.financeValues.cash']).toBe(800);
+
+    const income = makeActor({cash: 1000});
+    const earned = await addTransaction(income, {amount: 99.1});
+    expect(earned.amount).toBe(100);
+    expect(income.update.mock.calls[0][0]['system.financeValues.cash']).toBe(1100);
+  });
+
+  test('a balance that already has decimals does not pick up floating point noise', async () => {
     const actor = makeActor({cash: 0.1, digital: 0});
-    await addTransaction(actor, {amount: 0.2});
-    expect(actor.update.mock.calls[0][0]['system.financeValues.cash']).toBe(0.3);
+    await addTransaction(actor, {amount: 1});
+    expect(actor.update.mock.calls[0][0]['system.financeValues.cash']).toBe(1.1);
   });
 });
 
@@ -117,6 +129,15 @@ describe('moveMoney', () => {
     expect(update['system.financeValues.digital']).toBe(400);
     expect(update['system.ledger.transactions']).toEqual([entry]);
     expect(entry).toMatchObject({amount: 500, account: 'digital', toAccount: 'cash', category: 'transfer'});
+  });
+
+  test('a decimal amount is rounded up to whole Cr', async () => {
+    const actor = makeActor({cash: 0, digital: 1000});
+    const entry = await moveMoney(actor, {amount: 99.5, from: 'digital', to: 'cash'});
+    expect(entry.amount).toBe(100);
+    const [update] = actor.update.mock.calls[0];
+    expect(update['system.financeValues.cash']).toBe(100);
+    expect(update['system.financeValues.digital']).toBe(900);
   });
 
   test('rejects non-positive amounts and identical or unknown accounts', async () => {
@@ -173,6 +194,13 @@ describe('recordLedgerAdjustments', () => {
     expect(data.system.ledger.transactions[0]).toEqual(existing);
     expect(data.system.ledger.transactions[1].amount).toBe(-5);
     expect(transactions).toHaveLength(1);
+  });
+
+  test('an adjustment keeps the exact difference, so the ledger always agrees with the balance', () => {
+    const actor = makeActor({cash: 1000});
+    const data = {system: {financeValues: {cash: 1000.5}}};
+    recordLedgerAdjustments(actor, data, {});
+    expect(data.system.ledger.transactions[0].amount).toBe(0.5);
   });
 
   test('a change in both accounts creates one entry per account', () => {

@@ -58,6 +58,7 @@ export class TravellerData extends TwodsixActorBaseData {
         // Unique id, set when the entry is created (see features/finances/ledger.js)
         id: new fields.StringField({...requiredBlankString}),
         // Signed amount in Cr. For a transfer between own accounts: positive size of the transfer.
+        // Whole Cr when added by a player; an automatic adjustment keeps the exact difference of a manual edit.
         amount: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
         // Account the money was added to / taken from, or the source account of a transfer: "cash" | "digital"
         account: new fields.StringField({required: true, blank: false, initial: "cash"}),

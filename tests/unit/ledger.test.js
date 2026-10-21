@@ -10,7 +10,8 @@ import {
   getTransactionEffects,
   parseLedgerAmount,
   revertTransaction,
-  roundMoney
+  roundMoney,
+  roundUpCr
 } from '../../src/module/features/finances/ledger.js';
 
 const tx = (id, amount, account = 'cash', extra = {}) => ({id, amount, account, toAccount: null, category: 'other', description: id, ...extra});
@@ -36,6 +37,18 @@ describe('ledger effects and balances', () => {
 
   test('roundMoney removes floating point noise', () => {
     expect(roundMoney(0.1 + 0.2)).toBe(0.3);
+  });
+
+  test('roundUpCr rounds away from zero to whole Cr and ignores floating point noise', () => {
+    expect(roundUpCr(200)).toBe(200);
+    expect(roundUpCr(200.01)).toBe(201);
+    expect(roundUpCr(200.0000001)).toBe(200);
+    expect(roundUpCr(-200.01)).toBe(-201);
+    expect(roundUpCr(0.5)).toBe(1);
+    expect(roundUpCr(-0.5)).toBe(-1);
+    expect(roundUpCr(0.1 + 0.2)).toBe(1);
+    expect(Object.is(roundUpCr(-0.001), 0)).toBe(true);
+    expect(roundUpCr(NaN)).toBeNaN();
   });
 
   test('running balances are derived backwards from the current balances', () => {
@@ -131,12 +144,27 @@ describe('parseLedgerAmount', () => {
     expect(parseLedgerAmount('1,234,567')).toBe(1234567);
   });
 
-  test('decimals follow the locale but both separators are tolerated', () => {
-    expect(parseLedgerAmount('1,5', 'sv')).toBe(1.5);
-    expect(parseLedgerAmount('1.5', 'sv')).toBe(1.5);
-    expect(parseLedgerAmount('1,5', 'en')).toBe(1.5);
-    expect(parseLedgerAmount('1.234,56')).toBe(1234.56);
-    expect(parseLedgerAmount('1,234.56')).toBe(1234.56);
+  test('decimal separators follow the locale (both tolerated) and the result is rounded up to whole Cr', () => {
+    expect(parseLedgerAmount('1,5', 'sv')).toBe(2);
+    expect(parseLedgerAmount('1.5', 'sv')).toBe(2);
+    expect(parseLedgerAmount('1,5', 'en')).toBe(2);
+    expect(parseLedgerAmount('1.234,56')).toBe(1235);
+    expect(parseLedgerAmount('1,234.56')).toBe(1235);
+  });
+
+  test('decimals round up away from zero, so costs are never rounded down', () => {
+    expect(parseLedgerAmount('199.2')).toBe(200);
+    expect(parseLedgerAmount('-199.2')).toBe(-200);
+    expect(parseLedgerAmount('0.3')).toBe(1);
+    expect(parseLedgerAmount('-0.3')).toBe(-1);
+    expect(parseLedgerAmount('200.004')).toBe(200);
+    expect(parseLedgerAmount('1.5k')).toBe(1500);
+  });
+
+  test('zero stays a plain zero, never negative zero', () => {
+    expect(Object.is(parseLedgerAmount('0'), 0)).toBe(true);
+    expect(Object.is(parseLedgerAmount('-0'), 0)).toBe(true);
+    expect(Object.is(parseLedgerAmount('-0.001'), 0)).toBe(true);
   });
 
   test('k, M and G suffixes with optional Cr', () => {

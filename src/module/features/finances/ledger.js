@@ -33,6 +33,19 @@ export function roundMoney(value) {
 }
 
 /**
+ * Round an amount entered by a player up to whole Cr, away from zero: 199.2 becomes 200 and -199.2 becomes -200.
+ * Prices in the games are whole Cr, so the ledger does not take decimals from players.
+ * Amounts below one hundredth count as zero, so 200.004 stays 200.
+ * @param {number} value
+ * @returns {number}
+ */
+export function roundUpCr(value) {
+  const rounded = roundMoney(value);
+  const result = rounded < 0 ? -Math.ceil(-rounded) : Math.ceil(rounded);
+  return result === 0 ? 0 : result; // turns -0 into 0 and leaves NaN as NaN
+}
+
+/**
  * Effect of one transaction on each account.
  * @param {{amount: number, account: string, toAccount?: string|null}} transaction
  * @returns {Record<string, number>} effect per account, e.g. {cash: -200, digital: 0}
@@ -176,9 +189,10 @@ export function buildLedgerRows(transactions, currentBalances, options = {}) {
  * Parse an amount typed by a player.
  * Accepts a leading + or - (also the typographic minus), spaces and non-breaking spaces as thousand separators,
  * the locale's decimal separator (a dot is accepted as well), and an optional k/M/G suffix, optionally followed by "Cr".
+ * The result is rounded up to whole Cr (see roundUpCr).
  * @param {string} text
  * @param {string} [locale] - BCP 47 tag used to decide which of "." and "," is the decimal separator
- * @returns {number} the signed amount, or NaN if the text is not a valid amount
+ * @returns {number} the signed whole amount, or NaN if the text is not a valid amount
  */
 export function parseLedgerAmount(text, locale = "en") {
   if (typeof text !== "string") {
@@ -225,8 +239,8 @@ export function parseLedgerAmount(text, locale = "en") {
     return NaN;
   }
   const multiplier = {k: 1e3, K: 1e3, M: 1e6, G: 1e9}[match.groups.units] ?? 1;
-  const value = roundMoney(base * multiplier);
-  return match.groups.sign === "-" ? -value : value;
+  const value = roundUpCr(base * multiplier);
+  return match.groups.sign === "-" ? 0 - value : value;
 }
 
 /**

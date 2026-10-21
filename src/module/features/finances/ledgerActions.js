@@ -14,7 +14,7 @@ import {
   DEFAULT_LEDGER_CATEGORY,
   LEDGER_ACCOUNTS,
   revertTransaction,
-  roundMoney
+  roundUpCr
 } from './ledger.js';
 
 /** @typedef {import("../../entities/TwodsixActor").default} TwodsixActor */
@@ -97,7 +97,7 @@ async function writeLedger(actor, newBalances, newTransactions) {
  * Add income (positive amount) or an expense (negative amount) to one account.
  * @param {TwodsixActor} actor
  * @param {object} data
- * @param {number} data.amount - signed, in Cr. Must be finite and not zero.
+ * @param {number} data.amount - signed, in Cr. Rounded up to whole Cr. Must not be zero.
  * @param {string} [data.account] - "cash" or "digital"
  * @param {string} [data.category]
  * @param {string} [data.description]
@@ -105,7 +105,8 @@ async function writeLedger(actor, newBalances, newTransactions) {
  * @returns {Promise<object>} the transaction that was added
  */
 export async function addTransaction(actor, {amount, account = DEFAULT_LEDGER_ACCOUNT, category = DEFAULT_LEDGER_CATEGORY, description = "", gameDate} = {}) {
-  if (!Number.isFinite(amount) || roundMoney(amount) === 0) {
+  amount = roundUpCr(amount);
+  if (!Number.isFinite(amount) || amount === 0) {
     throw new TypeError("A transaction needs a non-zero amount");
   }
   if (!LEDGER_ACCOUNTS.includes(account)) {
@@ -125,7 +126,7 @@ export async function addTransaction(actor, {amount, account = DEFAULT_LEDGER_AC
  * Move money between a traveller's own accounts. The total funds do not change.
  * @param {TwodsixActor} actor
  * @param {object} data
- * @param {number} data.amount - positive, in Cr
+ * @param {number} data.amount - positive, in Cr. Rounded up to whole Cr.
  * @param {string} data.from - source account
  * @param {string} data.to - destination account
  * @param {string} [data.description]
@@ -133,7 +134,8 @@ export async function addTransaction(actor, {amount, account = DEFAULT_LEDGER_AC
  * @returns {Promise<object>} the transaction that was added
  */
 export async function moveMoney(actor, {amount, from, to, description = "", gameDate} = {}) {
-  if (!Number.isFinite(amount) || roundMoney(amount) <= 0) {
+  amount = roundUpCr(amount);
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new TypeError("Moving money needs a positive amount");
   }
   if (!LEDGER_ACCOUNTS.includes(from) || !LEDGER_ACCOUNTS.includes(to) || from === to) {
