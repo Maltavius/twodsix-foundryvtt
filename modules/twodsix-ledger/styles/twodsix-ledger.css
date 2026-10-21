@@ -1,0 +1,600 @@
+/* ============================================================================
+   Finances tab on the traveller sheet (money overview, add transaction form, transaction history, notes).
+   Loaded for every theme. Colours come from the text colour of the sheet (currentColor) wherever possible so the
+   tab follows the foundry, classic and western themes without a copy of the rules for each.
+   ============================================================================ */
+
+.finance-ledger {
+  --fl-line: color-mix(in srgb, currentColor 30%, transparent);
+  --fl-soft: color-mix(in srgb, currentColor 7%, transparent);
+  --fl-muted: color-mix(in srgb, currentColor 74%, transparent);
+  /* Mixed with the text colour so green and red stay readable on both light and dark sheets */
+  --fl-positive-base: var(--s2d6-crit-success, #2f7822);
+  --fl-negative-base: var(--s2d6-crit-fail, #aa0200);
+  --fl-positive: color-mix(in srgb, var(--fl-positive-base) 62%, currentColor);
+  --fl-negative: color-mix(in srgb, var(--fl-negative-base) 62%, currentColor);
+  --fl-cash: #b7791f;
+  --fl-digital: #2b6cb0;
+  --fl-gap: 8px;
+
+  container-type: inline-size;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fl-gap);
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  min-height: min-content;
+  margin: 0 auto;
+  padding: 6px 8px 8px;
+}
+
+/* Everything above the history keeps its size; extra height goes to the history and the notes. */
+.finance-ledger > section {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.finance-ledger .fl-label {
+  font-size: 0.8em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fl-muted);
+}
+
+.finance-ledger .positive {
+  color: var(--fl-positive);
+}
+
+.finance-ledger .negative {
+  color: var(--fl-negative);
+}
+
+/* ---- Totals: a dark banner with a big number. Fixed colours, so it reads the same in every theme. ---- */
+
+.finance-ledger .fl-totals {
+  --banner-bg: #1b2a28;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2px 16px;
+  padding: 8px 14px 9px;
+  border: 1px solid color-mix(in srgb, #fff 22%, var(--banner-bg));
+  border-radius: 6px;
+  background: var(--banner-bg);
+  color: #f3f1ea;
+}
+
+.finance-ledger .fl-totals .fl-label {
+  color: color-mix(in srgb, #f3f1ea 72%, transparent);
+}
+
+.finance-ledger .fl-total-main,
+.finance-ledger .fl-total-net {
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-ledger .fl-total-net {
+  align-items: flex-end;
+}
+
+.finance-ledger .fl-total-value {
+  font-size: 2.3em;
+  line-height: 1.1;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  color: #6fe3a8;
+}
+
+.finance-ledger .fl-totals.negative .fl-total-value {
+  color: #ff9b8f;
+}
+
+.finance-ledger .fl-totals.zero .fl-total-value {
+  color: #f3f1ea;
+}
+
+.finance-ledger .fl-unit {
+  font-size: 0.5em;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+.finance-ledger .fl-net-value {
+  font-size: 1.15em;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Cash and digital, and the four older fields ---- */
+
+.finance-ledger .fl-accounts,
+.finance-ledger .fl-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--fl-gap);
+}
+
+.finance-ledger .fl-account,
+.finance-ledger .fl-fields > div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+  /* The older themes give these classes a grid-area for the previous layout */
+  grid-area: auto;
+}
+
+.finance-ledger .item-title {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.finance-ledger .fl-account input[type="text"],
+.finance-ledger .fl-fields input[type="text"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 3.2ch;
+  padding: 0.4em 0.5em;
+}
+
+/* Cash and digital as cards with an icon and an accent colour */
+.finance-ledger .fl-card {
+  --accent: var(--fl-line);
+  gap: 2px;
+  padding: 6px 10px 6px 12px;
+  border: 1px solid var(--fl-line);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-card.cash:not(.digital) {
+  --accent: var(--fl-cash);
+}
+
+.finance-ledger .fl-card.digital {
+  --accent: var(--fl-digital);
+}
+
+.finance-ledger .fl-card-title {
+  font-weight: bold;
+}
+
+.finance-ledger .fl-card-title i {
+  width: 1.4em;
+  color: color-mix(in srgb, var(--accent) 80%, currentColor);
+}
+
+.finance-ledger .fl-card-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.finance-ledger .fl-card-value .fl-unit {
+  font-size: 0.95em;
+  color: var(--fl-muted);
+  opacity: 1;
+}
+
+/* The value is an input, but looks like plain big text until you hover or click it */
+.finance-ledger .fl-card input[type="text"] {
+  flex: 1 1 auto;
+  height: auto;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.6em;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+.finance-ledger .fl-card input[type="text"]:hover,
+.finance-ledger .fl-card input[type="text"]:focus {
+  border-color: var(--fl-line);
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-card .fl-hint i {
+  margin-left: 2px;
+  font-size: 0.85em;
+}
+
+.finance-ledger .fl-hint {
+  margin: 0;
+  font-size: 0.8em;
+  color: var(--fl-muted);
+}
+
+/* ---- Add transaction / move money ---- */
+
+.finance-ledger .fl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--fl-line);
+  border-radius: 4px;
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-modes {
+  display: flex;
+  gap: 4px;
+}
+
+.finance-ledger .fl-mode,
+.finance-ledger .fl-filter,
+.finance-ledger .fl-undo,
+.finance-ledger .fl-more {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 2px 10px;
+  line-height: 1.5;
+  border: 1px solid var(--fl-line);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-mode.active,
+.finance-ledger .fl-filter.active {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  border-color: currentColor;
+  font-weight: bold;
+}
+
+.finance-ledger button:not(:disabled):hover {
+  border-color: currentColor;
+}
+
+.finance-ledger .fl-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.finance-ledger .fl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 110px;
+  min-width: 0;
+}
+
+.finance-ledger .fl-field.fl-amount {
+  flex: 1 1 130px;
+}
+
+.finance-ledger .fl-field.fl-description {
+  flex: 3 1 200px;
+}
+
+.finance-ledger .fl-field input,
+.finance-ledger .fl-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 2.2em;
+  margin: 0;
+}
+
+.finance-ledger .fl-submit {
+  flex: 1 1 150px;
+  min-width: 150px;
+  height: 2.2em;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-submit[data-kind="income"] {
+  background: var(--fl-positive-base);
+  border-color: var(--fl-positive-base);
+  color: #fff;
+}
+
+.finance-ledger .fl-submit[data-kind="expense"] {
+  background: var(--fl-negative-base);
+  border-color: var(--fl-negative-base);
+  color: #fff;
+}
+
+.finance-ledger .fl-form .fl-hint,
+.finance-ledger .fl-form .fl-error {
+  margin: 0;
+}
+
+.finance-ledger .fl-error {
+  color: var(--fl-negative);
+  font-size: 0.9em;
+}
+
+.finance-ledger .fl-error[hidden] {
+  display: none;
+}
+
+/* ---- Transaction history: takes about three quarters of the extra height ---- */
+
+.finance-ledger .fl-history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 3 1 230px;
+  min-height: 230px;
+}
+
+.finance-ledger .fl-history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.finance-ledger .fl-history-head .item-title {
+  flex: 0 0 auto;
+}
+
+.finance-ledger .fl-filters {
+  display: flex;
+  gap: 4px;
+}
+
+.finance-ledger .fl-search {
+  flex: 1 1 90px;
+  min-width: 70px;
+  height: 2em;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.finance-ledger .fl-undo[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.finance-ledger .fl-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--fl-line);
+  border-radius: 4px;
+}
+
+.finance-ledger .fl-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.95em;
+}
+
+.finance-ledger .fl-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  /* The theme's own header colours; opaque so rows scrolling underneath do not show through */
+  color: var(--s2d6-title-color, currentColor);
+  background: var(--s2d6-header-background, var(--color-bg, Canvas));
+  border-bottom: 1px solid var(--fl-line);
+}
+
+.finance-ledger .fl-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.finance-ledger .fl-table tbody tr:nth-child(even) {
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-col-date,
+.finance-ledger .fl-col-amount,
+.finance-ledger .fl-col-balance {
+  /* Narrowest width that fits the content, so numbers and pills never overlap. The description takes what is left. */
+  width: 1%;
+  white-space: nowrap;
+}
+
+.finance-ledger .fl-col-account {
+  width: 1%;
+}
+
+.finance-ledger .fl-col-desc {
+  width: 100%;
+  min-width: 8ch;
+}
+
+.finance-ledger .fl-col-date {
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-ledger td.real-date {
+  color: var(--fl-muted);
+  font-style: italic;
+}
+
+.finance-ledger .fl-col-amount,
+.finance-ledger .fl-col-balance {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.finance-ledger td.fl-col-amount {
+  font-weight: bold;
+}
+
+.finance-ledger td.fl-col-amount.transfer {
+  color: inherit;
+}
+
+.finance-ledger .fl-transfer-icon {
+  margin-right: 2px;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.finance-ledger .fl-category {
+  display: block;
+  font-size: 0.8em;
+  color: var(--fl-muted);
+}
+
+/* Account pills have their own fixed colours (light fill, dark text) so they are readable on light and dark sheets */
+.finance-ledger .fl-accounts-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+}
+
+.finance-ledger .fl-pill-after {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.finance-ledger .fl-arrow {
+  color: var(--fl-muted);
+  font-size: 0.85em;
+}
+
+.finance-ledger .fl-pill {
+  display: inline-block;
+  padding: 0 8px;
+  border: 1px solid #9a9a92;
+  border-radius: 999px;
+  background: #e4e4de;
+  color: #3a3a36;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.finance-ledger .fl-pill.cash {
+  border-color: #c9a227;
+  background: #f3e2a8;
+  color: #5e4500;
+}
+
+.finance-ledger .fl-pill.digital {
+  border-color: #5b8fc4;
+  background: #d6e6f5;
+  color: #1b4a78;
+}
+
+/* Category labels: one colour per category, mixed with the text colour so they stay readable on both light and dark */
+.finance-ledger .fl-category {
+  --cat: currentColor;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--cat) 60%, currentColor);
+}
+
+.finance-ledger .fl-cat-living { --cat: #d9730d; }
+.finance-ledger .fl-cat-income { --cat: #2f9e44; }
+.finance-ledger .fl-cat-medical { --cat: #a23fc2; }
+.finance-ledger .fl-cat-equipment { --cat: #2f7fd1; }
+.finance-ledger .fl-cat-ship { --cat: #0f9aa8; }
+.finance-ledger .fl-cat-trade { --cat: #b8872b; }
+.finance-ledger .fl-category.fl-cat-other,
+.finance-ledger .fl-category.fl-cat-transfer,
+.finance-ledger .fl-category.fl-cat-adjustment {
+  /* No hue to add: nearly the full text colour, so it stays readable on the darker striped rows */
+  color: color-mix(in srgb, currentColor 82%, transparent);
+}
+
+.finance-ledger .fl-account-inline {
+  display: none;
+  color: var(--fl-muted);
+  font-weight: normal;
+}
+
+.finance-ledger .fl-opening td {
+  color: var(--fl-muted);
+  font-style: italic;
+}
+
+.finance-ledger .fl-empty {
+  margin: 0;
+  padding: 18px 8px;
+  text-align: center;
+  color: var(--fl-muted);
+}
+
+.finance-ledger .fl-more {
+  display: block;
+  margin: 6px auto;
+}
+
+/* ---- Financial notes: about a quarter of the extra height ---- */
+
+.finance-ledger .financial-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 100px;
+  min-height: 100px;
+  padding: 0;
+}
+
+.finance-ledger .financial-notes div[contenteditable] {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  overflow-y: auto;
+  padding: 0.3em 0.5em;
+}
+
+/* ---- Narrow tab ---- */
+
+@container (max-width: 400px) {
+  .finance-ledger .fl-fields {
+    grid-template-columns: 1fr;
+  }
+
+  /* No room for a column of its own: show the account under the description instead */
+  .finance-ledger .fl-col-account {
+    display: none;
+  }
+
+  .finance-ledger .fl-account-inline {
+    display: block;
+  }
+}
