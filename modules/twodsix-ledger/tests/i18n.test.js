@@ -8,6 +8,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { LEDGER_ACCOUNTS, LEDGER_CATEGORIES, SYSTEM_CATEGORIES } from '../scripts/ledger.js';
 import moduleLang from '../lang/en.json' with { type: 'json' };
+import swedishLang from '../lang/sv.json' with { type: 'json' };
 import systemLang from '../../../static/lang/en.json' with { type: 'json' };
 
 const moduleKeys = moduleLang.TWODSIX_LEDGER;
@@ -72,3 +73,22 @@ describe('module translations', () => {
     }
   });
 });
+
+describe('Swedish translation', () => {
+  const flatten = (node, path = '') => Object.entries(node).flatMap(([key, value]) =>
+    typeof value === 'object' ? flatten(value, `${path}${key}.`) : [[`${path}${key}`, value]]);
+  const english = new Map(flatten(moduleKeys));
+  const swedish = new Map(flatten(swedishLang.TWODSIX_LEDGER));
+
+  it('has exactly the same keys as English', () => {
+    expect([...swedish.keys()].sort()).toEqual([...english.keys()].sort());
+  });
+
+  it('keeps the placeholders ({count}, _ENTRY_) of every English string', () => {
+    for (const [key, text] of english) {
+      const placeholders = string => (string.match(/\{\w+\}|_[A-Z]+_/g) ?? []).sort();
+      expect(placeholders(swedish.get(key)), key).toEqual(placeholders(text));
+    }
+  });
+});
+
