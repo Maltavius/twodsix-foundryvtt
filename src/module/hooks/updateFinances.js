@@ -1,6 +1,7 @@
 /** @typedef {import("../entities/TwodsixActor").default} TwodsixActor */
 import { TravellerData } from '../data/actors/travellerData.js';
 import { parseLocaleNumber } from '../data/commonSchemaUtils.js';
+import { financeTextToNumber, stripNumberSpaces } from '../features/finances/financeText.js';
 
 /**
  * Update the finances for a traveller actor based on the provided financeDiff.
@@ -51,7 +52,7 @@ function updateFinanceValues(actor, update, financeDiff) {
         const delta = TravellerData.getParsedFinanceText(update.system.finances[financeField]);
         foundry.utils.mergeObject(updateMods, {
           financeValues: {
-            [financeField]: actor.system.financeValues[financeField] + (parseFloat(delta.num) * TravellerData.getMultiplier(delta.units))
+            [financeField]: actor.system.financeValues[financeField] + (parseLocaleNumber(stripNumberSpaces(delta.num)) * TravellerData.getMultiplier(delta.units))
           }
         });
         const parsedText = TravellerData.getParsedFinanceText(actor.system.finances[financeField]);
@@ -68,7 +69,7 @@ function updateFinanceValues(actor, update, financeDiff) {
         if (parsedText) {
           foundry.utils.mergeObject(updateMods, {
             financeValues: {
-              [financeField]: parseLocaleNumber(parsedText.num) * TravellerData.getMultiplier(parsedText.units)
+              [financeField]: financeTextToNumber(update.system.finances[financeField], parseLocaleNumber)
             }
           });
         }

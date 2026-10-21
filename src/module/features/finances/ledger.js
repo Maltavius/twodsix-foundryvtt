@@ -199,7 +199,7 @@ export function parseLedgerAmount(text, locale = "en") {
     return NaN;
   }
   const cleaned = text
-    .replace(/[−–—]/g, "-")
+    .replace(/[\u2212\u2013\u2014]/g, "-")
     .replace(/[\s\u00a0\u202f]/g, "");
   const match = /^(?<sign>[+-]?)(?<num>[0-9.,']+)(?<units>[kKMG]?)(?:Cr|cr)?$/.exec(cleaned);
   if (!match) {

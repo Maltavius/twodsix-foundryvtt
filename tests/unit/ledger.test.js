@@ -133,13 +133,13 @@ describe('parseLedgerAmount', () => {
     expect(parseLedgerAmount('200')).toBe(200);
     expect(parseLedgerAmount('+200')).toBe(200);
     expect(parseLedgerAmount('-200')).toBe(-200);
-    expect(parseLedgerAmount('−200')).toBe(-200);
+    expect(parseLedgerAmount('\u2212200')).toBe(-200);
   });
 
   test('thousand separators: spaces, nbsp, narrow nbsp, commas', () => {
     expect(parseLedgerAmount('1 500')).toBe(1500);
-    expect(parseLedgerAmount('1 500')).toBe(1500);
-    expect(parseLedgerAmount('+5 000', 'sv')).toBe(5000);
+    expect(parseLedgerAmount('1\u00a0500')).toBe(1500);
+    expect(parseLedgerAmount('+5\u202f000', 'sv')).toBe(5000);
     expect(parseLedgerAmount('1,500', 'en')).toBe(1500);
     expect(parseLedgerAmount('1,234,567')).toBe(1234567);
   });

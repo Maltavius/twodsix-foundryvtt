@@ -5,6 +5,7 @@ import {
   requiredBlankString,
   requiredInteger
 } from '../commonSchemaUtils.js';
+import { getUnitMultiplier, parseFinanceText } from '../../features/finances/financeText.js';
 import { TwodsixActorBaseData } from './character-base.js';
 
 export class TravellerData extends TwodsixActorBaseData {
@@ -111,28 +112,16 @@ export class TravellerData extends TwodsixActorBaseData {
    * @returns {number} - The numeric multiplier for the units.
    */
   static getMultiplier(units) {
-    switch (units[0]) {
-      case 'G':
-        return 1e+9;
-      case 'M':
-        return 1e+6;
-      case 'k':
-      case 'K':
-        return 1e+3;
-      default:
-        return 1;
-    }
+    return getUnitMultiplier(units);
   }
 
   /**
-   * Parse a finance text field into separate value and units.
+   * Parse a finance text field into separate value and units. A space may be used as thousands separator ("30 485").
    * @param {string} financeString - The finance string to parse.
    * @returns {Record<string, any> | undefined} - Object with keys num and units, or undefined if parsing fails.
    */
   static getParsedFinanceText(financeString) {
-    const re = new RegExp(/^(?<pre>\D*?)(?<num>[0-9,.\-+]*)(?<sp>\s*)(?<units>.*?)$/);
-    const parsedResult = re.exec(financeString);
-    return parsedResult?.groups;
+    return parseFinanceText(financeString);
   }
 
   /**
