@@ -1061,6 +1061,21 @@
   color: var(--fl-bar-text);
 }
 
+/* The buttons take the bar's text colour, so they are readable on whatever colour the theme gives the bar */
 .finance-ledger .fl-history-bar .fl-bar-button {
   min-height: 28px;
+  color: var(--fl-bar-text);
+  background: color-mix(in srgb, var(--fl-bar-text) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fl-bar-text) 45%, transparent);
+  text-shadow: none;
+}
+
+.finance-ledger .fl-history-bar .fl-bar-button:hover {
+  border-color: var(--fl-bar-text);
+  background: color-mix(in srgb, var(--fl-bar-text) 24%, transparent);
+}
+
+.finance-ledger .fl-history-bar .fl-bar-button.is-open {
+  border-color: var(--fl-bar-text);
+  background: color-mix(in srgb, var(--fl-bar-text) 30%, transparent);
 }
