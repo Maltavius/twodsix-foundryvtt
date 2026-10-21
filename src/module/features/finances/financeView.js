@@ -114,10 +114,14 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
       dateText: date.text,
       isRealDate: date.isRealDate,
       description: transaction.description || categoryLabels[transaction.category] || "",
+      categoryKey: categoryLabels[transaction.category] ? transaction.category : "other",
       categoryLabel: categoryLabels[transaction.category] ?? "",
       showCategory: Boolean(transaction.description) && Boolean(categoryLabels[transaction.category]),
       accountKey,
       accountText,
+      /** One pill per account involved: the account, or from and to for a transfer */
+      accountPills: (row.isTransfer ? [transaction.account, transaction.toAccount] : [transaction.account])
+        .map(key => ({key, label: accountLabels[key]})),
       isTransfer: row.isTransfer,
       amountText: showTransferSize ? formatLedgerNumber(amount, locale) : formatLedgerNumber(amount, locale, true),
       amountClass: showTransferSize ? "transfer" : signClass(amount),

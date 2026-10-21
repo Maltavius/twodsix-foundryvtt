@@ -70,11 +70,25 @@ describe('buildFinanceView', () => {
     const balances = {cash: 800, digital: 200};
     const all = build({transactions, balances});
     expect(all.rows).toHaveLength(1);
-    expect(all.rows[0]).toMatchObject({isTransfer: true, amountText: '200', amountClass: 'transfer', accountText: 'CASH → DIGITAL'.replace('CASH', 'CASH')});
+    expect(all.rows[0]).toMatchObject({isTransfer: true, amountText: '200', amountClass: 'transfer', accountText: 'CASH → DIGITAL', categoryKey: 'transfer'});
     const cash = build({transactions, balances, ui: {filter: 'cash'}});
     expect(cash.rows[0]).toMatchObject({amountText: '-200', amountClass: 'negative', balanceText: '800'});
     const digital = build({transactions, balances, ui: {filter: 'digital'}});
     expect(digital.rows[0]).toMatchObject({amountText: '+200', amountClass: 'positive', balanceText: '200'});
+  });
+
+  test('each row has one pill per account, or a from and a to pill for a transfer', () => {
+    const view = build({
+      transactions: [tx('a', 5, {account: 'digital'}), tx('t', 200, {account: 'digital', toAccount: 'cash', category: 'transfer'})],
+      balances: {cash: 200, digital: -195}
+    });
+    expect(view.rows[0].accountPills).toEqual([{key: 'digital', label: 'DIGITAL'}, {key: 'cash', label: 'CASH'}]);
+    expect(view.rows[1].accountPills).toEqual([{key: 'digital', label: 'DIGITAL'}]);
+  });
+
+  test('the category key is kept for colouring, and unknown categories count as other', () => {
+    const view = build({transactions: [tx('a', 5, {category: 'medical', description: 'x'}), tx('b', 5, {category: 'mystery', description: 'y'})], balances: {cash: 10}});
+    expect(view.rows.map(r => r.categoryKey)).toEqual(['other', 'medical']);
   });
 
   test('filters, search and bad filter values', () => {

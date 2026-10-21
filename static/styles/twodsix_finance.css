@@ -51,15 +51,24 @@
   color: var(--fl-negative);
 }
 
-/* ---- Totals ---- */
+/* ---- Totals: a dark banner with a big number. Fixed colours, so it reads the same in every theme. ---- */
 
 .finance-ledger .fl-totals {
+  --banner-bg: #1b2a28;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 2px 16px;
-  padding: 2px 2px 0;
+  padding: 8px 14px 9px;
+  border: 1px solid color-mix(in srgb, #fff 22%, var(--banner-bg));
+  border-radius: 6px;
+  background: var(--banner-bg);
+  color: #f3f1ea;
+}
+
+.finance-ledger .fl-totals .fl-label {
+  color: color-mix(in srgb, #f3f1ea 72%, transparent);
 }
 
 .finance-ledger .fl-total-main,
@@ -73,20 +82,30 @@
 }
 
 .finance-ledger .fl-total-value {
-  font-size: 2em;
+  font-size: 2.3em;
   line-height: 1.1;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
+  color: #6fe3a8;
+}
+
+.finance-ledger .fl-totals.negative .fl-total-value {
+  color: #ff9b8f;
+}
+
+.finance-ledger .fl-totals.zero .fl-total-value {
+  color: #f3f1ea;
 }
 
 .finance-ledger .fl-unit {
   font-size: 0.5em;
   font-weight: normal;
-  color: var(--fl-muted);
+  opacity: 0.7;
 }
 
 .finance-ledger .fl-net-value {
   font-size: 1.15em;
+  font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
 
@@ -130,11 +149,70 @@
   padding: 0.4em 0.5em;
 }
 
-.finance-ledger .fl-account input[type="text"] {
-  height: 3.8ch;
-  font-size: 1.25em;
+/* Cash and digital as cards with an icon and an accent colour */
+.finance-ledger .fl-card {
+  --accent: var(--fl-line);
+  gap: 2px;
+  padding: 6px 10px 6px 12px;
+  border: 1px solid var(--fl-line);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-card.cash:not(.digital) {
+  --accent: var(--fl-cash);
+}
+
+.finance-ledger .fl-card.digital {
+  --accent: var(--fl-digital);
+}
+
+.finance-ledger .fl-card-title {
+  font-weight: bold;
+}
+
+.finance-ledger .fl-card-title i {
+  width: 1.4em;
+  color: color-mix(in srgb, var(--accent) 80%, currentColor);
+}
+
+.finance-ledger .fl-card-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.finance-ledger .fl-card-value .fl-unit {
+  font-size: 0.95em;
+  color: var(--fl-muted);
+  opacity: 1;
+}
+
+/* The value is an input, but looks like plain big text until you hover or click it */
+.finance-ledger .fl-card input[type="text"] {
+  flex: 1 1 auto;
+  height: auto;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.6em;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+.finance-ledger .fl-card input[type="text"]:hover,
+.finance-ledger .fl-card input[type="text"]:focus {
+  border-color: var(--fl-line);
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-card .fl-hint i {
+  margin-left: 2px;
+  font-size: 0.85em;
 }
 
 .finance-ledger .fl-hint {
@@ -343,12 +421,15 @@
 }
 
 .finance-ledger .fl-col-date,
-.finance-ledger .fl-col-account,
 .finance-ledger .fl-col-amount,
 .finance-ledger .fl-col-balance {
   /* Narrowest width that fits the content, so numbers and pills never overlap. The description takes what is left. */
   width: 1%;
   white-space: nowrap;
+}
+
+.finance-ledger .fl-col-account {
+  width: 1%;
 }
 
 .finance-ledger .fl-col-desc {
@@ -386,26 +467,72 @@
   color: var(--fl-muted);
 }
 
-.finance-ledger .fl-account-inline {
-  display: none;
+/* Account pills have their own fixed colours (light fill, dark text) so they are readable on light and dark sheets */
+.finance-ledger .fl-accounts-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+}
+
+.finance-ledger .fl-pill-after {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.finance-ledger .fl-arrow {
+  color: var(--fl-muted);
+  font-size: 0.85em;
 }
 
 .finance-ledger .fl-pill {
   display: inline-block;
-  padding: 0 7px;
-  border: 1px solid var(--pill, var(--fl-line));
+  padding: 0 8px;
+  border: 1px solid #9a9a92;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--pill, currentColor) 16%, transparent);
+  background: #e4e4de;
+  color: #3a3a36;
   font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1.5;
   white-space: nowrap;
 }
 
 .finance-ledger .fl-pill.cash {
-  --pill: var(--fl-cash);
+  border-color: #c9a227;
+  background: #f3e2a8;
+  color: #5e4500;
 }
 
 .finance-ledger .fl-pill.digital {
-  --pill: var(--fl-digital);
+  border-color: #5b8fc4;
+  background: #d6e6f5;
+  color: #1b4a78;
+}
+
+/* Category labels: one colour per category, mixed with the text colour so they stay readable on both light and dark */
+.finance-ledger .fl-category {
+  --cat: currentColor;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--cat) 72%, currentColor);
+}
+
+.finance-ledger .fl-cat-living { --cat: #d9730d; }
+.finance-ledger .fl-cat-income { --cat: #2f9e44; }
+.finance-ledger .fl-cat-medical { --cat: #a23fc2; }
+.finance-ledger .fl-cat-equipment { --cat: #2f7fd1; }
+.finance-ledger .fl-cat-ship { --cat: #0f9aa8; }
+.finance-ledger .fl-cat-trade { --cat: #b8872b; }
+.finance-ledger .fl-cat-other,
+.finance-ledger .fl-cat-transfer,
+.finance-ledger .fl-cat-adjustment { --cat: #8a8a85; }
+
+.finance-ledger .fl-account-inline {
+  display: none;
+  color: var(--fl-muted);
+  font-weight: normal;
 }
 
 .finance-ledger .fl-opening td {

@@ -1,10 +1,10 @@
 <div class="finance-ledger">
 
   {{!-- Totals --}}
-  <section class="fl-totals">
+  <section class="fl-totals {{finance.totals.totalClass}}">
     <div class="fl-total-main">
       <span class="fl-label">{{localize "TWODSIX.Actor.Finances.TOTAL_FUNDS"}}</span>
-      <span class="fl-total-value {{finance.totals.totalClass}}">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
+      <span class="fl-total-value">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
     </div>
     {{#if finance.totals.showNetOfDebt}}
     <div class="fl-total-net">
@@ -16,16 +16,22 @@
 
   {{!-- Cash and digital --}}
   <section class="fl-accounts">
-    <div class="fl-account cash">
-      <span class="item-title">{{localize "TWODSIX.Actor.Finances.CASH"}}</span>
-      <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.CASH'}}"/>
-      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.CASH_HINT"}}</span>
+    <div class="fl-account fl-card cash" data-account="cash">
+      <span class="fl-card-title"><i class="fa-solid fa-money-bill-wave"></i> {{localize "TWODSIX.Actor.Finances.CASH"}}</span>
+      <div class="fl-card-value">
+        <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.CASH'}}"/>
+        <span class="fl-unit">Cr</span>
+      </div>
+      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.CASH_HINT"}} <i class="fa-solid fa-pen"></i></span>
     </div>
-    {{!-- "cash" is also on this card so the theme's existing input rules for .cash input (border, height) apply to it too --}}
-    <div class="fl-account digital cash">
-      <span class="item-title">{{localize "TWODSIX.Actor.Finances.DIGITAL"}}</span>
-      <input name="system.finances.digital" type="text" value="{{system.finances.digital}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.DIGITAL'}}"/>
-      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.DIGITAL_HINT"}}</span>
+    {{!-- "cash" is also on this card so the theme's existing input rules for .cash input apply to it too --}}
+    <div class="fl-account fl-card digital cash" data-account="digital">
+      <span class="fl-card-title"><i class="fa-solid fa-credit-card"></i> {{localize "TWODSIX.Actor.Finances.DIGITAL"}}</span>
+      <div class="fl-card-value">
+        <input name="system.finances.digital" type="text" value="{{system.finances.digital}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.DIGITAL'}}"/>
+        <span class="fl-unit">Cr</span>
+      </div>
+      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.DIGITAL_HINT"}} <i class="fa-solid fa-pen"></i></span>
     </div>
   </section>
 
@@ -138,8 +144,8 @@
           {{#each finance.rows}}
           <tr class="fl-row">
             <td class="fl-col-date {{#if isRealDate}}real-date{{/if}}" {{#if isRealDate}}data-tooltip="{{localize 'TWODSIX.Actor.Finances.REAL_DATE_TOOLTIP'}}"{{/if}}>{{dateText}}</td>
-            <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category">{{categoryLabel}}</span>{{/if}}<span class="fl-category fl-account-inline">{{accountText}}</span></td>
-            <td class="fl-col-account"><span class="fl-pill {{accountKey}}">{{accountText}}</span></td>
+            <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category fl-cat-{{categoryKey}}">{{categoryLabel}}</span>{{/if}}<span class="fl-category fl-account-inline">{{accountText}}</span></td>
+            <td class="fl-col-account"><span class="fl-accounts-cell {{#if isTransfer}}fl-transfer{{/if}}">{{#each accountPills}}{{#if @first}}<span class="fl-pill {{key}}">{{label}}</span>{{else}}<span class="fl-pill-after"><span class="fl-arrow" aria-hidden="true">→</span><span class="fl-pill {{key}}">{{label}}</span></span>{{/if}}{{/each}}</span></td>
             <td class="fl-col-amount {{amountClass}}">{{amountText}}</td>
             <td class="fl-col-balance">{{balanceText}}</td>
           </tr>
