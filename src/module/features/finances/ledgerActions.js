@@ -30,26 +30,58 @@ function formatDateParts(year, month, day) {
 }
 
 /**
+ * The Simple Calendar API, if a Simple Calendar module is active. The original module and its forks (for example
+ * "Simple Calendar Reborn") have different module ids but all provide the global `SimpleCalendar.api`.
+ * @returns {object|null}
+ */
+function getSimpleCalendarApi() {
+  const api = globalThis.SimpleCalendar?.api;
+  if (!api) {
+    return null;
+  }
+  // game.modules is a Map of id to module
+  const modules = typeof game.modules?.[Symbol.iterator] === "function" ? Array.from(game.modules) : [];
+  const isActive = Boolean(game.modules?.get?.("foundryvtt-simple-calendar")?.active)
+    || modules.some(([id, module]) => module?.active && /simple-calendar/i.test(id));
+  return isActive ? api : null;
+}
+
+/**
+ * The date as Simple Calendar itself shows it (for example "Holiday 01, 1105"), so the ledger matches the calendar
+ * window. Returns "" if the calendar cannot format it.
+ * @param {object} api - the Simple Calendar API
+ * @param {object} date - date parts from the API
+ * @returns {string}
+ */
+function formatWithSimpleCalendar(api, date) {
+  if (typeof api.formatDateTime !== "function") {
+    return "";
+  }
+  const formatted = api.formatDateTime(date);
+  const text = typeof formatted === "string" ? formatted : formatted?.date;
+  return typeof text === "string" ? text.trim() : "";
+}
+
+/**
  * Current in-game date as text, or "" if the world has no usable calendar.
- * Uses Simple Calendar if it is active (as the rest of the system does for time), otherwise the core calendar if the
- * world clock has been advanced. An unset world clock would produce a meaningless date, so it is treated as "no date".
+ * Uses Simple Calendar (the original or a fork such as Simple Calendar Reborn) if it is active, written the way the
+ * calendar shows it. Without such a calendar there is no in-game date, and the history shows the real date instead.
+ * (The core calendar is not used: by default it is the Gregorian calendar, which gives meaningless dates in a game
+ * set in another era.)
  * @returns {string}
  */
 export function getCurrentGameDate() {
   try {
-    if (game.modules.get("foundryvtt-simple-calendar")?.active && globalThis.SimpleCalendar?.api) {
-      const api = globalThis.SimpleCalendar.api;
+    const api = getSimpleCalendarApi();
+    if (api) {
       const date = api.timestampToDate(api.timestamp());
+      const formatted = formatWithSimpleCalendar(api, date);
+      if (formatted) {
+        return formatted;
+      }
       // Simple Calendar's month and day are zero based.
       if ([date?.year, date?.month, date?.day].every(Number.isFinite)) {
         return formatDateParts(date.year, date.month + 1, date.day + 1);
-      }
-    }
-    if (game.time?.worldTime > 0 && typeof game.time.calendar?.timeToComponents === "function") {
-      const components = game.time.calendar.timeToComponents(game.time.worldTime);
-      // Core calendar month and dayOfMonth are zero based.
-      if ([components?.year, components?.month, components?.dayOfMonth].every(Number.isFinite)) {
-        return formatDateParts(components.year, components.month + 1, components.dayOfMonth + 1);
       }
     }
   } catch (err) {

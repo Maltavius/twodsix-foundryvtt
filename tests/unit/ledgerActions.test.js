@@ -85,9 +85,15 @@ describe('addTransaction', () => {
     const explicit = await addTransaction(makeActor(), {amount: 1, gameDate: '1105-001'});
     expect(explicit.gameDate).toBe('1105-001');
 
-    globalThis.game.time = {worldTime: 100, calendar: {timeToComponents: () => ({year: 3026, month: 9, dayOfMonth: 14})}};
+    globalThis.game.modules = new Map([['foundryvtt-simple-calendar-reborn', {active: true}]]);
+    globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 3026, month: 9, day: 14})}};
     const automatic = await addTransaction(makeActor(), {amount: 1});
     expect(automatic.gameDate).toBe('3026-10-15');
+
+    // No calendar module: no in-game date, so the history shows the real date
+    delete globalThis.SimpleCalendar;
+    globalThis.game.modules = new Map();
+    expect((await addTransaction(makeActor(), {amount: 1})).gameDate).toBe('');
   });
 
   test('rejects zero, non-numeric and unknown-account input without writing', async () => {
@@ -225,37 +231,67 @@ describe('recordLedgerAdjustments', () => {
 });
 
 describe('getCurrentGameDate', () => {
-  test('is empty when the world clock has never been advanced', () => {
-    globalThis.game.time = {worldTime: 0, calendar: {timeToComponents: () => ({year: 1, month: 0, dayOfMonth: 0})}};
+  const coreCalendar = {worldTime: 5000, calendar: {timeToComponents: () => ({year: 1104, month: 3, dayOfMonth: 0})}};
+
+  test('is empty without a calendar module, so the real date is shown instead', () => {
+    globalThis.game.time = {worldTime: 0};
     expect(getCurrentGameDate()).toBe('');
   });
 
-  test('is empty when there is no calendar at all', () => {
-    globalThis.game.time = {worldTime: 5000};
+  test('the core calendar is not used, even when the world clock has advanced', () => {
+    globalThis.game.time = coreCalendar;
     expect(getCurrentGameDate()).toBe('');
   });
 
-  test('uses the core calendar (zero based month and day) once time has advanced', () => {
-    globalThis.game.time = {worldTime: 5000, calendar: {timeToComponents: () => ({year: 3026, month: 0, dayOfMonth: 8})}};
-    expect(getCurrentGameDate()).toBe('3026-01-09');
-  });
+  describe('Simple Calendar forks and the way the date is written', () => {
+    const coreCalendar = {worldTime: 5000, calendar: {timeToComponents: () => ({year: 1104, month: 3, dayOfMonth: 0})}};
+    const modulesMap = (...ids) => new Map(ids.map(id => [id, {active: true}]));
 
-  test('prefers Simple Calendar when it is active', () => {
-    globalThis.game.modules = {get: id => (id === 'foundryvtt-simple-calendar' ? {active: true} : undefined)};
-    globalThis.game.time = {worldTime: 5000, calendar: {timeToComponents: () => ({year: 1, month: 0, dayOfMonth: 0})}};
-    globalThis.SimpleCalendar = {api: {timestamp: () => 123, timestampToDate: () => ({year: 1105, month: 11, day: 30})}};
-    expect(getCurrentGameDate()).toBe('1105-12-31');
+    test('Simple Calendar Reborn (another module id) is used, not the core calendar', () => {
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
+      globalThis.game.time = coreCalendar;
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
+      expect(getCurrentGameDate()).toBe('1105-01-01');
+      expect(getCurrentGameDate()).not.toBe('1104-04-01');
+    });
+
+    test('the date is written the way the calendar shows it when it can format it (object result)', () => {
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0}), formatDateTime: () => ({date: 'Holiday 01, 1105', time: '00:02:07'})}};
+      expect(getCurrentGameDate()).toBe('Holiday 01, 1105');
+    });
+
+    test('a plain string from the formatter is used as well', () => {
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar');
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0}), formatDateTime: () => ' Holiday 01, 1105 '}};
+      expect(getCurrentGameDate()).toBe('Holiday 01, 1105');
+    });
+
+    test('numbers are used if the formatter returns nothing useful', () => {
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar');
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 4, day: 9}), formatDateTime: () => undefined}};
+      expect(getCurrentGameDate()).toBe('1105-05-10');
+    });
+
+    test('the global alone is not enough: the module must be active', () => {
+      globalThis.game.modules = new Map();
+      globalThis.game.time = coreCalendar;
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
+      expect(getCurrentGameDate()).toBe('');
+    });
   });
 
   test('falls back to blank, with a warning, if the calendar API throws', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    globalThis.game.time = {worldTime: 5000, calendar: {timeToComponents: () => { throw new Error('boom'); }}};
+    globalThis.game.modules = new Map([['foundryvtt-simple-calendar-reborn', {active: true}]]);
+    globalThis.SimpleCalendar = {api: {timestamp: () => { throw new Error('boom'); }}};
     expect(getCurrentGameDate()).toBe('');
     expect(warn).toHaveBeenCalled();
   });
 
   test('ignores incomplete calendar data', () => {
-    globalThis.game.time = {worldTime: 5000, calendar: {timeToComponents: () => ({year: 3026})}};
+    globalThis.game.modules = new Map([['foundryvtt-simple-calendar-reborn', {active: true}]]);
+    globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105})}};
     expect(getCurrentGameDate()).toBe('');
   });
 });
