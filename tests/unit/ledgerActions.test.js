@@ -305,7 +305,7 @@ describe('getCurrentGameDate', () => {
   test('falls back to blank, with a warning, if the calendar API throws', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     globalThis.game.modules = new Map([['foundryvtt-simple-calendar-reborn', {active: true}]]);
-    globalThis.SimpleCalendar = {api: {timestamp: () => { throw new Error('boom'); }}};
+    globalThis.SimpleCalendar = {api: {timestamp: () => { throw new Error('boom'); }, timestampToDate: () => ({})}};
     expect(getCurrentGameDate()).toBe('');
     expect(warn).toHaveBeenCalled();
   });
