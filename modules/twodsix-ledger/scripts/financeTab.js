@@ -32,6 +32,7 @@ import { isDeltaFinanceText } from "./financeText.js";
 import { ROW_LIMIT_STEP, buildFinanceView, getAddButtonState } from "./financeView.js";
 
 const PREFIX = "TWODSIX_LEDGER";
+const ROW_FOCUS_MS = 3000;
 const SEARCH_DELAY_MS = 250;
 
 /**
@@ -268,25 +269,19 @@ function readFieldPatch(field, name, group) {
 }
 
 /**
- * Note which field of an item or loan row has the cursor, so it can be given back after the re-render that follows a
- * saved change (otherwise Tab appears to skip the next field, because the field it moved to is replaced).
- * @param {object} sheet
- * @param {HTMLElement} root
- * @returns {void}
+ * The selector of an item or loan row field, so it can be found again after a re-render.
+ * @param {Element} element
+ * @returns {string|null}
  */
-function rememberRowFocus(sheet, root) {
-  const active = root.ownerDocument.activeElement;
-  if (!active || !root.contains(active)) {
-    return;
-  }
-  const field = active.closest("[data-rec-field], [data-loan-field]");
-  const row = active.closest("[data-rec-id], [data-loan-id]");
+function rowFieldSelector(element) {
+  const field = element.closest?.("[data-rec-field], [data-loan-field]");
+  const row = element.closest?.("[data-rec-id], [data-loan-id]");
   if (!field || !row) {
-    return;
+    return null;
   }
   const rowAttr = row.dataset.recId !== undefined ? `[data-rec-id="${CSS.escape(row.dataset.recId)}"]` : `[data-loan-id="${CSS.escape(row.dataset.loanId)}"]`;
   const fieldAttr = field.dataset.recField !== undefined ? `[data-rec-field="${field.dataset.recField}"]` : `[data-loan-field="${field.dataset.loanField}"]`;
-  getState(sheet).rowFocus = {selector: `${rowAttr} ${fieldAttr}`};
+  return `${rowAttr} ${fieldAttr}`;
 }
 
 /**
@@ -335,8 +330,14 @@ export function bindFinanceTab(sheet) {
     } else {
       return;
     }
-    rememberRowFocus(sheet, root);
     await sheet.render();
+  });
+
+  // Saving a field re-renders the sheet (Foundry does it as soon as the actor is updated), which replaces the field that
+  // Tab moved to. So the field that has the cursor is noted all the time and given back after a render.
+  root.querySelector("[data-recurring]")?.addEventListener("focusin", event => {
+    const selector = rowFieldSelector(event.target);
+    state.rowFocus = selector ? {selector, at: Date.now()} : null;
   });
 
   root.querySelectorAll("[data-draft]").forEach(el => {
@@ -376,9 +377,10 @@ export function bindFinanceTab(sheet) {
 
   // Tab out of a row field saves it and re-renders; put the cursor on the field Tab went to, with its text selected
   if (state.rowFocus) {
-    const {selector} = state.rowFocus;
+    const {selector, at} = state.rowFocus;
     state.rowFocus = null;
-    const el = root.querySelector(selector);
+    const lost = !root.contains(root.ownerDocument.activeElement) || root.ownerDocument.activeElement === root.ownerDocument.body;
+    const el = Date.now() - at < ROW_FOCUS_MS && lost ? root.querySelector(selector) : null;
     if (el) {
       el.focus();
       if (typeof el.select === "function" && el.type === "text") {
