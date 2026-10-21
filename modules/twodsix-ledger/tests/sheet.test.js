@@ -82,6 +82,7 @@ describe('findSystemTravellerSheet', () => {
   });
 
   test('returns null if the system sheet is not registered', () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     globalThis.CONFIG = {Actor: {sheetClasses: {}}};
     expect(findSystemTravellerSheet()).toBeNull();
   });

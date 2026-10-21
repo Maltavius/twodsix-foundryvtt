@@ -53,11 +53,20 @@ export async function ensureFinancePartial() {
  * @returns {Function|null}
  */
 export function findSystemTravellerSheet() {
-  const entries = Object.values(CONFIG.Actor.sheetClasses?.traveller ?? {});
-  // A built (minified) system can have another class name than the source, so also accept any sheet the system itself
-  // registered for travellers.
-  const own = entries.find(entry => entry.id === "twodsix.TwodsixTravellerSheet")
-    ?? entries.find(entry => String(entry.id).startsWith("twodsix."));
+  const registry = CONFIG.Actor.sheetClasses?.traveller ?? {};
+  const entries = Object.entries(registry).map(([key, entry]) => ({key, ...entry}));
+  const isClass = entry => typeof entry.cls === "function";
+  // The registry key/id is "<scope>.<class name>", but a built (minified) system can have another class name than the
+  // source, so fall back on the label the system gives its sheet, and then on any sheet from the twodsix scope.
+  const own = entries.find(entry => isClass(entry) && (entry.id ?? entry.key) === "twodsix.TwodsixTravellerSheet")
+    ?? entries.find(entry => isClass(entry) && entry.label === "TWODSIX.SheetTypes.TravellerSheet")
+    ?? entries.find(entry => isClass(entry) && String(entry.id ?? entry.key).startsWith("twodsix.")
+      && entry.label !== "TWODSIX.SheetTypes.NPCSheet");
+  if (!own) {
+    console.warn(`${MODULE_ID} | Sheet registry for travellers:`, entries.map(entry => ({
+      key: entry.key, id: entry.id, label: entry.label, hasClass: isClass(entry)
+    })));
+  }
   return own?.cls ?? null;
 }
 
