@@ -16,7 +16,7 @@
     "AMOUNT_HINT": "Use − for expenses. Enter adds.",
     "BALANCE": "Balance",
     "CALENDAR_SHORT": "Calendar",
-    "CALENDAR_TOOLTIP": "Traveller calendar: 13 months of 28 days, plus one extra day (Holiday) at the start of the year, 365 days in all. An item per month is paid once per month, an item per year once per year.",
+    "CALENDAR_TOOLTIP": "Traveller calendar: 13 months of 28 days, plus one extra day (Holiday) at the start of the year, 365 days in all.",
     "CASH": "Cash",
     "CASH_HINT": "Carried on you",
     "CATEGORIES": {

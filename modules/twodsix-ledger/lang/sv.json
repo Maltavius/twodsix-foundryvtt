@@ -16,7 +16,7 @@
     "AMOUNT_HINT": "Använd − för utgifter. Enter lägger till.",
     "BALANCE": "Saldo",
     "CALENDAR_SHORT": "Kalender",
-    "CALENDAR_TOOLTIP": "Traveller-kalendern: 13 månader om 28 dagar, plus en extra dag (Holiday) i början av året, totalt 365 dagar. En post per månad betalas en gång per månad, en post per år en gång per år.",
+    "CALENDAR_TOOLTIP": "Traveller-kalendern: 13 månader om 28 dagar, plus en extra dag (Holiday) i början av året, totalt 365 dagar.",
     "CASH": "Kontanter",
     "CASH_HINT": "Bärs på dig",
     "CATEGORIES": {
