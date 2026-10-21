@@ -141,7 +141,8 @@ export class TravellerData extends TwodsixActorBaseData {
    * @returns {string} - The localized number as a string, with units if provided.
    */
   static convertNumberToFormattedText(newValue, units) {
-    const numberDigits = newValue === 0 ? 1 : Math.floor(Math.log10(Math.abs(newValue))) + 1;
+    // At least one significant digit: values between -1 and 1 (e.g. 0.5) would otherwise give 0, which toLocaleString rejects
+    const numberDigits = newValue === 0 ? 1 : Math.max(1, Math.floor(Math.log10(Math.abs(newValue))) + 1);
     if (units) {
       newValue /= TravellerData.getMultiplier(units);
     }
