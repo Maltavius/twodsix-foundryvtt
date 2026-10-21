@@ -1,3 +1,4 @@
+import { addTransaction, moveMoney, recordLedgerAdjustments, undoLastTransaction } from '../../features/finances/ledgerActions.js';
 import { updateFinances } from '../../hooks/updateFinances';
 import { stackArmorValues } from '../../utils/actorDamage';
 import { deleteIdFromShipPositions } from './actor-base.js';
@@ -50,8 +51,46 @@ export class TravellerActor extends CreatureActor {
     if (!foundry.utils.isEmpty(financeDiff.finances) || !foundry.utils.isEmpty(financeDiff.financeValues)) {
       updateFinances(this, data, financeDiff);
     }
+    // Balance changes made outside the ledger (typing in the Cash field, macros, modules) get an "adjustment" entry
+    recordLedgerAdjustments(this, data, options);
 
     return allowed;
+  }
+
+  /**
+   * Add income (positive amount) or an expense (negative amount) to one account and to the finance ledger.
+   * @param {object} data
+   * @param {number} data.amount - signed amount in Cr, not zero
+   * @param {string} [data.account] - "cash" (default) or "digital"
+   * @param {string} [data.category] - e.g. "living", "equipment", "medical", "income"
+   * @param {string} [data.description]
+   * @param {string} [data.gameDate] - defaults to the current in-game date, if the world has one
+   * @returns {Promise<object>} the ledger entry that was added
+   */
+  async addTransaction(data) {
+    return addTransaction(this, data);
+  }
+
+  /**
+   * Move money between this traveller's own accounts. The total funds do not change.
+   * @param {object} data
+   * @param {number} data.amount - positive amount in Cr
+   * @param {string} data.from - "cash" or "digital"
+   * @param {string} data.to - "cash" or "digital"
+   * @param {string} [data.description]
+   * @param {string} [data.gameDate]
+   * @returns {Promise<object>} the ledger entry that was added
+   */
+  async moveMoney(data) {
+    return moveMoney(this, data);
+  }
+
+  /**
+   * Remove the newest ledger entry and undo its effect on the balances.
+   * @returns {Promise<object|null>} the removed entry, or null if the ledger is empty
+   */
+  async undoLastTransaction() {
+    return undoLastTransaction(this);
   }
 
   /** @override */

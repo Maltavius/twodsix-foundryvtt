@@ -182,7 +182,7 @@ export function recordLedgerAdjustments(actor, data, options) {
     return; // nothing changed, or the caller is managing the ledger itself
   }
   const entries = buildAdjustmentEntries(getStoredBalances(actor), newValues, () => foundry.utils.randomID(), {
-    description: game.i18n.localize("TWODSIX.Actor.Finances.ManualAdjustment"),
+    description: game.i18n.localize("TWODSIX.Actor.Finances.MANUAL_ADJUSTMENT"),
     gameDate: getCurrentGameDate(),
     userId: game.user?.id
   });
