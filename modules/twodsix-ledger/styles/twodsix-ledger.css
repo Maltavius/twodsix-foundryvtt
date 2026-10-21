@@ -739,33 +739,21 @@
 }
 
 .finance-ledger .fl-group-cards {
+  /* Four across for as long as they fit (the unit is hidden first when it gets tight), then two, then one */
   display: grid;
-  /* Two across by default; four in a wide tab and a single column in a very narrow one (see the queries below) */
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--fl-gap);
-}
-
-@container (min-width: 560px) {
-  .finance-ledger .fl-group-cards {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@container (max-width: 299px) {
-  .finance-ledger .fl-group-cards,
-  .finance-ledger .fl-accounts {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 .finance-ledger .fl-group-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 4px;
   min-height: 78px;
+  min-width: 0;
   margin: 0;
-  padding: 8px 12px;
+  padding: 8px 10px;
   text-align: left;
   color: inherit;
   background: var(--fl-soft);
@@ -781,7 +769,7 @@
 
 .finance-ledger .fl-group-card.is-open {
   border: 2px solid #c4561a;
-  padding: 7px 11px;
+  padding: 7px 9px;
   background: color-mix(in srgb, #c4561a 12%, transparent);
 }
 
@@ -797,23 +785,58 @@
   gap: 0;
 }
 
+/* The number on the left and the unit small and grey on the right, like Cr on the Cash and Digital cards. The unit is a
+   sibling of the number, not inside it, so it keeps the card's own text colour instead of the red or green of the number. */
+.finance-ledger .fl-group-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 .finance-ledger .fl-group-amount {
-  font-size: 1.45em;
+  font-size: 1.4em;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
 
-.finance-ledger .fl-group-amount .fl-unit {
-  font-size: 0.6em;
-  font-weight: normal;
+.finance-ledger .fl-group-unit {
+  font-size: 0.85em;
   color: var(--fl-muted);
-  opacity: 1;
+  white-space: nowrap;
 }
 
 .finance-ledger .fl-group-sub {
   margin-top: auto;
   font-size: 0.8em;
   color: var(--fl-muted);
+}
+
+@container (max-width: 559px) {
+  .finance-ledger .fl-group-unit {
+    display: none;
+  }
+
+  .finance-ledger .fl-group-amount {
+    font-size: 1.25em;
+  }
+}
+
+@container (max-width: 339px) {
+  .finance-ledger .fl-group-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finance-ledger .fl-group-unit {
+    display: inline;
+  }
+}
+
+@container (max-width: 239px) {
+  .finance-ledger .fl-group-cards,
+  .finance-ledger .fl-accounts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .finance-ledger .fl-group-panel {
