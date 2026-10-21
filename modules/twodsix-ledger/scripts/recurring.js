@@ -190,3 +190,18 @@ export function removeRecurringItem(items, id) {
 export function getPayKind(item) {
   return item.amount > 0 ? "receive" : "pay";
 }
+
+/**
+ * What a typed amount means for an item. Living costs and Ship payments are costs, so a number typed without a sign is
+ * a cost; a "+" makes it income. Pension is income, so there a number without a sign is income and a "-" a cost.
+ * @param {string} text - what was typed
+ * @param {number} amount - the parsed, signed amount
+ * @param {string} group
+ * @returns {number}
+ */
+export function signedItemAmount(text, amount, group) {
+  if (!Number.isFinite(amount) || /^\s*[+\-\u2212\u2013\u2014]/.test(String(text))) {
+    return amount;
+  }
+  return group === "pension" ? amount : -Math.abs(amount);
+}

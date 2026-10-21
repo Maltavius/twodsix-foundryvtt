@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   DAYS_PER_YEAR,
   GROUP_CATEGORY,
+  signedItemAmount,
   MONTHS_PER_YEAR,
   createRecurringItem,
   getPayKind,
@@ -142,4 +143,23 @@ describe('editing the list', () => {
 test('getPayKind', () => {
   expect(getPayKind(item({amount: -1}))).toBe('pay');
   expect(getPayKind(item({amount: 1}))).toBe('receive');
+});
+
+describe('signedItemAmount', () => {
+  test('a number without a sign is a cost in Living costs and Ship payments, and a "+" makes it income', () => {
+    expect(signedItemAmount('800', 800, 'living')).toBe(-800);
+    expect(signedItemAmount('5 680', 5680, 'ship')).toBe(-5680);
+    expect(signedItemAmount('-800', -800, 'living')).toBe(-800);
+    expect(signedItemAmount('+200', 200, 'living')).toBe(200);
+  });
+
+  test('in Pension a number without a sign is income, and a "-" a cost', () => {
+    expect(signedItemAmount('500', 500, 'pension')).toBe(500);
+    expect(signedItemAmount('-50', -50, 'pension')).toBe(-50);
+  });
+
+  test('unusable amounts and the Swedish minus sign', () => {
+    expect(signedItemAmount('abc', NaN, 'living')).toBeNaN();
+    expect(signedItemAmount('\u2212800', -800, 'living')).toBe(-800);
+  });
 });

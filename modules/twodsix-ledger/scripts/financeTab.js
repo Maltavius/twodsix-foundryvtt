@@ -27,7 +27,7 @@ import {
   undoLastTransaction
 } from "./store.js";
 import { buildGroupsView } from "./recurringView.js";
-import { GROUPS } from "./recurring.js";
+import { GROUPS, signedItemAmount } from "./recurring.js";
 import { isDeltaFinanceText } from "./financeText.js";
 import { ROW_LIMIT_STEP, buildFinanceView, getAddButtonState } from "./financeView.js";
 
@@ -249,7 +249,7 @@ function updateAddButton(root, amountText) {
  * @param {string} name - the name of the field
  * @returns {object|null}
  */
-function readFieldPatch(field, name) {
+function readFieldPatch(field, name, group) {
   if (field.type === "checkbox") {
     return {[name]: field.checked};
   }
@@ -259,7 +259,10 @@ function readFieldPatch(field, name) {
       return {monthly: 0};
     }
     const amount = parseLedgerAmount(text, game.i18n.lang);
-    return Number.isFinite(amount) ? {[name]: amount} : null;
+    if (!Number.isFinite(amount)) {
+      return null;
+    }
+    return {[name]: group && name === "amount" ? signedItemAmount(text, amount, group) : amount};
   }
   return {[name]: field.value};
 }
@@ -320,7 +323,7 @@ export function bindFinanceTab(sheet) {
     const itemField = event.target.closest("[data-rec-field]");
     const loanField = event.target.closest("[data-loan-field]");
     if (itemField) {
-      const patch = readFieldPatch(itemField, itemField.dataset.recField);
+      const patch = readFieldPatch(itemField, itemField.dataset.recField, getState(sheet).ui.openGroup);
       if (patch) {
         await editRecurringItem(sheet.actor, itemField.closest("[data-rec-id]").dataset.recId, patch);
       }
