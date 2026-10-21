@@ -68,6 +68,7 @@
     "MOVE_BUTTON": "Move Money",
     "MOVE_HINT": "Moves money between your own accounts. Total funds do not change.",
     "MOVE_MONEY": "Move money",
+    "NET_OF_DEBT_HINT": "Total funds minus what you owe.",
     "NET_OF_DEBT": "Net of debt",
     "NO_LOANS": "No debts. Take a loan, or add a debt you already have.",
     "NO_MATCHES": "No transactions match.",

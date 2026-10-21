@@ -68,6 +68,7 @@
     "MOVE_BUTTON": "Flytta pengar",
     "MOVE_HINT": "Flyttar pengar mellan dina egna konton. Totala medel ändras inte.",
     "MOVE_MONEY": "Flytta pengar",
+    "NET_OF_DEBT_HINT": "Totala tillgångar minus vad du är skyldig.",
     "NET_OF_DEBT": "Nettoskuld",
     "NO_LOANS": "Inga skulder. Ta ett lån, eller lägg till en skuld du redan har.",
     "NO_MATCHES": "Inga transaktioner matchar.",

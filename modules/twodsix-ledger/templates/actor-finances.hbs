@@ -7,7 +7,7 @@
       <span class="fl-total-value">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
     </div>
     {{#if finance.totals.showNetOfDebt}}
-    <div class="fl-total-net">
+    <div class="fl-total-net" data-tooltip="{{localize 'TWODSIX_LEDGER.NET_OF_DEBT_HINT'}}">
       <span class="fl-label">{{localize "TWODSIX_LEDGER.NET_OF_DEBT"}}</span>
       <span class="fl-net-value">{{finance.totals.netOfDebt}} Cr</span>
     </div>

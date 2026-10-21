@@ -1185,3 +1185,15 @@
   background: color-mix(in srgb, #f6d44b 30%, transparent);
   border-color: #f6d44b;
 }
+
+/* Heading bars follow the Financial Notes heading: rounded top corners, the whole width */
+.finance-ledger .fl-panel-head,
+.finance-ledger .fl-history-bar {
+  border-radius: 1.5ch 1.5ch 0 0;
+  padding-left: 1.2ch;
+  padding-right: 1.2ch;
+}
+
+.finance-ledger .fl-total-net {
+  cursor: help;
+}
