@@ -35,6 +35,7 @@ export class TravellerData extends TwodsixActorBaseData {
 
     schema.finances = new fields.SchemaField({
       cash: new fields.StringField({required: true, blank: false, initial: "0"}),
+      digital: new fields.StringField({required: true, blank: false, initial: "0"}),
       pension: new fields.StringField({required: true, blank: false, initial: "0"}),
       payments: new fields.StringField({required: true, blank: false, initial: "0"}),
       debt: new fields.StringField({required: true, blank: false, initial: "0"}),
@@ -43,10 +44,33 @@ export class TravellerData extends TwodsixActorBaseData {
     });
     schema.financeValues = new fields.SchemaField({
       cash: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
+      digital: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
       pension: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
       payment: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
       debt: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
       livingCosts: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0})
+    });
+
+    // Ledger of money movements. Balances are NOT stored here: `financeValues.cash` and `financeValues.digital` are
+    // the balances, and the history table derives running balances from them (see features/finances/ledger.js).
+    schema.ledger = new fields.SchemaField({
+      transactions: new fields.ArrayField(new fields.SchemaField({
+        id: new fields.StringField({required: true, blank: false, initial: () => foundry.utils.randomID()}),
+        // Signed amount in Cr. For a transfer between own accounts: positive size of the transfer.
+        amount: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
+        // Account the money was added to / taken from, or the source account of a transfer: "cash" | "digital"
+        account: new fields.StringField({required: true, blank: false, initial: "cash"}),
+        // Destination account when moving money between own accounts, otherwise null
+        toAccount: new fields.StringField({required: false, nullable: true, blank: false, initial: null}),
+        // Category key (translated on display), e.g. "living", "equipment", "transfer", "adjustment"
+        category: new fields.StringField({required: true, blank: false, initial: "other"}),
+        description: new fields.StringField({...requiredBlankString}),
+        // In-game date as free text so that any calendar works. Empty if unknown.
+        gameDate: new fields.StringField({...requiredBlankString}),
+        // Real-world time in ms, used for ordering and as a fallback date
+        timestamp: new fields.NumberField({required: true, nullable: false, integer: true, initial: () => Date.now()}),
+        userId: new fields.StringField({...requiredBlankString})
+      }), {initial: []})
     });
 
     schema.hideStoredItems = new fields.SchemaField({
