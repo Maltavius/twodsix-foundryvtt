@@ -19,4 +19,3 @@ Things we have decided to wait with. Nothing here is forgotten, and nothing here
 - **The first line, `feature/finance-ledger` (the ledger built into the system).** Parked while the work goes on in this
   module. Everything the module has gained since (groups, loans, accounts and categories in the settings, the notes
   button, month notes) can be moved over again if we go back to a pull request. Remember the AI policy disclosure then.
-- **`module.json`.** Needs a new description, a README and a manifest/download URL before the module is shared.
