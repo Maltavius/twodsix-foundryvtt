@@ -1211,3 +1211,11 @@
   color: color-mix(in srgb, #f3f1ea 72%, transparent);
   white-space: nowrap;
 }
+
+/* Total funds, then the calendar icon and the in-game date on the same line */
+.finance-ledger .fl-total-label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+}

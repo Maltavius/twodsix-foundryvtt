@@ -3,13 +3,15 @@
   {{!-- Totals --}}
   <section class="fl-totals {{finance.totals.totalClass}}">
     <div class="fl-total-main">
-      <span class="fl-label">{{localize "TWODSIX_LEDGER.TOTAL_FUNDS"}}</span>
+      <span class="fl-total-label-row">
+        <span class="fl-label">{{localize "TWODSIX_LEDGER.TOTAL_FUNDS"}}</span>
+        {{#if finance.groups.gameDate}}
+        <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}"><i class="fa-solid fa-calendar-days"></i> {{finance.groups.gameDate}}</span>
+        {{/if}}
+      </span>
       <span class="fl-total-value">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
     </div>
     <div class="fl-total-side">
-      {{#if finance.groups.gameDate}}
-      <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}"><i class="fa-solid fa-calendar-days"></i> {{finance.groups.gameDate}}</span>
-      {{/if}}
       {{#if finance.totals.showNetOfDebt}}
       <div class="fl-total-net" data-tooltip="{{localize 'TWODSIX_LEDGER.NET_OF_DEBT_HINT'}}">
         <span class="fl-label">{{localize "TWODSIX_LEDGER.NET_OF_DEBT"}}</span>
