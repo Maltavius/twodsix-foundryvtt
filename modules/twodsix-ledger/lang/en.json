@@ -61,6 +61,7 @@
     "LOAN_PAYMENT": "Loan payment",
     "LOAN_TAKEN": "Loan",
     "MANUAL_ADJUSTMENT": "Manual adjustment",
+    "MONTH_NOTE": "month {month}",
     "MONTH": "Month",
     "MONTHLY_PAYMENT": "Per month",
     "MOVE_BUTTON": "Move Money",

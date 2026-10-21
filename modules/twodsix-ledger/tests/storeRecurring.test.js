@@ -17,7 +17,7 @@ import {
 function installStubs() {
   let counter = 0;
   globalThis.foundry = {utils: {deepClone: value => structuredClone(value), randomID: () => `id${++counter}`}};
-  globalThis.game = {user: {id: 'u1'}, i18n: {localize: key => key}, modules: {get: () => undefined}};
+  globalThis.game = {user: {id: 'u1'}, i18n: {localize: key => key, format: (key, data) => `${key}:${data.month}`}, modules: {get: () => undefined}};
 }
 
 function makeActor({cash = 1000, digital = 0, debt = 0, recurring, loans, transactions = [], finances = {}} = {}) {
@@ -38,6 +38,7 @@ beforeEach(installStubs);
 afterEach(() => {
   delete globalThis.foundry;
   delete globalThis.game;
+  delete globalThis.SimpleCalendar;
   vi.restoreAllMocks();
 });
 
@@ -235,5 +236,27 @@ describe('not enough money', () => {
     const actor = makeActor({cash: 400, debt: 12000, loans: [vargo]}); // monthly 500 from cash
     expect(await payLoan(actor, 'vargo')).toBeNull();
     expect(await payLoan(actor, 'vargo', 300)).not.toBeNull();
+  });
+});
+
+describe('the month in the note', () => {
+  const calendar = month => {
+    globalThis.SimpleCalendar = {api: {timestamp: () => 0, timestampToDate: () => ({year: 1105, month, day: 0})}};
+  };
+
+  test('a monthly payment names the in-game month when it is known', async () => {
+    calendar(2); // zero based: the third month
+    const entry = await payRecurringItem(makeActor({digital: 1000, recurring: [rent]}), 'rent');
+    expect(entry.description).toBe('Rent (TWODSIX_LEDGER.MONTH_NOTE:3)');
+    const loanEntry = await payLoan(makeActor({cash: 1000, debt: 12000, loans: [vargo]}), 'vargo');
+    expect(loanEntry.description).toBe('TWODSIX_LEDGER.LOAN_PAYMENT: Vargo (TWODSIX_LEDGER.MONTH_NOTE:3)');
+  });
+
+  test('not for a yearly item, a chosen loan amount, or when there is no calendar', async () => {
+    calendar(2);
+    expect((await payRecurringItem(makeActor({recurring: [pension]}), 'pen')).description).toBe('Pension');
+    expect((await payLoan(makeActor({cash: 1000, debt: 12000, loans: [vargo]}), 'vargo', 100)).description).toBe('TWODSIX_LEDGER.LOAN_PAYMENT: Vargo');
+    delete globalThis.SimpleCalendar;
+    expect((await payRecurringItem(makeActor({digital: 1000, recurring: [rent]}), 'rent')).description).toBe('Rent');
   });
 });

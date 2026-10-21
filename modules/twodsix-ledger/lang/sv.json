@@ -61,6 +61,7 @@
     "LOAN_PAYMENT": "Lånebetalning",
     "LOAN_TAKEN": "Lån",
     "MANUAL_ADJUSTMENT": "Manuell justering",
+    "MONTH_NOTE": "månad {month}",
     "MONTH": "Månad",
     "MONTHLY_PAYMENT": "Per månad",
     "MOVE_BUTTON": "Flytta pengar",

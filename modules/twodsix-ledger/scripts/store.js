@@ -122,6 +122,34 @@ export function getCurrentGameDate() {
 }
 
 /**
+ * @returns {number|null} the number of the in-game month (the first is 1), or null if the world has no calendar
+ */
+export function getCurrentGameMonth() {
+  try {
+    const api = getSimpleCalendarApi();
+    if (api) {
+      const date = api.timestampToDate(api.timestamp());
+      if (Number.isFinite(date?.month)) {
+        return date.month + 1; // Simple Calendar's months are zero based
+      }
+    }
+  } catch (err) {
+    console.warn("twodsix | Could not read the in-game month for the finance ledger", err);
+  }
+  return null;
+}
+
+/**
+ * Add the in-game month to the note of a payment that is made every month, when it is known: "Rent (month 3)".
+ * @param {string} text
+ * @returns {string}
+ */
+function withMonth(text) {
+  const month = getCurrentGameMonth();
+  return month === null ? text : `${text} (${game.i18n.format("TWODSIX_LEDGER.MONTH_NOTE", {month})})`;
+}
+
+/**
  * @param {TwodsixActor} actor
  * @returns {Record<string, number>} the stored balance of each ledger account
  */
@@ -352,7 +380,7 @@ export async function payRecurringItem(actor, id) {
   if (!plan || !hasFunds(getStoredBalances(actor)[plan.account], plan.amount)) {
     return null;
   }
-  return postEntry(actor, plan);
+  return postEntry(actor, item.frequency === "month" ? {...plan, description: withMonth(plan.description)} : plan);
 }
 
 /**
@@ -408,7 +436,7 @@ export async function payLoan(actor, id, amount) {
     amount: plan.amount,
     account: plan.account,
     category: "loan",
-    description: `${game.i18n.localize("TWODSIX_LEDGER.LOAN_PAYMENT")}: ${name}`,
+    description: amount === undefined ? withMonth(`${game.i18n.localize("TWODSIX_LEDGER.LOAN_PAYMENT")}: ${name}`) : `${game.i18n.localize("TWODSIX_LEDGER.LOAN_PAYMENT")}: ${name}`,
     loan: plan.loan
   }, loanUpdate(applyLoanChange(loans, plan.loan)));
 }
