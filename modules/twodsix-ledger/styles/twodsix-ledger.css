@@ -776,7 +776,7 @@
 .finance-ledger .fl-group-label {
   font-size: 1.05em;
   font-weight: 700;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .finance-ledger .fl-group-values {
@@ -822,7 +822,8 @@
   }
 }
 
-@container (max-width: 339px) {
+/* Four cards across need room for words like "Ship payments"; below that, two across (with the unit if it fits) */
+@container (max-width: 519px) {
   .finance-ledger .fl-group-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -832,10 +833,22 @@
   }
 }
 
-@container (max-width: 239px) {
+@container (max-width: 339px) {
+  .finance-ledger .fl-group-unit,
+  .finance-ledger .fl-card-value .fl-unit {
+    display: none;
+  }
+}
+
+@container (max-width: 259px) {
   .finance-ledger .fl-group-cards,
   .finance-ledger .fl-accounts {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .finance-ledger .fl-group-unit,
+  .finance-ledger .fl-card-value .fl-unit {
+    display: inline;
   }
 }
 
@@ -1112,4 +1125,18 @@
 .finance-ledger .fl-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Account names can be long (they are set in the settings): the filter buttons wrap among themselves and cut the text */
+.finance-ledger .fl-filters {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.finance-ledger .fl-filter {
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
