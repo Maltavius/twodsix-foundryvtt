@@ -352,6 +352,17 @@ export function bindFinanceTab(sheet) {
     el.addEventListener("change", () => readDraft(sheet, root));
   });
 
+  // Move money: the two accounts are never the same, so choosing one for From switches To to the other, and the other way round
+  for (const [changed, other] of [["from", "to"], ["to", "from"]]) {
+    root.querySelector(`[data-draft="${changed}"]`)?.addEventListener("change", event => {
+      const otherSelect = root.querySelector(`[data-draft="${other}"]`);
+      if (otherSelect && otherSelect.value === event.target.value) {
+        otherSelect.value = LEDGER_ACCOUNTS.find(account => account !== event.target.value) ?? otherSelect.value;
+      }
+      readDraft(sheet, root);
+    });
+  }
+
   root.querySelectorAll("[data-submit-on-enter]").forEach(el => {
     el.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.isComposing) {
