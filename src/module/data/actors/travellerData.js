@@ -55,20 +55,21 @@ export class TravellerData extends TwodsixActorBaseData {
     // the balances, and the history table derives running balances from them (see features/finances/ledger.js).
     schema.ledger = new fields.SchemaField({
       transactions: new fields.ArrayField(new fields.SchemaField({
-        id: new fields.StringField({required: true, blank: false, initial: () => foundry.utils.randomID()}),
+        // Unique id, set when the entry is created (see features/finances/ledger.js)
+        id: new fields.StringField({...requiredBlankString}),
         // Signed amount in Cr. For a transfer between own accounts: positive size of the transfer.
         amount: new fields.NumberField({required: true, nullable: false, integer: false, initial: 0}),
         // Account the money was added to / taken from, or the source account of a transfer: "cash" | "digital"
         account: new fields.StringField({required: true, blank: false, initial: "cash"}),
         // Destination account when moving money between own accounts, otherwise null
-        toAccount: new fields.StringField({required: false, nullable: true, blank: false, initial: null}),
+        toAccount: new fields.StringField({required: false, blank: true, nullable: true, initial: null}),
         // Category key (translated on display), e.g. "living", "equipment", "transfer", "adjustment"
         category: new fields.StringField({required: true, blank: false, initial: "other"}),
         description: new fields.StringField({...requiredBlankString}),
         // In-game date as free text so that any calendar works. Empty if unknown.
         gameDate: new fields.StringField({...requiredBlankString}),
-        // Real-world time in ms, used for ordering and as a fallback date
-        timestamp: new fields.NumberField({required: true, nullable: false, integer: true, initial: () => Date.now()}),
+        // Real-world time in ms when the entry was created, used as a fallback date
+        timestamp: new fields.NumberField({required: true, nullable: false, integer: true, initial: 0}),
         userId: new fields.StringField({...requiredBlankString})
       }), {initial: []})
     });
