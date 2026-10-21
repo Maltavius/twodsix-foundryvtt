@@ -1021,12 +1021,13 @@
   flex: 1 1 140px;
 }
 
-/* ---- Headings: a dark bar over the whole width, square corners, like the mockups ---- */
+/* ---- Headings: a bar over the whole width in the theme's heading colours, square corners, like the mockups ---- */
 
 .finance-ledger .fl-panel-head,
 .finance-ledger .fl-history-bar {
-  --fl-bar-bg: #15151a;
-  --fl-bar-text: #f3f1ea;
+  /* The system's own heading colours, so every theme gets its own look */
+  --fl-bar-bg: var(--s2d6-header-background, #15151a);
+  --fl-bar-text: var(--s2d6-title-color, #f3f1ea);
   box-sizing: border-box;
   padding: 4px 10px;
   border-radius: 0;
