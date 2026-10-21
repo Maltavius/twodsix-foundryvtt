@@ -7,10 +7,10 @@ import { createLedgerSheet, findSystemTravellerSheet } from "./sheet.js";
 import { getFinanceValueFixes, parseLocaleNumber } from "./financeText.js";
 
 /**
- * Register the ledger sheet as the default traveller sheet. Done in `setup`, after the system has registered its own
- * sheets in `init`.
+ * Register the ledger sheet as the default traveller sheet. Foundry fills in its sheet registry (which is where the
+ * system's own sheet class is found) after the `setup` hook has run, so this is done when the game is ready.
  */
-Hooks.once("setup", () => {
+function registerLedgerSheet() {
   const SystemSheet = findSystemTravellerSheet();
   if (!SystemSheet) {
     console.error(`${MODULE_ID} | Could not find the Twodsix traveller sheet, so the ledger sheet is not registered.`);
@@ -22,7 +22,9 @@ Hooks.once("setup", () => {
     label: "TWODSIX_LEDGER.SHEET_NAME",
     makeDefault: true
   });
-});
+}
+
+Hooks.once("ready", registerLedgerSheet);
 
 /** Balance changes made outside the ledger (typing in a field, a macro, another module) get an adjustment entry. */
 Hooks.on("preUpdateActor", (actor, data, options) => {
