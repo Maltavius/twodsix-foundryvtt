@@ -1,3 +1,5 @@
+import { getFinanceValueFixes } from '../../features/finances/financeText.js';
+import { parseLocaleNumber } from '../../data/commonSchemaUtils.js';
 import { addTransaction, moveMoney, recordLedgerAdjustments, undoLastTransaction } from '../../features/finances/ledgerActions.js';
 import { updateFinances } from '../../hooks/updateFinances';
 import { stackArmorValues } from '../../utils/actorDamage';
@@ -38,6 +40,19 @@ export class TravellerActor extends CreatureActor {
         }
       });
     }
+  }
+
+  /** @override */
+  async _preCreate(data, options, userId) {
+    const allowed = await super._preCreate(data, options, userId);
+    if (allowed !== false) {
+      // Characters from chargen or imports can have finance text without the matching numbers
+      const fixes = getFinanceValueFixes(this.system.finances, this.system.financeValues, parseLocaleNumber);
+      if (!foundry.utils.isEmpty(fixes)) {
+        this.updateSource({'system.financeValues': fixes});
+      }
+    }
+    return allowed;
   }
 
   /** @override */
