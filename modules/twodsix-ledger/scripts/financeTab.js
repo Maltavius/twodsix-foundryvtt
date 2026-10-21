@@ -130,7 +130,8 @@ export function prepareFinanceContext(sheet, context) {
       locale,
       localize: key => game.i18n.localize(key),
       gameDate: getCurrentGameDate(),
-      openGroup: state.ui.openGroup
+      openGroup: state.ui.openGroup,
+      balances: getStoredBalances(sheet.actor)
     }),
     formOpen: state.ui.formOpen,
     addFormOpen: state.ui.formOpen && state.ui.mode !== "move",
@@ -596,7 +597,9 @@ export const financeActions = {
    * @returns {Promise<void>}
    */
   async financeRecPay(event, target) {
-    await payRecurringItem(this.actor, target.dataset.id);
+    if (!await payRecurringItem(this.actor, target.dataset.id)) {
+      ui.notifications.warn(game.i18n.localize(`${PREFIX}.PAY_NO_FUNDS`));
+    }
     await this.render();
   },
 
@@ -636,7 +639,9 @@ export const financeActions = {
    * @returns {Promise<void>}
    */
   async financeLoanPay(event, target) {
-    await payLoan(this.actor, target.dataset.id);
+    if (!await payLoan(this.actor, target.dataset.id)) {
+      ui.notifications.warn(game.i18n.localize(`${PREFIX}.PAY_NO_FUNDS`));
+    }
     await this.render();
   },
 
@@ -650,7 +655,9 @@ export const financeActions = {
   async financeLoanPayCustom(event, target) {
     const amount = await askAmount(game.i18n.localize(`${PREFIX}.PAY_OTHER`));
     if (amount !== null) {
-      await payLoan(this.actor, target.dataset.id, parseLedgerAmount(amount, getLocale()));
+      if (!await payLoan(this.actor, target.dataset.id, parseLedgerAmount(amount, getLocale()))) {
+        ui.notifications.warn(game.i18n.localize(`${PREFIX}.PAY_NO_FUNDS`));
+      }
       await this.render();
     }
   },

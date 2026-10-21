@@ -216,3 +216,24 @@ describe('undo', () => {
     expect('flags.twodsix-ledger.loans' in update).toBe(false);
   });
 });
+
+describe('not enough money', () => {
+  test('an item that costs more than the account holds is not paid', async () => {
+    const actor = makeActor({digital: 500, recurring: [rent]}); // rent is -600 from digital
+    expect(await payRecurringItem(actor, 'rent')).toBeNull();
+    expect(actor.update).not.toHaveBeenCalled();
+    const enough = makeActor({digital: 600, recurring: [rent]});
+    expect(await payRecurringItem(enough, 'rent')).not.toBeNull();
+  });
+
+  test('income is always received', async () => {
+    const actor = makeActor({digital: 0, recurring: [pension]});
+    expect(await payRecurringItem(actor, 'pen')).not.toBeNull();
+  });
+
+  test('a loan payment is not made when the account cannot cover it', async () => {
+    const actor = makeActor({cash: 400, debt: 12000, loans: [vargo]}); // monthly 500 from cash
+    expect(await payLoan(actor, 'vargo')).toBeNull();
+    expect(await payLoan(actor, 'vargo', 300)).not.toBeNull();
+  });
+});

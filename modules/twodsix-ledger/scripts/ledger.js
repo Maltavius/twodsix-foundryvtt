@@ -311,3 +311,12 @@ export function buildAdjustmentEntries(oldBalances, newBalances, makeId, extra =
   }
   return entries;
 }
+
+/**
+ * @param {number} balance - what is on the account
+ * @param {number} amount - the signed change (negative is a payment)
+ * @returns {boolean} false if the change would take more than the account holds
+ */
+export function hasFunds(balance, amount) {
+  return !(amount < 0) || balance + amount >= 0;
+}

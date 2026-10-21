@@ -6,7 +6,7 @@
  * three hold recurring items, the last one holds loans. Each group is a card; the one that is open shows its panel.
  */
 
-import { LEDGER_ACCOUNTS, formatLedgerNumber } from "./ledger.js";
+import { LEDGER_ACCOUNTS, formatLedgerNumber, hasFunds } from "./ledger.js";
 import { FREQUENCIES, GROUPS, getPayKind, itemsInGroup, summarizeItems } from "./recurring.js";
 import { totalOwed } from "./loans.js";
 
@@ -80,9 +80,12 @@ function countText(count, oneKey, manyKey, localize) {
  * @param {(key: string) => string} args.localize
  * @param {string} [args.gameDate] - the current in-game date, "" if the world has no calendar
  * @param {string|null} [args.openGroup] - the group whose panel is open
+ * @param {{cash: number, digital: number}} [args.balances] - what is on each account; a payment that is more than that
+ *   cannot be paid. Left out, nothing is checked.
  * @returns {object}
  */
-export function buildGroupsView({items = [], loans = [], locale = "en", localize, gameDate = "", openGroup = null}) {
+export function buildGroupsView({items = [], loans = [], locale = "en", localize, gameDate = "", openGroup = null, balances = null}) {
+  const affordable = (account, amount) => !balances || hasFunds(balances[account] ?? 0, amount);
   const select = (options, selected) => options.map(option => ({...option, selected: option.key === selected}));
   const accountOptions = LEDGER_ACCOUNTS.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
   const frequencyOptions = FREQUENCIES.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
@@ -116,7 +119,9 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
       label: localize(`${PREFIX}.GROUP_DEBT`),
       isDebt: true,
       rows: loans.map(loan => {
-        const canPay = loan.monthly > 0 && loan.remaining > 0;
+        const due = Math.min(loan.monthly, loan.remaining);
+        const hasMoney = affordable(loan.account, -due);
+        const canPay = loan.monthly > 0 && loan.remaining > 0 && hasMoney;
         return {
           id: loan.id,
           name: loan.name,
@@ -125,7 +130,7 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
           accounts: select(accountOptions, loan.account),
           canPay,
           payLabel: canPay ? `${localize(`${PREFIX}.PAY`)} ${formatLedgerNumber(Math.min(loan.monthly, loan.remaining), locale)}` : localize(`${PREFIX}.PAY`),
-          payHint: canPay ? "" : localize(`${PREFIX}.${loan.remaining > 0 ? "PAY_NO_AMOUNT" : "PAY_NO_DEBT"}`),
+          payHint: canPay ? "" : localize(`${PREFIX}.${loan.remaining <= 0 ? "PAY_NO_DEBT" : (loan.monthly > 0 ? "PAY_NO_FUNDS" : "PAY_NO_AMOUNT")}`),
           canPayCustom: loan.remaining > 0
         };
       }),
@@ -140,7 +145,7 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
       label: localize(`${PREFIX}.GROUP_${open.toUpperCase()}`),
       isDebt: false,
       rows: groupItems.map(item => {
-        const canPay = item.active && item.amount !== 0;
+        const canPay = item.active && item.amount !== 0 && affordable(item.account, item.amount);
         return {
           id: item.id,
           name: item.name,
@@ -151,7 +156,7 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
           frequencies: select(frequencyOptions, item.frequency),
           payLabel: localize(`${PREFIX}.${getPayKind(item) === "receive" ? "RECEIVE" : "PAY"}`),
           canPay,
-          payHint: canPay ? "" : localize(`${PREFIX}.${!item.active ? "PAY_OFF" : "PAY_NO_AMOUNT"}`)
+          payHint: canPay ? "" : localize(`${PREFIX}.${!item.active ? "PAY_OFF" : (item.amount === 0 ? "PAY_NO_AMOUNT" : "PAY_NO_FUNDS")}`)
         };
       }),
       hasRows: groupItems.length > 0,

@@ -105,3 +105,21 @@ describe('the panel', () => {
     expect(view([], [], {gameDate: 'Holiday 01, 1105'}).gameDate).toBe('Holiday 01, 1105');
   });
 });
+
+describe('when the account is too poor', () => {
+  test('the Pay button is off with a reason, for items and loans', () => {
+    const items = [item({amount: -600, account: 'digital'}, 'rent'), item({amount: 500, group: 'living', account: 'digital'}, 'bonus')];
+    const rows = view(items, [], {openGroup: 'living', balances: {cash: 0, digital: 100}}).panel.rows;
+    expect(rows[0]).toMatchObject({canPay: false, payHint: 'TWODSIX_LEDGER.PAY_NO_FUNDS'});
+    expect(rows[1].canPay).toBe(true);
+    const loanRows = view([], [loan({remaining: 12000, monthly: 500, account: 'cash'}, 'a')], {openGroup: 'debt', balances: {cash: 499, digital: 0}}).panel.rows;
+    expect(loanRows[0]).toMatchObject({canPay: false, payHint: 'TWODSIX_LEDGER.PAY_NO_FUNDS', canPayCustom: true});
+  });
+
+  test('enough money, or no balances given, means it can be paid', () => {
+    const items = [item({amount: -600, account: 'digital'}, 'rent')];
+    expect(view(items, [], {openGroup: 'living', balances: {cash: 0, digital: 600}}).panel.rows[0].canPay).toBe(true);
+    expect(view(items, [], {openGroup: 'living'}).panel.rows[0].canPay).toBe(true);
+  });
+});
+

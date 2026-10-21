@@ -76,6 +76,7 @@
     "PAID_WITH": "Paid with",
     "PAY": "Pay",
     "PAY_NO_AMOUNT": "Enter an amount first.",
+    "PAY_NO_FUNDS": "There is not enough money on that account.",
     "PAY_NO_DEBT": "There is no debt left to pay.",
     "PAY_OFF": "This item is switched off.",
     "PAY_OTHER": "Pay off…",

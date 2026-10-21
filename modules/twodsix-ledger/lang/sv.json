@@ -76,6 +76,7 @@
     "PAID_WITH": "Betalat med",
     "PAY": "Betala",
     "PAY_NO_AMOUNT": "Ange ett belopp först.",
+    "PAY_NO_FUNDS": "Det finns inte tillräckligt med pengar på kontot.",
     "PAY_NO_DEBT": "Det finns ingen skuld kvar att betala.",
     "PAY_OFF": "Posten är avstängd.",
     "PAY_OTHER": "Betala av…",

@@ -17,6 +17,7 @@ import {
   createTransaction,
   DEFAULT_LEDGER_ACCOUNT,
   DEFAULT_LEDGER_CATEGORY,
+  hasFunds,
   LEDGER_ACCOUNTS,
   revertTransaction,
   roundUpCr
@@ -348,7 +349,10 @@ async function postEntry(actor, {amount, account, category, description, loan}, 
 export async function payRecurringItem(actor, id) {
   const item = getRecurringItems(actor).find(entry => entry.id === id);
   const plan = planPayment(item);
-  return plan ? postEntry(actor, plan) : null;
+  if (!plan || !hasFunds(getStoredBalances(actor)[plan.account], plan.amount)) {
+    return null;
+  }
+  return postEntry(actor, plan);
 }
 
 /**
@@ -396,7 +400,7 @@ export async function payLoan(actor, id, amount) {
   const loans = getLoans(actor);
   const loan = loans.find(entry => entry.id === id);
   const plan = planLoanPayment(loan, amount);
-  if (!plan) {
+  if (!plan || !hasFunds(getStoredBalances(actor)[plan.account], plan.amount)) {
     return null;
   }
   const name = loan.name || game.i18n.localize("TWODSIX_LEDGER.LOAN");
