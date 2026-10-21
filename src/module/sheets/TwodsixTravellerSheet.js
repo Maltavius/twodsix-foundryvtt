@@ -2,6 +2,7 @@
 /** @typedef {import("../entities/TwodsixItem").default} TwodsixItem */
 
 import { CONSUMABLE_SUBTYPES, TWODSIX } from '../config';
+import { bindFinanceTab, financeActions, prepareFinanceContext } from '../features/finances/financeTab.js';
 import { enrichContextFields } from '../utils/sheetUtils';
 import { AbstractTwodsixActorSheet } from './AbstractTwodsixActorSheet';
 
@@ -29,7 +30,8 @@ export class TwodsixTravellerSheet extends foundry.applications.api.HandlebarsAp
       toggleView: this._onViewToggle,
       toggleSkillHeader: this._onSkillHeaderToggle,
       toggleAttachmentsList: this._onToggleAttachmentsList,
-      toggleConsumablesList: this._onToggleConsumablesList
+      toggleConsumablesList: this._onToggleConsumablesList,
+      ...financeActions
     },
     tag: "form",
     sheetType: "TwodsixTravellerSheet"
@@ -38,7 +40,7 @@ export class TwodsixTravellerSheet extends foundry.applications.api.HandlebarsAp
   static PARTS = {
     main: {
       template: "systems/twodsix/templates/actors/traveller-sheet.hbs",
-      scrollable: [".skills", ".character-inventory", ".inventory", ".finances", ".info", ".effects", ".actor-notes"]
+      scrollable: [".skills", ".character-inventory", ".inventory", ".finances", ".info", ".effects", ".actor-notes", ".fl-scroll"]
     }
   };
 
@@ -250,6 +252,8 @@ export class TwodsixTravellerSheet extends foundry.applications.api.HandlebarsAp
       showTraitAE: game.settings.get('twodsix', 'showTraitAE')
     });
 
+    prepareFinanceContext(this, context);
+
     //Add custom source labels for active effects
     for (const effect of context.effects) {
       if (["dead", "unconscious", "wounded", "encumbered"].includes(Array.from(effect.statuses)[0])) {
@@ -283,6 +287,9 @@ export class TwodsixTravellerSheet extends foundry.applications.api.HandlebarsAp
       this.element.querySelector(".window-content").classList.add("overlap-header");
       this.element.querySelector(".window-header").classList.add("transparent-header");
     }
+
+    // Finances tab. Also bound when read only, so the filter and search work for observers.
+    bindFinanceTab(this);
 
     // Everything below here is only needed if the sheet is editable
     if (!context.editable) {

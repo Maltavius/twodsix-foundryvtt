@@ -1,31 +1,169 @@
-<div class="finances-container">
-  <div class="cash">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.CASH_ON_HAND"}}</span>
-    <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0"/>
-  </div>
+<div class="finance-ledger">
 
-  <div class="pension">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.PENSION"}}</span>
-    <input name="system.finances.pension" type="text" value="{{system.finances.pension}}" placeholder="0"/>
-  </div>
+  {{!-- Totals --}}
+  <section class="fl-totals">
+    <div class="fl-total-main">
+      <span class="fl-label">{{localize "TWODSIX.Actor.Finances.TOTAL_FUNDS"}}</span>
+      <span class="fl-total-value {{finance.totals.totalClass}}">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
+    </div>
+    {{#if finance.totals.showNetOfDebt}}
+    <div class="fl-total-net">
+      <span class="fl-label">{{localize "TWODSIX.Actor.Finances.NET_OF_DEBT"}}</span>
+      <span class="fl-net-value">{{finance.totals.netOfDebt}} Cr</span>
+    </div>
+    {{/if}}
+  </section>
 
-  <div class="debt">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.DEBT"}}</span>
-    <input name="system.finances.debt" type="text" value="{{system.finances.debt}}" placeholder="0"/>
-  </div>
+  {{!-- Cash and digital --}}
+  <section class="fl-accounts">
+    <div class="fl-account cash">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.CASH"}}</span>
+      <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.CASH'}}"/>
+      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.CASH_HINT"}}</span>
+    </div>
+    <div class="fl-account digital">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.DIGITAL"}}</span>
+      <input name="system.finances.digital" type="text" value="{{system.finances.digital}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.DIGITAL'}}"/>
+      <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.DIGITAL_HINT"}}</span>
+    </div>
+  </section>
 
-  <div class="ship-payments">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.SHIP_PAYMENTS_MONTHLY"}}</span>
-    <input name="system.finances.payments" type="text" value="{{system.finances.payments}}" placeholder="0"/>
-  </div>
+  {{!-- The four fields that were here before the ledger --}}
+  <section class="fl-fields">
+    <div class="pension">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.PENSION"}}</span>
+      <input name="system.finances.pension" type="text" value="{{system.finances.pension}}" placeholder="0"/>
+    </div>
+    <div class="debt">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.DEBT"}}</span>
+      <input name="system.finances.debt" type="text" value="{{system.finances.debt}}" placeholder="0"/>
+    </div>
+    <div class="ship-payments">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.SHIP_PAYMENTS_MONTHLY"}}</span>
+      <input name="system.finances.payments" type="text" value="{{system.finances.payments}}" placeholder="0"/>
+    </div>
+    <div class="living-costs">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.LIVING_COSTS"}}</span>
+      <input name="system.finances.livingCosts" type="text" value="{{system.finances.livingCosts}}" placeholder="0"/>
+    </div>
+  </section>
 
-  <div class="living-costs">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.LIVING_COSTS"}}</span>
-    <input name="system.finances.livingCosts" type="text" value="{{system.finances.livingCosts}}" placeholder="0"/>
-  </div>
+  {{!-- Add transaction / move money --}}
+  {{#if finance.editable}}
+  <section class="fl-form fl-nosubmit" data-mode="{{finance.mode}}">
+    <div class="fl-modes" role="tablist">
+      <button type="button" class="fl-mode {{#unless finance.isMoveMode}}active{{/unless}}" data-action="financeSetMode" data-mode="add" role="tab" aria-selected="{{#if finance.isMoveMode}}false{{else}}true{{/if}}">{{localize "TWODSIX.Actor.Finances.ADD_TRANSACTION"}}</button>
+      <button type="button" class="fl-mode {{#if finance.isMoveMode}}active{{/if}}" data-action="financeSetMode" data-mode="move" role="tab" aria-selected="{{#if finance.isMoveMode}}true{{else}}false{{/if}}">{{localize "TWODSIX.Actor.Finances.MOVE_MONEY"}}</button>
+    </div>
 
-  <div class="financial-notes"><span class="item-title">{{localize "TWODSIX.Actor.Finances.FINANCIAL_NOTES"}}</span>
+    <div class="fl-form-row">
+      <label class="fl-field fl-amount">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.AMOUNT"}}</span>
+        <input type="text" inputmode="text" autocomplete="off" data-draft="amount" data-submit-on-enter value="{{finance.draft.amount}}" placeholder="-200"/>
+      </label>
+      {{#if finance.isMoveMode}}
+      <label class="fl-field">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.FROM"}}</span>
+        <select data-draft="from">
+          {{#each finance.fromAccounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </label>
+      <label class="fl-field">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.TO"}}</span>
+        <select data-draft="to">
+          {{#each finance.toAccounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </label>
+      {{else}}
+      <label class="fl-field">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.PAID_WITH"}}</span>
+        <select data-draft="account">
+          {{#each finance.addAccounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </label>
+      <label class="fl-field">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.CATEGORY"}}</span>
+        <select data-draft="category">
+          {{#each finance.categoryOptions}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </label>
+      {{/if}}
+    </div>
+
+    <div class="fl-form-row">
+      <label class="fl-field fl-description">
+        <span class="fl-label">{{localize "TWODSIX.Actor.Finances.DESCRIPTION"}}</span>
+        <input type="text" autocomplete="off" data-draft="description" data-submit-on-enter value="{{finance.draft.description}}"/>
+      </label>
+      {{#if finance.isMoveMode}}
+      <button type="button" class="fl-submit" data-kind="neutral" data-action="financeMove"><span class="fl-button-label">{{localize "TWODSIX.Actor.Finances.MOVE_BUTTON"}}</span></button>
+      {{else}}
+      <button type="button" class="fl-submit" data-kind="{{finance.button.kind}}" data-action="financeAdd"><span class="fl-button-label">{{finance.button.label}}</span></button>
+      {{/if}}
+    </div>
+    <p class="fl-hint">{{#if finance.isMoveMode}}{{localize "TWODSIX.Actor.Finances.MOVE_HINT"}}{{else}}{{localize "TWODSIX.Actor.Finances.AMOUNT_HINT"}}{{/if}}</p>
+    <p class="fl-error" role="alert" aria-live="polite" hidden></p>
+  </section>
+  {{/if}}
+
+  {{!-- History --}}
+  <section class="fl-history fl-nosubmit">
+    <div class="fl-history-head">
+      <span class="item-title">{{localize "TWODSIX.Actor.Finances.HISTORY"}}</span>
+      <div class="fl-filters" role="group" aria-label="{{localize 'TWODSIX.Actor.Finances.ACCOUNT'}}">
+        {{#each finance.filters}}
+        <button type="button" class="fl-filter {{#if active}}active{{/if}}" data-action="financeFilter" data-filter="{{key}}" aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+        {{/each}}
+      </div>
+      <input type="search" class="fl-search" data-role="search" value="{{finance.search}}" placeholder="{{localize 'TWODSIX.Actor.Finances.SEARCH'}}" aria-label="{{localize 'TWODSIX.Actor.Finances.SEARCH'}}"/>
+      {{#if finance.editable}}
+      <button type="button" class="fl-undo" data-action="financeUndo" {{#unless finance.canUndo}}disabled{{/unless}}><i class="fa-solid fa-rotate-left"></i> {{localize "TWODSIX.Actor.Finances.UNDO_LAST"}}</button>
+      {{/if}}
+    </div>
+
+    <div class="fl-scroll">
+      {{#if finance.rows.length}}
+      <table class="fl-table">
+        <thead>
+          <tr>
+            <th class="fl-col-date">{{localize "TWODSIX.Actor.Finances.DATE_IN_GAME"}}</th>
+            <th class="fl-col-desc">{{localize "TWODSIX.Actor.Finances.DESCRIPTION"}}</th>
+            <th class="fl-col-account">{{localize "TWODSIX.Actor.Finances.ACCOUNT"}}</th>
+            <th class="fl-col-amount">{{localize "TWODSIX.Actor.Finances.AMOUNT_COLUMN"}}</th>
+            <th class="fl-col-balance">{{localize "TWODSIX.Actor.Finances.BALANCE"}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each finance.rows}}
+          <tr class="fl-row">
+            <td class="fl-col-date {{#if isRealDate}}real-date{{/if}}" {{#if isRealDate}}data-tooltip="{{localize 'TWODSIX.Actor.Finances.REAL_DATE_TOOLTIP'}}"{{/if}}>{{dateText}}</td>
+            <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category">{{categoryLabel}}</span>{{/if}}</td>
+            <td class="fl-col-account"><span class="fl-pill {{accountKey}}">{{accountText}}</span></td>
+            <td class="fl-col-amount {{amountClass}}">{{amountText}}</td>
+            <td class="fl-col-balance">{{balanceText}}</td>
+          </tr>
+          {{/each}}
+          {{#if finance.opening}}
+          <tr class="fl-row fl-opening">
+            <td></td>
+            <td class="fl-col-desc" colspan="3"><span class="fl-desc-text">{{localize "TWODSIX.Actor.Finances.OPENING_BALANCE"}}</span></td>
+            <td class="fl-col-balance">{{finance.opening.text}}</td>
+          </tr>
+          {{/if}}
+        </tbody>
+      </table>
+      {{else}}
+      <p class="fl-empty">{{#if finance.noMatches}}{{localize "TWODSIX.Actor.Finances.NO_MATCHES"}}{{else}}{{localize "TWODSIX.Actor.Finances.NO_TRANSACTIONS"}}{{/if}}</p>
+      {{/if}}
+      {{#if finance.hasMore}}
+      <button type="button" class="fl-more" data-action="financeMore">{{localize "TWODSIX.Actor.Finances.SHOW_MORE_COUNT" count=finance.hiddenCount}}</button>
+      {{/if}}
+    </div>
+  </section>
+
+  {{!-- Notes (unchanged field) --}}
+  <section class="financial-notes">
+    <span class="item-title">{{localize "TWODSIX.Actor.Finances.FINANCIAL_NOTES"}}</span>
     <div contenteditable="true" data-edit="system.finances.financial-notes">{{{system.finances.financial-notes}}}</div>
-  </div>
+  </section>
 </div>
-
