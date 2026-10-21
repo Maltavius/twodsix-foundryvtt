@@ -21,7 +21,8 @@
       <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.CASH'}}"/>
       <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.CASH_HINT"}}</span>
     </div>
-    <div class="fl-account digital">
+    {{!-- "cash" is also on this card so the theme's existing input rules for .cash input (border, height) apply to it too --}}
+    <div class="fl-account digital cash">
       <span class="item-title">{{localize "TWODSIX.Actor.Finances.DIGITAL"}}</span>
       <input name="system.finances.digital" type="text" value="{{system.finances.digital}}" placeholder="0" aria-label="{{localize 'TWODSIX.Actor.Finances.DIGITAL'}}"/>
       <span class="fl-hint">{{localize "TWODSIX.Actor.Finances.DIGITAL_HINT"}}</span>
