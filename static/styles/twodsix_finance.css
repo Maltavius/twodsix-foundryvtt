@@ -311,7 +311,7 @@
   width: 100%;
   margin: 0;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 0.95em;
 }
 
@@ -342,9 +342,21 @@
   background: var(--fl-soft);
 }
 
-.finance-ledger .fl-col-date {
-  width: 11ch;
+.finance-ledger .fl-col-date,
+.finance-ledger .fl-col-account,
+.finance-ledger .fl-col-amount,
+.finance-ledger .fl-col-balance {
+  /* Narrowest width that fits the content, so numbers and pills never overlap. The description takes what is left. */
+  width: 1%;
   white-space: nowrap;
+}
+
+.finance-ledger .fl-col-desc {
+  width: 100%;
+  min-width: 8ch;
+}
+
+.finance-ledger .fl-col-date {
   font-variant-numeric: tabular-nums;
 }
 
@@ -353,13 +365,8 @@
   font-style: italic;
 }
 
-.finance-ledger .fl-col-account {
-  width: 10ch;
-}
-
 .finance-ledger .fl-col-amount,
 .finance-ledger .fl-col-balance {
-  width: 10ch;
   text-align: right !important;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -377,6 +384,10 @@
   display: block;
   font-size: 0.8em;
   color: var(--fl-muted);
+}
+
+.finance-ledger .fl-account-inline {
+  display: none;
 }
 
 .finance-ledger .fl-pill {
@@ -440,5 +451,14 @@
 @container (max-width: 400px) {
   .finance-ledger .fl-fields {
     grid-template-columns: 1fr;
+  }
+
+  /* No room for a column of its own: show the account under the description instead */
+  .finance-ledger .fl-col-account {
+    display: none;
+  }
+
+  .finance-ledger .fl-account-inline {
+    display: block;
   }
 }

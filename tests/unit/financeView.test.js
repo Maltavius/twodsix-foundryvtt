@@ -62,7 +62,7 @@ describe('buildFinanceView', () => {
   test('falls back to the real date when no in-game date was recorded', () => {
     const view = build({transactions: [tx('a', 5, {timestamp: Date.UTC(2026, 9, 21, 12)})], balances: {cash: 5}});
     expect(view.rows[0].isRealDate).toBe(true);
-    expect(view.rows[0].dateText).toMatch(/2026/);
+    expect(view.rows[0].dateText).toMatch(/^2026-10-2[01]$/);
   });
 
   test('a transfer is one row, shown as neutral in "all" and as in/out per account', () => {

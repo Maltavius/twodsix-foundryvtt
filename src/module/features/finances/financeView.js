@@ -44,19 +44,18 @@ export function getAddButtonState(amountText, locale = "en") {
 
 /**
  * @param {object} transaction
- * @param {string} locale
  * @returns {{text: string, isRealDate: boolean}}
  */
-function formatRowDate(transaction, locale) {
+function formatRowDate(transaction) {
   if (transaction.gameDate) {
     return {text: transaction.gameDate, isRealDate: false};
   }
   const timestamp = Number(transaction.timestamp);
   if (Number.isFinite(timestamp) && timestamp > 0) {
-    return {
-      text: new Intl.DateTimeFormat(locale, {year: "numeric", month: "2-digit", day: "2-digit"}).format(new Date(timestamp)),
-      isRealDate: true
-    };
+    // Same year-month-day order as the in-game dates, so the column looks the same whichever kind of date a row has
+    const date = new Date(timestamp);
+    const pad = value => String(value).padStart(2, "0");
+    return {text: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`, isRealDate: true};
   }
   return {text: "", isRealDate: true};
 }
@@ -103,7 +102,7 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
 
   const viewRows = rows.map(row => {
     const {transaction} = row;
-    const date = formatRowDate(transaction, locale);
+    const date = formatRowDate(transaction);
     const accountKey = row.isTransfer ? "transfer" : transaction.account;
     const accountText = row.isTransfer
       ? `${accountLabels[transaction.account]} → ${accountLabels[transaction.toAccount]}`

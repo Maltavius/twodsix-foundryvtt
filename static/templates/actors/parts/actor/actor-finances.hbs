@@ -138,7 +138,7 @@
           {{#each finance.rows}}
           <tr class="fl-row">
             <td class="fl-col-date {{#if isRealDate}}real-date{{/if}}" {{#if isRealDate}}data-tooltip="{{localize 'TWODSIX.Actor.Finances.REAL_DATE_TOOLTIP'}}"{{/if}}>{{dateText}}</td>
-            <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category">{{categoryLabel}}</span>{{/if}}</td>
+            <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category">{{categoryLabel}}</span>{{/if}}<span class="fl-category fl-account-inline">{{accountText}}</span></td>
             <td class="fl-col-account"><span class="fl-pill {{accountKey}}">{{accountText}}</span></td>
             <td class="fl-col-amount {{amountClass}}">{{amountText}}</td>
             <td class="fl-col-balance">{{balanceText}}</td>
