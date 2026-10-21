@@ -129,8 +129,14 @@ export function getCurrentGameMonth() {
     const api = getSimpleCalendarApi();
     if (api) {
       const date = api.timestampToDate(api.timestamp());
+      // Simple Calendar Reborn counts months from 1 (the date it shows is 1005-01-17 when `month` is 1), so the number is
+      // used as it is. The shown month is preferred when it is a number.
+      const shown = Number(date?.display?.month);
+      if (Number.isFinite(shown) && shown > 0) {
+        return shown;
+      }
       if (Number.isFinite(date?.month)) {
-        return date.month + 1; // Simple Calendar's months are zero based
+        return date.month;
       }
     }
   } catch (err) {

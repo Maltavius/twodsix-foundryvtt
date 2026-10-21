@@ -245,7 +245,7 @@ describe('the month in the note', () => {
   };
 
   test('a monthly payment names the in-game month when it is known', async () => {
-    calendar(2); // zero based: the third month
+    calendar(3); // Simple Calendar Reborn counts months from 1
     const entry = await payRecurringItem(makeActor({digital: 1000, recurring: [rent]}), 'rent');
     expect(entry.description).toBe('Rent (TWODSIX_LEDGER.MONTH_NOTE:3)');
     const loanEntry = await payLoan(makeActor({cash: 1000, debt: 12000, loans: [vargo]}), 'vargo');
