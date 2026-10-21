@@ -1020,3 +1020,46 @@
 .finance-ledger .fl-rec .fl-field.fl-description {
   flex: 1 1 140px;
 }
+
+/* ---- Headings: a dark bar over the whole width, square corners, like the mockups ---- */
+
+.finance-ledger .fl-panel-head,
+.finance-ledger .fl-history-bar {
+  --fl-bar-bg: #15151a;
+  --fl-bar-text: #f3f1ea;
+  box-sizing: border-box;
+  padding: 4px 10px;
+  border-radius: 0;
+  background: var(--fl-bar-bg);
+  color: var(--fl-bar-text);
+}
+
+.finance-ledger .fl-panel-head {
+  margin: -6px -8px 2px;
+}
+
+.finance-ledger .fl-panel-head .item-title,
+.finance-ledger .fl-history-bar .item-title {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--fl-bar-text);
+  font-size: 1.1em;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.finance-ledger .fl-panel-head .fl-calendar-note,
+.finance-ledger .fl-panel-head .fl-panel-close {
+  color: color-mix(in srgb, var(--fl-bar-text) 78%, transparent);
+}
+
+.finance-ledger .fl-panel-head .fl-panel-close:hover {
+  color: var(--fl-bar-text);
+}
+
+.finance-ledger .fl-history-bar .fl-bar-button {
+  min-height: 28px;
+}
