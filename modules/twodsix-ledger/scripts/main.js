@@ -16,6 +16,7 @@ Hooks.once("setup", () => {
     console.error(`${MODULE_ID} | Could not find the Twodsix traveller sheet, so the ledger sheet is not registered.`);
     return;
   }
+  console.info(`${MODULE_ID} | Registering the ledger sheet on top of`, SystemSheet.name);
   foundry.documents.collections.Actors.registerSheet(MODULE_ID, createLedgerSheet(SystemSheet), {
     types: ["traveller"],
     label: "TWODSIX_LEDGER.SHEET_NAME",

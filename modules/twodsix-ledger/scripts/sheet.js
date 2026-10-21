@@ -54,7 +54,11 @@ export async function ensureFinancePartial() {
  */
 export function findSystemTravellerSheet() {
   const entries = Object.values(CONFIG.Actor.sheetClasses?.traveller ?? {});
-  return entries.find(entry => entry.id === "twodsix.TwodsixTravellerSheet")?.cls ?? null;
+  // A built (minified) system can have another class name than the source, so also accept any sheet the system itself
+  // registered for travellers.
+  const own = entries.find(entry => entry.id === "twodsix.TwodsixTravellerSheet")
+    ?? entries.find(entry => String(entry.id).startsWith("twodsix."));
+  return own?.cls ?? null;
 }
 
 /**
