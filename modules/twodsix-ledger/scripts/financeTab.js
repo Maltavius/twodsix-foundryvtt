@@ -8,26 +8,81 @@
 import { LEDGER_ACCOUNTS, formatLedgerNumber, parseLedgerAmount } from "./ledger.js";
 import {
   MODULE_ID,
+  addLoan,
   addRecurringItem,
   addTransaction,
+  deleteLoan,
   deleteRecurringItem,
+  editLoan,
   editRecurringItem,
   getCurrentGameDate,
+  getLoans,
   getRecurringItems,
   getStoredBalances,
-  getStoredDebt,
   getStoredTransactions,
   moveMoney,
-  payAllRecurring,
+  payLoan,
   payRecurringItem,
+  takeLoan,
   undoLastTransaction
 } from "./store.js";
-import { buildRecurringView } from "./recurringView.js";
+import { buildGroupsView } from "./recurringView.js";
+import { GROUPS } from "./recurring.js";
 import { isDeltaFinanceText } from "./financeText.js";
 import { ROW_LIMIT_STEP, buildFinanceView, getAddButtonState } from "./financeView.js";
 
 const PREFIX = "TWODSIX_LEDGER";
 const SEARCH_DELAY_MS = 250;
+
+/**
+ * Which group is open and whether the form is open are remembered per traveller in this browser, so they come back
+ * after switching tab, closing the sheet or reloading. Storage can be unavailable (private window, blocked site data),
+ * in which case the tab simply starts closed/open as usual.
+ * @param {object} actor
+ * @returns {string}
+ */
+function prefsKey(actor) {
+  return `${MODULE_ID}.ui.${actor?.id ?? "unknown"}`;
+}
+
+/**
+ * @param {object} actor
+ * @returns {{openGroup?: string|null, formOpen?: boolean, mode?: string}}
+ */
+function loadUiPrefs(actor) {
+  try {
+    const saved = JSON.parse(globalThis.localStorage?.getItem(prefsKey(actor)) ?? "null");
+    if (!saved || typeof saved !== "object") {
+      return {};
+    }
+    const prefs = {};
+    if (saved.openGroup === null || [...GROUPS, "debt"].includes(saved.openGroup)) {
+      prefs.openGroup = saved.openGroup;
+    }
+    if (typeof saved.formOpen === "boolean") {
+      prefs.formOpen = saved.formOpen;
+    }
+    if (saved.mode === "add" || saved.mode === "move") {
+      prefs.mode = saved.mode;
+    }
+    return prefs;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * @param {object} sheet
+ * @returns {void}
+ */
+function saveUiPrefs(sheet) {
+  try {
+    const {openGroup, formOpen, mode} = getState(sheet).ui;
+    globalThis.localStorage?.setItem(prefsKey(sheet.actor), JSON.stringify({openGroup, formOpen, mode}));
+  } catch {
+    // Not remembered, that is all
+  }
+}
 
 /**
  * @param {object} sheet
@@ -36,7 +91,7 @@ const SEARCH_DELAY_MS = 250;
  */
 function getState(sheet) {
   sheet._financeState ??= {
-    ui: {filter: "all", search: "", limit: undefined, mode: "add"},
+    ui: {filter: "all", search: "", limit: undefined, mode: "add", openGroup: null, formOpen: true, ...loadUiPrefs(sheet.actor)},
     draft: {amount: "", description: "", category: "other", account: "cash", from: "cash", to: "digital"},
     focus: null
   };
@@ -67,13 +122,17 @@ export function prepareFinanceContext(sheet, context) {
   context.finance = {
     ...view,
     editable: Boolean(context.editable),
-    recurring: buildRecurringView({
+    groups: buildGroupsView({
       items: getRecurringItems(sheet.actor),
-      debt: getStoredDebt(sheet.actor),
+      loans: getLoans(sheet.actor),
       locale,
       localize: key => game.i18n.localize(key),
-      gameDate: getCurrentGameDate()
+      gameDate: getCurrentGameDate(),
+      openGroup: state.ui.openGroup
     }),
+    formOpen: state.ui.formOpen,
+    addFormOpen: state.ui.formOpen && state.ui.mode !== "move",
+    moveFormOpen: state.ui.formOpen && state.ui.mode === "move",
     digitalText: formatLedgerNumber(balances.digital, locale),
     draft,
     button: {kind: button.kind, label: game.i18n.localize(button.labelKey)},
@@ -183,19 +242,23 @@ function updateAddButton(root, amountText) {
 }
 
 /**
- * What a changed field of a recurring item means, as a patch for the item. Returns null if the text is not usable (an
- * amount that is not a number), in which case the sheet is simply drawn again with the stored value.
+ * What a changed field of an item or loan means, as a patch. Returns null if the text is not usable (an amount that is
+ * not a number), in which case the sheet is simply drawn again with the stored value.
  * @param {HTMLInputElement|HTMLSelectElement} field
+ * @param {string} name - the name of the field
  * @returns {object|null}
  */
-function readRecurringField(field) {
-  const name = field.dataset.recField;
+function readFieldPatch(field, name) {
   if (field.type === "checkbox") {
     return {[name]: field.checked};
   }
-  if (name === "amount") {
-    const amount = parseLedgerAmount(field.value, game.i18n.lang);
-    return Number.isFinite(amount) ? {amount} : null;
+  if (name === "amount" || name === "remaining" || name === "monthly") {
+    const text = field.value.trim();
+    if (text === "" && name === "monthly") {
+      return {monthly: 0};
+    }
+    const amount = parseLedgerAmount(text, game.i18n.lang);
+    return Number.isFinite(amount) ? {[name]: amount} : null;
   }
   return {[name]: field.value};
 }
@@ -229,16 +292,22 @@ export function bindFinanceTab(sheet) {
     await sheet.render();
   });
 
-  // Recurring items: one change handler for the whole list
+  // Items and loans: one change handler for the whole panel
   root.querySelector("[data-recurring]")?.addEventListener("change", async event => {
-    const field = event.target.closest("[data-rec-field]");
-    const row = event.target.closest("[data-rec-id]");
-    if (!field || !row) {
+    const itemField = event.target.closest("[data-rec-field]");
+    const loanField = event.target.closest("[data-loan-field]");
+    if (itemField) {
+      const patch = readFieldPatch(itemField, itemField.dataset.recField);
+      if (patch) {
+        await editRecurringItem(sheet.actor, itemField.closest("[data-rec-id]").dataset.recId, patch);
+      }
+    } else if (loanField) {
+      const patch = readFieldPatch(loanField, loanField.dataset.loanField);
+      if (patch) {
+        await editLoan(sheet.actor, loanField.closest("[data-loan-id]").dataset.loanId, patch);
+      }
+    } else {
       return;
-    }
-    const patch = readRecurringField(field);
-    if (patch) {
-      await editRecurringItem(sheet.actor, row.dataset.recId, patch);
     }
     await sheet.render();
   });
@@ -289,6 +358,41 @@ export function bindFinanceTab(sheet) {
     }
     state.focus = null;
   }
+}
+
+/**
+ * Ask for the details of a new loan.
+ * @returns {Promise<{name: string, amount: string, account: string, monthly: string}|null>} null if cancelled
+ */
+async function askLoanDetails() {
+  const t = key => foundry.utils.escapeHTML(game.i18n.localize(`${PREFIX}.${key}`));
+  const accounts = LEDGER_ACCOUNTS.map(key => `<option value="${key}">${t(key.toUpperCase())}</option>`).join("");
+  const content = `<div class="form-group"><label>${t("LOAN_NAME")}</label><input type="text" name="name" autofocus></div>
+    <div class="form-group"><label>${t("LOAN_AMOUNT")}</label><input type="text" name="amount" inputmode="text"></div>
+    <div class="form-group"><label>${t("LOAN_INTO_ACCOUNT")}</label><select name="account">${accounts}</select></div>
+    <div class="form-group"><label>${t("MONTHLY_PAYMENT")}</label><input type="text" name="monthly" inputmode="text" placeholder="0"></div>`;
+  return foundry.applications.api.DialogV2.prompt({
+    window: {title: game.i18n.localize(`${PREFIX}.TAKE_LOAN`)},
+    content,
+    ok: {label: game.i18n.localize(`${PREFIX}.TAKE_LOAN`), callback: (event, button) => Object.fromEntries(new FormData(button.form))},
+    rejectClose: false
+  });
+}
+
+/**
+ * Ask for one amount.
+ * @param {string} title
+ * @returns {Promise<string|null>} what was typed, or null if cancelled
+ */
+async function askAmount(title) {
+  const label = foundry.utils.escapeHTML(game.i18n.localize(`${PREFIX}.AMOUNT`));
+  const answer = await foundry.applications.api.DialogV2.prompt({
+    window: {title},
+    content: `<div class="form-group"><label>${label}</label><input type="text" name="amount" inputmode="text" autofocus></div>`,
+    ok: {label: title, callback: (event, button) => new FormData(button.form).get("amount")},
+    rejectClose: false
+  });
+  return typeof answer === "string" ? answer : null;
 }
 
 /**
@@ -354,18 +458,37 @@ export const financeActions = {
   },
 
   /**
-   * Switch the form between adding a transaction and moving money.
+   * Open or close the form. The two buttons beside the history title share it: pressing the one for the mode that is
+   * showing closes it, the other one switches the mode.
    * @this {object} the sheet
    * @param {Event} event
    * @param {HTMLElement} target - has data-mode
    * @returns {Promise<void>}
    */
-  async financeSetMode(event, target) {
+  async financeToggleForm(event, target) {
     const root = getRoot(this);
     if (root) {
       readDraft(this, root);
     }
-    getState(this).ui.mode = target.dataset.mode === "move" ? "move" : "add";
+    const {ui} = getState(this);
+    const mode = target.dataset.mode === "move" ? "move" : "add";
+    ui.formOpen = !(ui.formOpen && ui.mode === mode);
+    ui.mode = mode;
+    saveUiPrefs(this);
+    await this.render();
+  },
+
+  /**
+   * Open the list of a group, or close it if it is the one that is open.
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-group
+   * @returns {Promise<void>}
+   */
+  async financeToggleGroup(event, target) {
+    const {ui} = getState(this);
+    ui.openGroup = ui.openGroup === target.dataset.group ? null : target.dataset.group;
+    saveUiPrefs(this);
     await this.render();
   },
 
@@ -399,12 +522,15 @@ export const financeActions = {
   },
 
   /**
-   * Add an empty item to the list of recurring items.
+   * Add an empty item to a group.
    * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-group
    * @returns {Promise<void>}
    */
-  async financeRecAdd() {
-    await addRecurringItem(this.actor, {name: "", amount: 0, account: "digital", frequency: "month"});
+  async financeRecAdd(event, target) {
+    const group = GROUPS.includes(target.dataset.group) ? target.dataset.group : "living";
+    await addRecurringItem(this.actor, {name: "", amount: 0, account: "digital", group});
     await this.render();
   },
 
@@ -433,12 +559,69 @@ export const financeActions = {
   },
 
   /**
-   * Pay every active monthly item.
+   * Take a new loan: asks for the details, then creates the loan and puts the money on the chosen account.
    * @this {object} the sheet
    * @returns {Promise<void>}
    */
-  async financeRecPayAll() {
-    await payAllRecurring(this.actor);
+  async financeLoanTake() {
+    const answer = await askLoanDetails();
+    if (answer) {
+      await takeLoan(this.actor, {
+        name: answer.name,
+        amount: parseLedgerAmount(answer.amount, getLocale()),
+        account: answer.account,
+        monthly: parseLedgerAmount(answer.monthly || "0", getLocale())
+      });
+      await this.render();
+    }
+  },
+
+  /**
+   * Add a debt that already exists, without any money changing hands.
+   * @this {object} the sheet
+   * @returns {Promise<void>}
+   */
+  async financeLoanAdd() {
+    await addLoan(this.actor, {name: "", remaining: 0, monthly: 0, account: "cash"});
+    await this.render();
+  },
+
+  /**
+   * Pay a loan's monthly amount.
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-id
+   * @returns {Promise<void>}
+   */
+  async financeLoanPay(event, target) {
+    await payLoan(this.actor, target.dataset.id);
+    await this.render();
+  },
+
+  /**
+   * Pay back another amount of a loan: asks how much.
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-id
+   * @returns {Promise<void>}
+   */
+  async financeLoanPayCustom(event, target) {
+    const amount = await askAmount(game.i18n.localize(`${PREFIX}.PAY_OTHER`));
+    if (amount !== null) {
+      await payLoan(this.actor, target.dataset.id, parseLedgerAmount(amount, getLocale()));
+      await this.render();
+    }
+  },
+
+  /**
+   * Remove a loan from the list (this does not touch the history).
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-id
+   * @returns {Promise<void>}
+   */
+  async financeLoanDelete(event, target) {
+    await deleteLoan(this.actor, target.dataset.id);
     await this.render();
   },
 

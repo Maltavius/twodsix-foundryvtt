@@ -15,7 +15,7 @@
 export const LEDGER_ACCOUNTS = ["cash", "digital"];
 
 /** Categories a player can pick when adding a transaction. Order is the order shown in the form. */
-export const LEDGER_CATEGORIES = ["other", "income", "living", "equipment", "medical", "ship", "trade"];
+export const LEDGER_CATEGORIES = ["other", "income", "living", "equipment", "medical", "ship", "trade", "loan"];
 
 /** Categories created by the system itself. */
 export const SYSTEM_CATEGORIES = ["transfer", "adjustment"];

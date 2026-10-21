@@ -1,12 +1,18 @@
 /**
- * Builds what the "Recurring" part of the Finances tab needs to show, as plain data. Pure (no Foundry globals), like
- * financeView.js, so it can be unit tested in Node.
+ * Builds what the group cards and their panels in the Finances tab need to show, as plain data. Pure (no Foundry
+ * globals), like financeView.js, so it can be unit tested in Node.
+ *
+ * There are four groups, matching the old fields of the sheet: Pension, Living costs, Ship payments and Debt. The first
+ * three hold recurring items, the last one holds loans. Each group is a card; the one that is open shows its panel.
  */
 
-import { LEDGER_ACCOUNTS, LEDGER_CATEGORIES, formatLedgerNumber } from "./ledger.js";
-import { FREQUENCIES, getPayKind, planPayAll, planPayment, summarizeRecurring } from "./recurring.js";
+import { LEDGER_ACCOUNTS, formatLedgerNumber } from "./ledger.js";
+import { FREQUENCIES, GROUPS, getPayKind, itemsInGroup, summarizeItems } from "./recurring.js";
+import { totalOwed } from "./loans.js";
 
 const PREFIX = "TWODSIX_LEDGER";
+export const DEBT_GROUP = "debt";
+export const CARD_ORDER = ["pension", "living", "ship", DEBT_GROUP];
 
 /**
  * @param {number} value
@@ -20,55 +26,125 @@ function signClass(value) {
 }
 
 /**
+ * "-800/month", "+500/year", both of them, or "0" when there is nothing.
+ * @param {{monthly: {net: number, count: number}, yearly: {net: number, count: number}}} summary
+ * @param {string} locale
+ * @param {(key: string) => string} localize
+ * @returns {string}
+ */
+function formatSummary(summary, locale, localize) {
+  const parts = [];
+  if (summary.monthly.count) {
+    parts.push(`${formatLedgerNumber(summary.monthly.net, locale, true)}${localize(`${PREFIX}.PER_MONTH`)}`);
+  }
+  if (summary.yearly.count) {
+    parts.push(`${formatLedgerNumber(summary.yearly.net, locale, true)}${localize(`${PREFIX}.PER_YEAR`)}`);
+  }
+  return parts.length ? parts.join(" ") : "0";
+}
+
+/**
+ * @param {number} count
+ * @param {string} oneKey
+ * @param {string} manyKey
+ * @param {(key: string) => string} localize
+ * @returns {string} e.g. "2 items"
+ */
+function countText(count, oneKey, manyKey, localize) {
+  return `${count} ${localize(`${PREFIX}.${count === 1 ? oneKey : manyKey}`)}`;
+}
+
+/**
  * @param {object} args
  * @param {Array<object>} args.items - recurring items
- * @param {number} [args.debt] - current debt, which decides whether a debt payment can be made
+ * @param {Array<object>} args.loans
  * @param {string} [args.locale]
  * @param {(key: string) => string} args.localize
  * @param {string} [args.gameDate] - the current in-game date, "" if the world has no calendar
+ * @param {string|null} [args.openGroup] - the group whose panel is open
  * @returns {object}
  */
-export function buildRecurringView({items = [], debt = 0, locale = "en", localize, gameDate = ""}) {
+export function buildGroupsView({items = [], loans = [], locale = "en", localize, gameDate = "", openGroup = null}) {
   const select = (options, selected) => options.map(option => ({...option, selected: option.key === selected}));
   const accountOptions = LEDGER_ACCOUNTS.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
-  const categoryOptions = LEDGER_CATEGORIES.map(key => ({key, label: localize(`${PREFIX}.CATEGORIES.${key}`)}));
-  const frequencyOptions = FREQUENCIES.map(key => ({key, label: localize(`${PREFIX}.PER_${key.toUpperCase()}`)}));
+  const frequencyOptions = FREQUENCIES.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
+  const open = CARD_ORDER.includes(openGroup) ? openGroup : null;
 
-  const rows = items.map(item => {
-    const plan = planPayment(item, {debt});
-    const kind = getPayKind(item);
+  const cards = CARD_ORDER.map(key => {
+    const label = localize(`${PREFIX}.GROUP_${key.toUpperCase()}`);
+    if (key === DEBT_GROUP) {
+      const owed = totalOwed(loans);
+      const monthly = loans.reduce((sum, loan) => sum + (loan.remaining > 0 ? Math.min(loan.monthly, loan.remaining) : 0), 0);
+      return {
+        key, label, isDebt: true, open: open === key,
+        amountText: formatLedgerNumber(owed, locale),
+        amountClass: owed > 0 ? "negative" : "",
+        subText: monthly > 0
+          ? `${countText(loans.length, "LOAN_ONE", "LOAN_MANY", localize)} · ${formatLedgerNumber(-monthly, locale, true)}${localize(`${PREFIX}.PER_MONTH`)}`
+          : countText(loans.length, "LOAN_ONE", "LOAN_MANY", localize)
+      };
+    }
+    const summary = summarizeItems(itemsInGroup(items, key));
+    const net = summary.monthly.net || summary.yearly.net;
     return {
-      id: item.id,
-      name: item.name,
-      active: item.active,
-      reducesDebt: item.reducesDebt,
-      isYearly: item.frequency === "year",
-      amountText: formatLedgerNumber(item.amount, locale, true),
-      amountClass: item.active ? signClass(item.amount) : "",
-      accounts: select(accountOptions, item.account),
-      categories: select(categoryOptions, item.category),
-      frequencies: select(frequencyOptions, item.frequency),
-      payLabel: localize(`${PREFIX}.${kind === "receive" ? "RECEIVE" : "PAY"}`),
-      canPay: plan !== null,
-      /** Why the button is off, for its tooltip */
-      payHint: plan !== null ? "" : localize(`${PREFIX}.${!item.active ? "PAY_OFF" : item.amount === 0 ? "PAY_NO_AMOUNT" : "PAY_NO_DEBT"}`)
+      key, label, isDebt: false, open: open === key,
+      amountText: formatSummary(summary, locale, localize),
+      amountClass: signClass(net),
+      subText: countText(summary.count, "ITEM_ONE", "ITEM_MANY", localize)
     };
   });
 
-  const summary = summarizeRecurring(items);
-  const plans = planPayAll(items, {debt});
-  const payAllTotal = plans.reduce((sum, plan) => sum + plan.amount, 0);
-  return {
-    rows,
-    hasItems: rows.length > 0,
-    gameDate,
-    monthText: formatLedgerNumber(summary.monthly.net, locale, true),
-    monthClass: signClass(summary.monthly.net),
-    showYear: summary.yearly.count > 0,
-    yearText: formatLedgerNumber(summary.yearly.net, locale, true),
-    yearClass: signClass(summary.yearly.net),
-    canPayAll: plans.length > 0,
-    payAllCount: plans.length,
-    payAllTotalText: formatLedgerNumber(payAllTotal, locale, true)
-  };
+  let panel = null;
+  if (open === DEBT_GROUP) {
+    panel = {
+      key: DEBT_GROUP,
+      label: localize(`${PREFIX}.GROUP_DEBT`),
+      isDebt: true,
+      rows: loans.map(loan => {
+        const canPay = loan.monthly > 0 && loan.remaining > 0;
+        return {
+          id: loan.id,
+          name: loan.name,
+          remainingText: formatLedgerNumber(loan.remaining, locale),
+          monthlyText: loan.monthly > 0 ? formatLedgerNumber(loan.monthly, locale) : "",
+          accounts: select(accountOptions, loan.account),
+          canPay,
+          payLabel: canPay ? `${localize(`${PREFIX}.PAY`)} ${formatLedgerNumber(Math.min(loan.monthly, loan.remaining), locale)}` : localize(`${PREFIX}.PAY`),
+          payHint: canPay ? "" : localize(`${PREFIX}.${loan.remaining > 0 ? "PAY_NO_AMOUNT" : "PAY_NO_DEBT"}`),
+          canPayCustom: loan.remaining > 0
+        };
+      }),
+      hasRows: loans.length > 0,
+      footerText: `${localize(`${PREFIX}.TOTAL_OWED`)} ${formatLedgerNumber(totalOwed(loans), locale)} Cr`
+    };
+  } else if (open) {
+    const groupItems = itemsInGroup(items, open);
+    const summary = summarizeItems(groupItems);
+    panel = {
+      key: open,
+      label: localize(`${PREFIX}.GROUP_${open.toUpperCase()}`),
+      isDebt: false,
+      rows: groupItems.map(item => {
+        const canPay = item.active && item.amount !== 0;
+        return {
+          id: item.id,
+          name: item.name,
+          active: item.active,
+          amountText: formatLedgerNumber(item.amount, locale, true),
+          amountClass: item.active ? signClass(item.amount) : "",
+          accounts: select(accountOptions, item.account),
+          frequencies: select(frequencyOptions, item.frequency),
+          payLabel: localize(`${PREFIX}.${getPayKind(item) === "receive" ? "RECEIVE" : "PAY"}`),
+          canPay,
+          payHint: canPay ? "" : localize(`${PREFIX}.${!item.active ? "PAY_OFF" : "PAY_NO_AMOUNT"}`)
+        };
+      }),
+      hasRows: groupItems.length > 0,
+      footerText: summary.count ? `${localize(`${PREFIX}.SUM`)} ${formatSummary(summary, locale, localize)}` : ""
+    };
+  }
+
+  return {gameDate, cards, panel, hasPanel: panel !== null};
 }
+
+export {GROUPS};

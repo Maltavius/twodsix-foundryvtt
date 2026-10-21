@@ -2,8 +2,9 @@
  * Recurring items: the costs and income a traveller has again and again (rent, ship payments, a pension).
  * Pure logic with no Foundry globals, so it can be unit tested in Node.
  *
- * An item is paid by hand: the player presses Pay (or Receive), which adds an ordinary ledger entry. Nothing here
- * knows about dates or the calendar.
+ * An item belongs to one of three groups that match the old fields of the sheet: pension, living costs and ship
+ * payments. (Debts are not items: they are loans, see loans.js.) An item is paid by hand: the player presses Pay (or
+ * Receive), which adds an ordinary ledger entry. Nothing here knows about dates or the calendar.
  *
  * The Third Imperium calendar has 13 months of 28 days and one extra day, Holiday, at the start of the year. A "month"
  * item is paid once per such month and a "year" item once per year, which is what the totals below are based on.
@@ -11,6 +12,10 @@
 
 import { LEDGER_ACCOUNTS, roundMoney, roundUpCr } from "./ledger.js";
 
+export const GROUPS = ["pension", "living", "ship"];
+export const DEFAULT_GROUP = "living";
+/** The history category an item is booked under, decided by its group */
+export const GROUP_CATEGORY = {pension: "income", living: "living", ship: "ship"};
 export const FREQUENCIES = ["month", "year"];
 export const DEFAULT_FREQUENCY = "month";
 export const MONTHS_PER_YEAR = 13;
@@ -23,11 +28,25 @@ export const DAYS_PER_YEAR = MONTHS_PER_YEAR * DAYS_PER_MONTH + 1; // 365: the 1
  * @property {string} name
  * @property {number} amount - signed, in whole Cr: negative is a cost, positive is income
  * @property {string} account - "cash" or "digital"
- * @property {string} category - a ledger category
+ * @property {string} group - "pension", "living" or "ship"
  * @property {string} frequency - "month" or "year"
  * @property {boolean} active - items that are off are kept in the list but never paid or counted
- * @property {boolean} reducesDebt - paying this item also lowers the traveller's debt
  */
+
+/**
+ * Items saved by the first version of the module had a category instead of a group.
+ * @param {object} data
+ * @returns {string}
+ */
+function inferGroup(data) {
+  if (GROUPS.includes(data.group)) {
+    return data.group;
+  }
+  if (data.category === "income") {
+    return "pension";
+  }
+  return data.category === "ship" ? "ship" : DEFAULT_GROUP;
+}
 
 /**
  * Build a clean item from loose data. Unknown values fall back to defaults, so stored or typed data can never produce
@@ -43,10 +62,9 @@ export function createRecurringItem(data = {}, id) {
     name: String(data.name ?? "").trim(),
     amount: Number.isFinite(amount) ? amount : 0,
     account: LEDGER_ACCOUNTS.includes(data.account) ? data.account : "cash",
-    category: String(data.category || "other"),
+    group: inferGroup(data),
     frequency: FREQUENCIES.includes(data.frequency) ? data.frequency : DEFAULT_FREQUENCY,
-    active: data.active !== false,
-    reducesDebt: data.reducesDebt === true
+    active: data.active !== false
   };
 }
 
@@ -74,104 +92,74 @@ export function normalizeRecurringItems(raw) {
 /**
  * The items a traveller starts with: what was in the sheet's old Pension, Ship payments and Living costs fields.
  * Ids are fixed so that the list looks the same each time it is built, until it is saved.
- * Debt is not an item: it stays a single number, and a debt payment is an item that reduces it.
  * @param {{pension?: number, payments?: number, livingCosts?: number}} values - numbers from the old fields
  * @param {Function} localize - turns a key into text
  * @returns {RecurringItem[]}
  */
 export function seedRecurringItems({pension = 0, payments = 0, livingCosts = 0} = {}, localize = key => key) {
   const items = [];
-  const add = (id, key, amount, category, frequency) => {
+  const add = (id, key, amount, group, frequency) => {
     const value = Math.abs(Number(amount));
     if (Number.isFinite(value) && value > 0) {
       items.push(createRecurringItem({
-        name: localize(key), amount: category === "income" ? value : -value, account: "digital", category, frequency
+        name: localize(key), amount: group === "pension" ? value : -value, account: "digital", group, frequency
       }, id));
     }
   };
   add("seed-living", "TWODSIX_LEDGER.SEED_LIVING", livingCosts, "living", "month");
   add("seed-ship", "TWODSIX_LEDGER.SEED_SHIP", payments, "ship", "month");
-  add("seed-pension", "TWODSIX_LEDGER.SEED_PENSION", pension, "income", "year");
+  add("seed-pension", "TWODSIX_LEDGER.SEED_PENSION", pension, "pension", "year");
   return items;
 }
 
 /**
- * Totals of the active items, for the summary line.
  * @param {RecurringItem[]} items
- * @returns {{monthly: {net: number, costs: number, income: number, count: number}, yearly: {net: number, count: number}}}
+ * @param {string} group
+ * @returns {RecurringItem[]}
  */
-export function summarizeRecurring(items) {
-  const monthly = {net: 0, costs: 0, income: 0, count: 0};
+export function itemsInGroup(items, group) {
+  return items.filter(item => item.group === group);
+}
+
+/**
+ * Totals of the active items of one group, kept apart by how often they are paid.
+ * @param {RecurringItem[]} items - the items of the group (or all of them)
+ * @returns {{monthly: {net: number, count: number}, yearly: {net: number, count: number}, count: number}}
+ */
+export function summarizeItems(items) {
+  const monthly = {net: 0, count: 0};
   const yearly = {net: 0, count: 0};
   for (const item of items) {
     if (!item.active) {
       continue;
     }
-    if (item.frequency === "year") {
-      yearly.net += item.amount;
-      yearly.count += 1;
-    } else {
-      monthly.net += item.amount;
-      monthly.count += 1;
-      if (item.amount < 0) {
-        monthly.costs += item.amount;
-      } else {
-        monthly.income += item.amount;
-      }
-    }
+    const target = item.frequency === "year" ? yearly : monthly;
+    target.net += item.amount;
+    target.count += 1;
   }
   return {
-    monthly: {net: roundMoney(monthly.net), costs: roundMoney(monthly.costs), income: roundMoney(monthly.income), count: monthly.count},
-    yearly: {net: roundMoney(yearly.net), count: yearly.count}
+    monthly: {net: roundMoney(monthly.net), count: monthly.count},
+    yearly: {net: roundMoney(yearly.net), count: yearly.count},
+    count: monthly.count + yearly.count
   };
 }
 
 /**
- * What pressing Pay on one item does: the ledger entry to add and how much the debt goes down.
- * An item that reduces debt never pays more than what is owed. Returns null when there is nothing to do.
+ * What pressing Pay on one item does: the ledger entry to add. Returns null when there is nothing to do.
  * @param {RecurringItem} item
- * @param {{debt?: number}} [context] - the traveller's current debt
- * @returns {{amount: number, account: string, category: string, description: string, debtChange: number, itemId: string}|null}
+ * @returns {{amount: number, account: string, category: string, description: string, itemId: string}|null}
  */
-export function planPayment(item, {debt = 0} = {}) {
+export function planPayment(item) {
   if (!item?.active || !Number.isFinite(item.amount) || item.amount === 0) {
     return null;
   }
-  let amount = item.amount;
-  let debtChange = 0;
-  if (item.reducesDebt) {
-    const owed = Math.max(Number(debt) || 0, 0);
-    const paid = Math.min(Math.abs(amount), owed);
-    if (paid === 0) {
-      return null;
-    }
-    amount = amount < 0 ? -paid : paid;
-    debtChange = -paid;
-  }
-  return {amount, account: item.account, category: item.category, description: item.name, debtChange, itemId: item.id};
-}
-
-/**
- * What "Pay all" does: every active monthly item, in list order. Yearly items are left out on purpose, because they
- * are paid out at a different time, and so is anything with nothing to pay.
- * @param {RecurringItem[]} items
- * @param {{debt?: number}} [context]
- * @returns {Array<ReturnType<typeof planPayment>>}
- */
-export function planPayAll(items, {debt = 0} = {}) {
-  const plans = [];
-  let owed = Number(debt) || 0;
-  for (const item of items) {
-    if (item.frequency !== "month") {
-      continue;
-    }
-    const plan = planPayment(item, {debt: owed});
-    if (plan) {
-      plans.push(plan);
-      owed += plan.debtChange;
-    }
-  }
-  return plans;
+  return {
+    amount: item.amount,
+    account: item.account,
+    category: GROUP_CATEGORY[item.group] ?? "other",
+    description: item.name,
+    itemId: item.id
+  };
 }
 
 /**
@@ -195,7 +183,7 @@ export function removeRecurringItem(items, id) {
 }
 
 /**
- * Text for the Pay button of an item, as a key and the amount, so the sheet can write "Pay" or "Receive".
+ * Whether Pay means paying out or receiving, so the sheet can write "Pay" or "Receive".
  * @param {RecurringItem} item
  * @returns {"pay"|"receive"}
  */

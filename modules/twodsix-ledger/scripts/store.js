@@ -26,12 +26,23 @@ import { financeTextToNumber, parseLocaleNumber } from './financeText.js';
 import {
   createRecurringItem,
   normalizeRecurringItems,
-  planPayAll,
   planPayment,
   removeRecurringItem,
   seedRecurringItems,
   updateRecurringItem
 } from './recurring.js';
+import {
+  applyLoanChange,
+  createLoan,
+  normalizeLoans,
+  planLoanPayment,
+  planNewLoan,
+  removeLoan,
+  revertLoanChange,
+  seedLoans,
+  totalOwed,
+  updateLoan
+} from './loans.js';
 
 export const MODULE_ID = "twodsix-ledger";
 
@@ -218,20 +229,35 @@ export async function undoLastTransaction(actor) {
     return null;
   }
   const extra = {};
-  if (removed.debtChange) {
-    // The entry was a debt payment: put the debt back as well
-    extra["system.financeValues.debt"] = Math.max(getStoredDebt(actor) - removed.debtChange, 0);
+  if (removed.loan) {
+    // The entry was a loan payment or a new loan: change the loan back as well
+    Object.assign(extra, loanUpdate(revertLoanChange(getLoans(actor), removed.loan)));
   }
   await writeLedger(actor, revertTransaction(getStoredBalances(actor), removed), transactions, extra);
   return removed;
 }
 
 /**
+ * The loans. A traveller who has never had a list gets one built from the sheet's old Debt value; it is only saved when
+ * something is changed, so just opening the tab writes nothing.
  * @param {TwodsixActor} actor
- * @returns {number} the traveller's current debt, as a number
+ * @returns {Array<object>}
  */
-export function getStoredDebt(actor) {
-  return Number(actor.system?._source?.financeValues?.debt) || 0;
+export function getLoans(actor) {
+  const stored = actor.getFlag(MODULE_ID, "loans");
+  if (stored !== undefined && stored !== null) {
+    return normalizeLoans(foundry.utils.deepClone(stored));
+  }
+  const debt = Number(actor.system?._source?.financeValues?.debt) || 0;
+  return seedLoans(debt, game.i18n.localize("TWODSIX_LEDGER.SEED_DEBT"));
+}
+
+/**
+ * @param {Array<object>} loans
+ * @returns {object} update paths for the loans and for the sheet's own debt number, which is what is owed in total
+ */
+function loanUpdate(loans) {
+  return {[`flags.${MODULE_ID}.loans`]: loans, "system.financeValues.debt": totalOwed(loans)};
 }
 
 /**
@@ -294,55 +320,112 @@ export async function deleteRecurringItem(actor, id) {
 }
 
 /**
- * Make the ledger entries for some payments in a single update, so that balances, debt and history cannot drift apart.
+ * Add one ledger entry, and in the same update anything else that must change with it (a loan), so that balances,
+ * loans and history cannot drift apart.
  * @param {TwodsixActor} actor
- * @param {Array<object>} plans - from planPayment / planPayAll
- * @param {string} [gameDate]
- * @returns {Promise<Array<object>>} the entries that were added
+ * @param {object} data - amount, account, category, description, and `loan` (what changed on a loan) if any
+ * @param {object} [extra] - other update paths
+ * @returns {Promise<object>} the entry
  */
-async function postPayments(actor, plans, gameDate) {
-  if (!plans.length) {
-    return [];
+async function postEntry(actor, {amount, account, category, description, loan}, extra = {}) {
+  const entry = createTransaction({
+    amount, account, category, description, gameDate: getCurrentGameDate(), userId: game.user?.id
+  }, foundry.utils.randomID());
+  if (loan) {
+    entry.loan = loan;
   }
-  const date = gameDate ?? getCurrentGameDate();
-  let balances = getStoredBalances(actor);
-  const entries = plans.map(plan => {
-    const entry = createTransaction({
-      amount: plan.amount, account: plan.account, category: plan.category, description: plan.description,
-      gameDate: date, userId: game.user?.id
-    }, foundry.utils.randomID());
-    if (plan.debtChange) {
-      entry.debtChange = plan.debtChange;
-    }
-    balances = applyTransaction(balances, entry);
-    return entry;
-  });
-  const debtChange = plans.reduce((sum, plan) => sum + plan.debtChange, 0);
-  const extra = debtChange ? {"system.financeValues.debt": Math.max(getStoredDebt(actor) + debtChange, 0)} : {};
-  await writeLedger(actor, balances, [...getStoredTransactions(actor), ...entries], extra);
-  return entries;
+  const balances = applyTransaction(getStoredBalances(actor), entry);
+  await writeLedger(actor, balances, [...getStoredTransactions(actor), entry], extra);
+  return entry;
 }
 
 /**
- * Pay (or receive) one item.
+ * Pay (or receive) one recurring item.
  * @param {TwodsixActor} actor
  * @param {string} id
  * @returns {Promise<object|null>} the entry, or null if there was nothing to pay
  */
 export async function payRecurringItem(actor, id) {
   const item = getRecurringItems(actor).find(entry => entry.id === id);
-  const plan = item ? planPayment(item, {debt: getStoredDebt(actor)}) : null;
-  const [entry] = plan ? await postPayments(actor, [plan]) : [];
-  return entry ?? null;
+  const plan = planPayment(item);
+  return plan ? postEntry(actor, plan) : null;
 }
 
 /**
- * Pay every active monthly item.
+ * Add a loan to the list without any money changing hands (for a debt the traveller already has).
  * @param {TwodsixActor} actor
- * @returns {Promise<Array<object>>} the entries that were added
+ * @param {object} [data] - name, remaining, monthly, account
+ * @returns {Promise<object>} the loan
  */
-export async function payAllRecurring(actor) {
-  return postPayments(actor, planPayAll(getRecurringItems(actor), {debt: getStoredDebt(actor)}));
+export async function addLoan(actor, data = {}) {
+  const loan = createLoan(data, foundry.utils.randomID());
+  await actor.update(loanUpdate([...getLoans(actor), loan]), {twodsixLedger: true});
+  return loan;
+}
+
+/**
+ * Take a new loan: the loan is created and the money arrives on the chosen account, with an entry in the history.
+ * @param {TwodsixActor} actor
+ * @param {object} data - name, amount, account, monthly
+ * @returns {Promise<object|null>} the entry, or null if the amount was not usable
+ */
+export async function takeLoan(actor, data) {
+  const plan = planNewLoan(data, foundry.utils.randomID());
+  if (!plan) {
+    return null;
+  }
+  const loans = applyLoanChange(getLoans(actor), plan.entryLoan, plan.loan);
+  const name = plan.loan.name || game.i18n.localize("TWODSIX_LEDGER.LOAN");
+  return postEntry(actor, {
+    amount: plan.amount,
+    account: plan.account,
+    category: "loan",
+    description: `${game.i18n.localize("TWODSIX_LEDGER.LOAN_TAKEN")}: ${name}`,
+    loan: plan.entryLoan
+  }, loanUpdate(loans));
+}
+
+/**
+ * Pay back some of a loan.
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @param {number} [amount] - the loan's monthly amount if left out. Never more than what is owed.
+ * @returns {Promise<object|null>} the entry, or null if there was nothing to pay
+ */
+export async function payLoan(actor, id, amount) {
+  const loans = getLoans(actor);
+  const loan = loans.find(entry => entry.id === id);
+  const plan = planLoanPayment(loan, amount);
+  if (!plan) {
+    return null;
+  }
+  const name = loan.name || game.i18n.localize("TWODSIX_LEDGER.LOAN");
+  return postEntry(actor, {
+    amount: plan.amount,
+    account: plan.account,
+    category: "loan",
+    description: `${game.i18n.localize("TWODSIX_LEDGER.LOAN_PAYMENT")}: ${name}`,
+    loan: plan.loan
+  }, loanUpdate(applyLoanChange(loans, plan.loan)));
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @param {object} patch - the fields to change
+ * @returns {Promise<void>}
+ */
+export async function editLoan(actor, id, patch) {
+  await actor.update(loanUpdate(updateLoan(getLoans(actor), id, patch)), {twodsixLedger: true});
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @returns {Promise<void>}
+ */
+export async function deleteLoan(actor, id) {
+  await actor.update(loanUpdate(removeLoan(getLoans(actor), id)), {twodsixLedger: true});
 }
 
 /**

@@ -531,6 +531,7 @@
 .finance-ledger .fl-cat-equipment { --cat: #2f7fd1; }
 .finance-ledger .fl-cat-ship { --cat: #0f9aa8; }
 .finance-ledger .fl-cat-trade { --cat: #b8872b; }
+.finance-ledger .fl-cat-loan { --cat: #a8402f; }
 .finance-ledger .fl-category.fl-cat-other,
 .finance-ledger .fl-category.fl-cat-transfer,
 .finance-ledger .fl-category.fl-cat-adjustment {
@@ -600,28 +601,6 @@
 }
 
 /* ---- Recurring items ---- */
-
-.finance-ledger .fl-debt-field > .debt {
-  grid-column: 1 / -1;
-}
-
-.finance-ledger .fl-recurring {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 6px 8px 8px;
-  border: 1px solid var(--fl-line);
-  border-radius: 6px;
-  background: var(--fl-soft);
-}
-
-.finance-ledger .fl-recurring-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px 12px;
-}
 
 .finance-ledger .fl-calendar-note {
   font-size: 0.85em;
@@ -749,4 +728,155 @@
   flex-wrap: wrap;
   gap: 2px 12px;
   font-size: 0.9em;
+}
+
+/* ---- Group cards and their panel ---- */
+
+.finance-ledger .fl-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fl-gap);
+}
+
+.finance-ledger .fl-group-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fl-gap);
+}
+
+.finance-ledger .fl-group-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  margin: 0;
+  padding: 7px 9px;
+  text-align: left;
+  color: inherit;
+  background: var(--fl-soft);
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.finance-ledger .fl-group-card:hover {
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.finance-ledger .fl-group-card.is-open {
+  border: 2px solid #c4561a;
+  padding: 6px 8px;
+  background: color-mix(in srgb, #c4561a 12%, transparent);
+}
+
+.finance-ledger .fl-group-label {
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.finance-ledger .fl-group-amount {
+  font-size: 1.15em;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.finance-ledger .fl-group-sub {
+  font-size: 0.78em;
+  color: var(--fl-muted);
+}
+
+.finance-ledger .fl-group-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px 8px;
+  border: 2px solid #c4561a;
+  border-radius: 6px;
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.finance-ledger .fl-panel-head .item-title {
+  margin-right: auto;
+}
+
+.finance-ledger .fl-panel-close {
+  min-height: 0;
+  padding: 0 6px;
+  line-height: 1.6;
+  font-size: 0.85em;
+  background: none;
+  border: 0;
+  color: var(--fl-muted);
+  cursor: pointer;
+}
+
+.finance-ledger .fl-rec-labeled {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 0 0 auto;
+}
+
+.finance-ledger .fl-rec-labeled .fl-hint {
+  font-size: 0.72em;
+}
+
+.finance-ledger .fl-rec-payother {
+  min-height: 32px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-rec-payother:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.finance-ledger .fl-rec-extra {
+  align-items: flex-end;
+}
+
+/* ---- History title with the buttons that open the form ---- */
+
+.finance-ledger .fl-history-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+}
+
+.finance-ledger .fl-bar-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.finance-ledger .fl-bar-button {
+  min-height: 32px;
+  margin: 0;
+  padding: 0 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-bar-button.is-open {
+  border-color: #c4561a;
+  background: color-mix(in srgb, #c4561a 14%, transparent);
+}
+
+@container (max-width: 400px) {
+  .finance-ledger .fl-group-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

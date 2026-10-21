@@ -1,73 +1,104 @@
 import { describe, expect, test } from 'vitest';
-import { buildRecurringView } from '../scripts/recurringView.js';
+import { buildGroupsView } from '../scripts/recurringView.js';
 import { createRecurringItem } from '../scripts/recurring.js';
+import { createLoan } from '../scripts/loans.js';
 
 const localize = key => key;
-const item = (over, id) => createRecurringItem({name: id, amount: -100, account: 'digital', category: 'living', ...over}, id);
-const view = (items, extra = {}) => buildRecurringView({items, localize, ...extra});
+const item = (over, id) => createRecurringItem({name: id, amount: -100, account: 'digital', group: 'living', ...over}, id);
+const loan = (over, id) => createLoan({name: id, remaining: 1000, monthly: 0, account: 'cash', ...over}, id);
+const view = (items = [], loans = [], extra = {}) => buildGroupsView({items, loans, localize, ...extra});
+const card = (result, key) => result.cards.find(entry => entry.key === key);
 
-describe('buildRecurringView', () => {
-  test('an empty list', () => {
-    const empty = view([]);
-    expect(empty.hasItems).toBe(false);
-    expect(empty.canPayAll).toBe(false);
-    expect(empty.showYear).toBe(false);
-    expect(empty.monthText).toBe('0');
+describe('the cards', () => {
+  test('are the four groups in the order of the old fields', () => {
+    expect(view().cards.map(entry => entry.key)).toEqual(['pension', 'living', 'ship', 'debt']);
+    expect(view().cards.map(entry => entry.label)).toEqual([
+      'TWODSIX_LEDGER.GROUP_PENSION', 'TWODSIX_LEDGER.GROUP_LIVING', 'TWODSIX_LEDGER.GROUP_SHIP', 'TWODSIX_LEDGER.GROUP_DEBT'
+    ]);
   });
 
-  test('rows carry the selected options and a signed amount', () => {
-    const [row] = view([item({amount: -600, frequency: 'month', account: 'cash', category: 'ship'}, 'rent')]).rows;
-    expect(row).toMatchObject({id: 'rent', name: 'rent', amountText: '-600', amountClass: 'negative', isYearly: false});
-    expect(row.accounts.find(option => option.selected).key).toBe('cash');
-    expect(row.categories.find(option => option.selected).key).toBe('ship');
-    expect(row.frequencies.find(option => option.selected).key).toBe('month');
-    expect(row.frequencies.map(option => option.label)).toEqual(['TWODSIX_LEDGER.PER_MONTH', 'TWODSIX_LEDGER.PER_YEAR']);
-  });
-
-  test('income is positive and says Receive; costs say Pay', () => {
-    const rows = view([item({amount: 500, category: 'income'}, 'pen'), item({}, 'rent')]).rows;
-    expect(rows[0]).toMatchObject({amountText: '+500', amountClass: 'positive', payLabel: 'TWODSIX_LEDGER.RECEIVE'});
-    expect(rows[1].payLabel).toBe('TWODSIX_LEDGER.PAY');
-  });
-
-  test('says why a button is off', () => {
-    const rows = view([
-      item({active: false}, 'off'),
-      item({amount: 0}, 'none'),
-      item({reducesDebt: true}, 'debt')
-    ], {debt: 0}).rows;
-    expect(rows.map(row => row.canPay)).toEqual([false, false, false]);
-    expect(rows.map(row => row.payHint)).toEqual(['TWODSIX_LEDGER.PAY_OFF', 'TWODSIX_LEDGER.PAY_NO_AMOUNT', 'TWODSIX_LEDGER.PAY_NO_DEBT']);
-    expect(view([item({reducesDebt: true}, 'debt')], {debt: 50}).rows[0]).toMatchObject({canPay: true, payHint: ''});
-  });
-
-  test('the summary and the Pay all button count only active monthly items', () => {
+  test('show the active total with how often it is paid, and how many items', () => {
     const result = view([
       item({amount: -600}, 'a'),
       item({amount: -200}, 'b'),
-      item({amount: 500, frequency: 'year', category: 'income'}, 'c'),
-      item({amount: -50, active: false}, 'd')
+      item({amount: -50, active: false}, 'off'),
+      item({amount: 500, group: 'pension', frequency: 'year'}, 'p'),
+      item({amount: 300, group: 'pension'}, 'q')
     ]);
-    expect(result.monthText).toBe('-800');
-    expect(result.monthClass).toBe('negative');
-    expect(result.showYear).toBe(true);
-    expect(result.yearText).toBe('+500');
-    expect(result.canPayAll).toBe(true);
-    expect(result.payAllCount).toBe(2);
-    expect(result.payAllTotalText).toBe('-800');
+    expect(card(result, 'living')).toMatchObject({amountText: '-800TWODSIX_LEDGER.PER_MONTH', amountClass: 'negative', subText: '2 TWODSIX_LEDGER.ITEM_MANY'});
+    expect(card(result, 'pension')).toMatchObject({amountText: '+300TWODSIX_LEDGER.PER_MONTH +500TWODSIX_LEDGER.PER_YEAR', amountClass: 'positive'});
   });
 
-  test('Pay all counts a debt payment at what can actually be paid', () => {
-    const result = view([item({amount: -500, reducesDebt: true}, 'loan')], {debt: 120});
-    expect(result.payAllTotalText).toBe('-120');
+  test('an empty group shows 0 and no items', () => {
+    expect(card(view(), 'ship')).toMatchObject({amountText: '0', amountClass: '', subText: '0 TWODSIX_LEDGER.ITEM_MANY'});
+    expect(card(view([item({}, 'a')]), 'living').subText).toBe('1 TWODSIX_LEDGER.ITEM_ONE');
   });
 
-  test('passes the in-game date on', () => {
-    expect(view([], {gameDate: 'Holiday 01, 1105'}).gameDate).toBe('Holiday 01, 1105');
+  test('the debt card shows what is owed and, if there are fixed payments, what is paid each month', () => {
+    const none = view([], [loan({remaining: 12000}, 'a'), loan({remaining: 13000}, 'b')]);
+    expect(card(none, 'debt')).toMatchObject({amountText: '25,000', amountClass: 'negative', isDebt: true, subText: '2 TWODSIX_LEDGER.LOAN_MANY'});
+    const paying = view([], [loan({remaining: 12000, monthly: 500}, 'a'), loan({remaining: 100, monthly: 500}, 'b')]);
+    expect(card(paying, 'debt').subText).toBe('2 TWODSIX_LEDGER.LOAN_MANY · -600TWODSIX_LEDGER.PER_MONTH');
+    expect(card(view([], []), 'debt')).toMatchObject({amountText: '0', amountClass: ''});
   });
 
   test('numbers follow the locale', () => {
-    const [row] = buildRecurringView({items: [item({amount: -1500}, 'a')], locale: 'sv', localize}).rows;
-    expect(row.amountText).toBe('−1 500');
+    expect(card(buildGroupsView({items: [item({amount: -1500}, 'a')], localize, locale: 'sv'}), 'living').amountText).toBe('−1 500TWODSIX_LEDGER.PER_MONTH');
+  });
+});
+
+describe('the panel', () => {
+  test('nothing is open by default, or for an unknown group', () => {
+    expect(view().panel).toBeNull();
+    expect(view([], [], {openGroup: 'nope'}).hasPanel).toBe(false);
+    expect(view().cards.some(entry => entry.open)).toBe(false);
+  });
+
+  test('the open card is marked and its panel shows that group\'s items only', () => {
+    const result = view([item({amount: -600}, 'a'), item({amount: -5680, group: 'ship'}, 'b')], [], {openGroup: 'living'});
+    expect(card(result, 'living').open).toBe(true);
+    expect(card(result, 'ship').open).toBe(false);
+    expect(result.panel.rows.map(row => row.id)).toEqual(['a']);
+    expect(result.panel.footerText).toBe('TWODSIX_LEDGER.SUM -600TWODSIX_LEDGER.PER_MONTH');
+  });
+
+  test('item rows carry options, a signed amount and the right button', () => {
+    const rows = view([
+      item({amount: -600, frequency: 'month', account: 'cash'}, 'rent'),
+      item({amount: 500, group: 'living', frequency: 'year'}, 'bonus'),
+      item({active: false}, 'off'),
+      item({amount: 0}, 'none')
+    ], [], {openGroup: 'living'}).panel.rows;
+    expect(rows[0]).toMatchObject({amountText: '-600', amountClass: 'negative', payLabel: 'TWODSIX_LEDGER.PAY', canPay: true, payHint: ''});
+    expect(rows[0].accounts.find(option => option.selected).key).toBe('cash');
+    expect(rows[0].frequencies.map(option => option.label)).toEqual(['TWODSIX_LEDGER.MONTH', 'TWODSIX_LEDGER.YEAR']);
+    expect(rows[1]).toMatchObject({payLabel: 'TWODSIX_LEDGER.RECEIVE', amountClass: 'positive'});
+    expect(rows[1].frequencies.find(option => option.selected).key).toBe('year');
+    expect(rows[2]).toMatchObject({canPay: false, payHint: 'TWODSIX_LEDGER.PAY_OFF'});
+    expect(rows[3]).toMatchObject({canPay: false, payHint: 'TWODSIX_LEDGER.PAY_NO_AMOUNT'});
+  });
+
+  test('an empty group has no rows and no sum line', () => {
+    const result = view([], [], {openGroup: 'ship'});
+    expect(result.panel).toMatchObject({hasRows: false, footerText: ''});
+  });
+
+  test('the debt panel lists the loans with what is owed and what is paid each month', () => {
+    const result = view([], [loan({remaining: 12000, monthly: 500, account: 'digital'}, 'a'), loan({remaining: 13000}, 'b'), loan({remaining: 0, monthly: 100}, 'c')], {openGroup: 'debt'});
+    expect(result.panel).toMatchObject({isDebt: true, hasRows: true, footerText: 'TWODSIX_LEDGER.TOTAL_OWED 25,000 Cr'});
+    const [a, b, c] = result.panel.rows;
+    expect(a).toMatchObject({remainingText: '12,000', monthlyText: '500', canPay: true, payLabel: 'TWODSIX_LEDGER.PAY 500', canPayCustom: true});
+    expect(a.accounts.find(option => option.selected).key).toBe('digital');
+    expect(b).toMatchObject({monthlyText: '', canPay: false, payHint: 'TWODSIX_LEDGER.PAY_NO_AMOUNT', canPayCustom: true});
+    expect(c).toMatchObject({canPay: false, payHint: 'TWODSIX_LEDGER.PAY_NO_DEBT', canPayCustom: false});
+  });
+
+  test('the Pay button of a loan never offers more than is owed', () => {
+    const [row] = view([], [loan({remaining: 120, monthly: 500}, 'a')], {openGroup: 'debt'}).panel.rows;
+    expect(row.payLabel).toBe('TWODSIX_LEDGER.PAY 120');
+  });
+
+  test('passes the in-game date on', () => {
+    expect(view([], [], {gameDate: 'Holiday 01, 1105'}).gameDate).toBe('Holiday 01, 1105');
   });
 });

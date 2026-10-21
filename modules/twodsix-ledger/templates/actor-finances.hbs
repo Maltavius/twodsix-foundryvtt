@@ -35,77 +35,112 @@
     </div>
   </section>
 
-  {{!-- Debt stays a single number of the system. The other three old fields (pension, ship payments, living costs)
-        are now items in the list below. --}}
-  <section class="fl-fields fl-debt-field">
-    <div class="debt">
-      <span class="item-title">{{localize "TWODSIX.Actor.Finances.DEBT"}}</span>
-      <input name="system.finances.debt" type="text" value="{{system.finances.debt}}" placeholder="0"/>
+  {{!-- The four groups that match the old fields: Pension, Living costs, Ship payments and Debt. Click a card to
+        open its list. --}}
+  <section class="fl-groups fl-nosubmit" data-recurring>
+    <div class="fl-group-cards">
+      {{#each finance.groups.cards}}
+      <button type="button" class="fl-group-card {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
+        <span class="fl-group-label">{{label}}</span>
+        <span class="fl-group-amount {{amountClass}}">{{amountText}}{{#if isDebt}} <span class="fl-unit">Cr</span>{{/if}}</span>
+        <span class="fl-group-sub">{{subText}} {{#if open}}▴{{else}}▾{{/if}}</span>
+      </button>
+      {{/each}}
     </div>
+
+    {{#if finance.groups.hasPanel}}
+    {{#with finance.groups.panel}}
+    <div class="fl-group-panel" data-panel="{{key}}">
+      <div class="fl-panel-head">
+        <span class="item-title">{{label}}</span>
+        <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}">
+          {{#if @root.finance.groups.gameDate}}<i class="fa-solid fa-calendar-days"></i> {{@root.finance.groups.gameDate}}{{else}}<i class="fa-solid fa-circle-info"></i> {{localize "TWODSIX_LEDGER.CALENDAR_SHORT"}}{{/if}}
+        </span>
+        <button type="button" class="fl-panel-close" data-action="financeToggleGroup" data-group="{{key}}">{{localize "TWODSIX_LEDGER.CLOSE"}} ▴</button>
+      </div>
+
+      {{#if hasRows}}
+      <ul class="fl-rec-list">
+        {{#if isDebt}}
+        {{#each rows}}
+        <li class="fl-rec" data-loan-id="{{id}}">
+          <div class="fl-rec-main">
+            <input type="text" class="fl-rec-name" data-loan-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}"/>
+            <label class="fl-rec-labeled"><span class="fl-hint">{{localize "TWODSIX_LEDGER.REMAINING"}}</span>
+              <input type="text" class="fl-rec-amount" data-loan-field="remaining" value="{{remainingText}}" inputmode="text"/></label>
+          </div>
+          <div class="fl-rec-extra">
+            <label class="fl-rec-labeled"><span class="fl-hint">{{localize "TWODSIX_LEDGER.MONTHLY_PAYMENT"}}</span>
+              <input type="text" class="fl-rec-amount" data-loan-field="monthly" value="{{monthlyText}}" inputmode="text" placeholder="0"/></label>
+            <select class="fl-rec-account" data-loan-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
+              {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <span class="fl-rec-actions">
+              <button type="button" class="fl-rec-pay" data-action="financeLoanPay" data-id="{{id}}" {{#unless canPay}}disabled{{/unless}} {{#if payHint}}data-tooltip="{{payHint}}"{{/if}}>{{payLabel}}</button>
+              <button type="button" class="fl-rec-payother" data-action="financeLoanPayCustom" data-id="{{id}}" {{#unless canPayCustom}}disabled{{/unless}}>{{localize "TWODSIX_LEDGER.PAY_OTHER"}}</button>
+              <button type="button" class="fl-rec-delete" data-action="financeLoanDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+          </div>
+        </li>
+        {{/each}}
+        {{else}}
+        {{#each rows}}
+        <li class="fl-rec {{#unless active}}is-off{{/unless}}" data-rec-id="{{id}}">
+          <div class="fl-rec-main">
+            <input type="checkbox" class="fl-rec-active" data-rec-field="active" {{#if active}}checked{{/if}} aria-label="{{localize 'TWODSIX_LEDGER.ACTIVE'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.ACTIVE'}}"/>
+            <input type="text" class="fl-rec-name" data-rec-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}"/>
+            <input type="text" class="fl-rec-amount {{amountClass}}" data-rec-field="amount" value="{{amountText}}" inputmode="text" aria-label="{{localize 'TWODSIX_LEDGER.AMOUNT_COLUMN'}}"/>
+            <select class="fl-rec-freq" data-rec-field="frequency" aria-label="{{localize 'TWODSIX_LEDGER.FREQUENCY'}}">
+              {{#each frequencies}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+          </div>
+          <div class="fl-rec-extra">
+            <select class="fl-rec-account" data-rec-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
+              {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <span class="fl-rec-actions">
+              <button type="button" class="fl-rec-pay" data-action="financeRecPay" data-id="{{id}}" {{#unless canPay}}disabled{{/unless}} {{#if payHint}}data-tooltip="{{payHint}}"{{/if}}>{{payLabel}}</button>
+              <button type="button" class="fl-rec-delete" data-action="financeRecDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+          </div>
+        </li>
+        {{/each}}
+        {{/if}}
+      </ul>
+      {{else}}
+      <p class="fl-empty">{{#if isDebt}}{{localize "TWODSIX_LEDGER.NO_LOANS"}}{{else}}{{localize "TWODSIX_LEDGER.NO_RECURRING"}}{{/if}}</p>
+      {{/if}}
+
+      <div class="fl-rec-foot">
+        {{#if isDebt}}
+        <button type="button" class="fl-rec-add" data-action="financeLoanTake"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.TAKE_LOAN"}}</button>
+        <button type="button" class="fl-rec-add" data-action="financeLoanAdd" data-tooltip="{{localize 'TWODSIX_LEDGER.ADD_EXISTING_LOAN_HINT'}}"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.ADD_EXISTING_LOAN"}}</button>
+        {{else}}
+        <button type="button" class="fl-rec-add" data-action="financeRecAdd" data-group="{{key}}"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.ADD_ITEM"}}</button>
+        {{/if}}
+        <span class="fl-rec-summary">{{footerText}}</span>
+      </div>
+      {{#unless isDebt}}<p class="fl-hint">{{localize "TWODSIX_LEDGER.RECURRING_HINT"}}</p>{{/unless}}
+    </div>
+    {{/with}}
+    {{/if}}
   </section>
 
-  {{!-- Recurring items: paid by hand with the Pay buttons --}}
-  <section class="fl-recurring fl-nosubmit" data-recurring>
-    <div class="fl-recurring-head">
-      <span class="item-title">{{localize "TWODSIX_LEDGER.RECURRING"}}</span>
-      <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}">
-        {{#if finance.recurring.gameDate}}<i class="fa-solid fa-calendar-days"></i> {{finance.recurring.gameDate}}{{else}}<i class="fa-solid fa-circle-info"></i> {{localize "TWODSIX_LEDGER.CALENDAR_SHORT"}}{{/if}}
-      </span>
+  {{!-- History title with the buttons that open the form below it --}}
+  <section class="fl-history-bar fl-nosubmit">
+    <span class="item-title">{{localize "TWODSIX_LEDGER.HISTORY"}}</span>
+    {{#if finance.editable}}
+    <div class="fl-bar-buttons">
+      <button type="button" class="fl-bar-button {{#if finance.addFormOpen}}is-open{{/if}}" data-action="financeToggleForm" data-mode="add" aria-expanded="{{#if finance.addFormOpen}}true{{else}}false{{/if}}"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.ADD_TRANSACTION"}} {{#if finance.addFormOpen}}▴{{else}}▾{{/if}}</button>
+      <button type="button" class="fl-bar-button {{#if finance.moveFormOpen}}is-open{{/if}}" data-action="financeToggleForm" data-mode="move" aria-expanded="{{#if finance.moveFormOpen}}true{{else}}false{{/if}}"><i class="fa-solid fa-right-left"></i> {{localize "TWODSIX_LEDGER.MOVE_MONEY"}} {{#if finance.moveFormOpen}}▴{{else}}▾{{/if}}</button>
     </div>
-
-    {{#if finance.recurring.hasItems}}
-    <ul class="fl-rec-list">
-      {{#each finance.recurring.rows}}
-      <li class="fl-rec {{#unless active}}is-off{{/unless}}" data-rec-id="{{id}}">
-        <div class="fl-rec-main">
-          <input type="checkbox" class="fl-rec-active" data-rec-field="active" {{#if active}}checked{{/if}} aria-label="{{localize 'TWODSIX_LEDGER.ACTIVE'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.ACTIVE'}}"/>
-          <input type="text" class="fl-rec-name" data-rec-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}"/>
-          <input type="text" class="fl-rec-amount {{amountClass}}" data-rec-field="amount" value="{{amountText}}" inputmode="text" aria-label="{{localize 'TWODSIX_LEDGER.AMOUNT_COLUMN'}}"/>
-          <select class="fl-rec-freq" data-rec-field="frequency" aria-label="{{localize 'TWODSIX_LEDGER.FREQUENCY'}}">
-            {{#each frequencies}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-          </select>
-        </div>
-        <div class="fl-rec-extra">
-          <select class="fl-rec-account" data-rec-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
-            {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-          </select>
-          <select class="fl-rec-category" data-rec-field="category" aria-label="{{localize 'TWODSIX_LEDGER.CATEGORY'}}">
-            {{#each categories}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-          </select>
-          <label class="fl-rec-debt" data-tooltip="{{localize 'TWODSIX_LEDGER.REDUCES_DEBT_HINT'}}">
-            <input type="checkbox" data-rec-field="reducesDebt" {{#if reducesDebt}}checked{{/if}}/> {{localize "TWODSIX_LEDGER.REDUCES_DEBT"}}
-          </label>
-          <span class="fl-rec-actions">
-            <button type="button" class="fl-rec-pay" data-action="financeRecPay" data-id="{{id}}" {{#unless canPay}}disabled{{/unless}} {{#if payHint}}data-tooltip="{{payHint}}"{{/if}}>{{payLabel}}</button>
-            <button type="button" class="fl-rec-delete" data-action="financeRecDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-xmark"></i></button>
-          </span>
-        </div>
-      </li>
-      {{/each}}
-    </ul>
-    {{else}}
-    <p class="fl-empty">{{localize "TWODSIX_LEDGER.NO_RECURRING"}}</p>
     {{/if}}
-
-    <div class="fl-rec-foot">
-      <button type="button" class="fl-rec-add" data-action="financeRecAdd"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.ADD_ITEM"}}</button>
-      <div class="fl-rec-summary">
-        <span>{{localize "TWODSIX_LEDGER.PER_MONTH_TOTAL"}} <b class="{{finance.recurring.monthClass}}">{{finance.recurring.monthText}} Cr</b></span>
-        {{#if finance.recurring.showYear}}<span>{{localize "TWODSIX_LEDGER.PER_YEAR_TOTAL"}} <b class="{{finance.recurring.yearClass}}">{{finance.recurring.yearText}} Cr</b></span>{{/if}}
-      </div>
-      <button type="button" class="fl-rec-payall" data-action="financeRecPayAll" {{#unless finance.recurring.canPayAll}}disabled{{/unless}}>{{localize "TWODSIX_LEDGER.PAY_ALL"}} ({{finance.recurring.payAllTotalText}} Cr)</button>
-    </div>
-    <p class="fl-hint">{{localize "TWODSIX_LEDGER.RECURRING_HINT"}}</p>
   </section>
 
   {{!-- Add transaction / move money --}}
   {{#if finance.editable}}
+  {{#if finance.formOpen}}
   <section class="fl-form fl-nosubmit" data-mode="{{finance.mode}}">
-    <div class="fl-modes" role="tablist">
-      <button type="button" class="fl-mode {{#unless finance.isMoveMode}}active{{/unless}}" data-action="financeSetMode" data-mode="add" role="tab" aria-selected="{{#if finance.isMoveMode}}false{{else}}true{{/if}}">{{localize "TWODSIX_LEDGER.ADD_TRANSACTION"}}</button>
-      <button type="button" class="fl-mode {{#if finance.isMoveMode}}active{{/if}}" data-action="financeSetMode" data-mode="move" role="tab" aria-selected="{{#if finance.isMoveMode}}true{{else}}false{{/if}}">{{localize "TWODSIX_LEDGER.MOVE_MONEY"}}</button>
-    </div>
-
     <div class="fl-form-row">
       <label class="fl-field fl-amount">
         <span class="fl-label">{{localize "TWODSIX_LEDGER.AMOUNT"}}</span>
@@ -155,11 +190,11 @@
     <p class="fl-error" role="alert" aria-live="polite" hidden></p>
   </section>
   {{/if}}
+  {{/if}}
 
   {{!-- History --}}
   <section class="fl-history fl-nosubmit">
     <div class="fl-history-head">
-      <span class="item-title">{{localize "TWODSIX_LEDGER.HISTORY"}}</span>
       <div class="fl-filters" role="group" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
         {{#each finance.filters}}
         <button type="button" class="fl-filter {{#if active}}active{{/if}}" data-action="financeFilter" data-filter="{{key}}" aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>

@@ -1,19 +1,20 @@
 import { describe, expect, test } from 'vitest';
 import {
   DAYS_PER_YEAR,
+  GROUP_CATEGORY,
   MONTHS_PER_YEAR,
   createRecurringItem,
   getPayKind,
+  itemsInGroup,
   normalizeRecurringItems,
-  planPayAll,
   planPayment,
   removeRecurringItem,
   seedRecurringItems,
-  summarizeRecurring,
+  summarizeItems,
   updateRecurringItem
 } from '../scripts/recurring.js';
 
-const item = (over = {}, id = 'a') => createRecurringItem({name: 'Rent', amount: -600, account: 'digital', category: 'living', ...over}, id);
+const item = (over = {}, id = 'a') => createRecurringItem({name: 'Rent', amount: -600, account: 'digital', group: 'living', ...over}, id);
 
 describe('the calendar constants', () => {
   test('13 months of 28 days and Holiday make 365 days', () => {
@@ -25,15 +26,22 @@ describe('the calendar constants', () => {
 describe('createRecurringItem', () => {
   test('cleans up values', () => {
     const created = createRecurringItem({name: '  Food ', amount: '-199.2', account: 'bank', frequency: 'week'}, 7);
-    expect(created).toEqual({
-      id: '7', name: 'Food', amount: -200, account: 'cash', category: 'other', frequency: 'month', active: true, reducesDebt: false
-    });
+    expect(created).toEqual({id: '7', name: 'Food', amount: -200, account: 'cash', group: 'living', frequency: 'month', active: true});
   });
 
   test('handles junk', () => {
     expect(createRecurringItem(undefined, 'x').amount).toBe(0);
     expect(createRecurringItem({amount: 'abc'}, 'x').amount).toBe(0);
-    expect(createRecurringItem({active: false, reducesDebt: true}, 'x')).toMatchObject({active: false, reducesDebt: true});
+    expect(createRecurringItem({active: false}, 'x').active).toBe(false);
+    expect(createRecurringItem({group: 'crime'}, 'x').group).toBe('living');
+  });
+
+  test('items saved with a category (first version) get the matching group', () => {
+    expect(createRecurringItem({category: 'income'}, 'x').group).toBe('pension');
+    expect(createRecurringItem({category: 'ship'}, 'x').group).toBe('ship');
+    expect(createRecurringItem({category: 'living'}, 'x').group).toBe('living');
+    expect(createRecurringItem({category: 'medical'}, 'x').group).toBe('living');
+    expect(createRecurringItem({category: 'income', group: 'ship'}, 'x').group).toBe('ship');
   });
 });
 
@@ -51,12 +59,12 @@ describe('normalizeRecurringItems', () => {
 });
 
 describe('seedRecurringItems', () => {
-  test('makes items from the old fields, with the right signs and frequencies', () => {
+  test('makes items from the old fields, with the right signs, groups and frequencies', () => {
     const items = seedRecurringItems({pension: 500, payments: 5680, livingCosts: -800});
-    expect(items.map(entry => [entry.id, entry.amount, entry.frequency, entry.category])).toEqual([
+    expect(items.map(entry => [entry.id, entry.amount, entry.frequency, entry.group])).toEqual([
       ['seed-living', -800, 'month', 'living'],
       ['seed-ship', -5680, 'month', 'ship'],
-      ['seed-pension', 500, 'year', 'income']
+      ['seed-pension', 500, 'year', 'pension']
     ]);
   });
 
@@ -70,75 +78,45 @@ describe('seedRecurringItems', () => {
   });
 });
 
-describe('summarizeRecurring', () => {
+describe('itemsInGroup and summarizeItems', () => {
+  const items = [
+    item({amount: -600}, 'a'),
+    item({amount: -200}, 'b'),
+    item({amount: -5680, group: 'ship'}, 'c'),
+    item({amount: 500, group: 'pension', frequency: 'year'}, 'd'),
+    item({amount: -150, active: false}, 'e')
+  ];
+
+  test('itemsInGroup', () => {
+    expect(itemsInGroup(items, 'living').map(entry => entry.id)).toEqual(['a', 'b', 'e']);
+    expect(itemsInGroup(items, 'ship').map(entry => entry.id)).toEqual(['c']);
+  });
+
   test('counts only active items, and keeps months and years apart', () => {
-    const summary = summarizeRecurring([
-      item({amount: -600}, 'a'),
-      item({amount: -200}, 'b'),
-      item({amount: 300}, 'c'),
-      item({amount: -150, active: false}, 'd'),
-      item({amount: 500, frequency: 'year'}, 'e')
-    ]);
-    expect(summary.monthly).toEqual({net: -500, costs: -800, income: 300, count: 3});
-    expect(summary.yearly).toEqual({net: 500, count: 1});
+    expect(summarizeItems(itemsInGroup(items, 'living'))).toEqual({monthly: {net: -800, count: 2}, yearly: {net: 0, count: 0}, count: 2});
+    expect(summarizeItems(itemsInGroup(items, 'pension'))).toEqual({monthly: {net: 0, count: 0}, yearly: {net: 500, count: 1}, count: 1});
   });
 
   test('an empty list is all zeros', () => {
-    expect(summarizeRecurring([])).toEqual({monthly: {net: 0, costs: 0, income: 0, count: 0}, yearly: {net: 0, count: 0}});
+    expect(summarizeItems([])).toEqual({monthly: {net: 0, count: 0}, yearly: {net: 0, count: 0}, count: 0});
   });
 });
 
 describe('planPayment', () => {
-  test('a plain item pays its own amount from its own account', () => {
-    expect(planPayment(item())).toEqual({
-      amount: -600, account: 'digital', category: 'living', description: 'Rent', debtChange: 0, itemId: 'a'
-    });
+  test('pays the item\'s own amount from its own account, booked under its group\'s category', () => {
+    expect(planPayment(item())).toEqual({amount: -600, account: 'digital', category: 'living', description: 'Rent', itemId: 'a'});
+    expect(planPayment(item({group: 'ship'}))?.category).toBe('ship');
+    expect(GROUP_CATEGORY.pension).toBe('income');
   });
 
-  test('income is received as a positive entry', () => {
-    expect(planPayment(item({amount: 500, category: 'income'}))?.amount).toBe(500);
+  test('a pension is received as a positive entry', () => {
+    expect(planPayment(item({amount: 500, group: 'pension'}))).toMatchObject({amount: 500, category: 'income'});
   });
 
   test('nothing to pay for an item that is off or has no amount', () => {
     expect(planPayment(item({active: false}))).toBeNull();
     expect(planPayment(item({amount: 0}))).toBeNull();
     expect(planPayment(null)).toBeNull();
-  });
-
-  test('a debt payment lowers the debt', () => {
-    const plan = planPayment(item({amount: -500, reducesDebt: true}), {debt: 25000});
-    expect(plan).toMatchObject({amount: -500, debtChange: -500});
-  });
-
-  test('a debt payment never pays more than is owed', () => {
-    const plan = planPayment(item({amount: -500, reducesDebt: true}), {debt: 120});
-    expect(plan).toMatchObject({amount: -120, debtChange: -120});
-  });
-
-  test('with no debt left there is nothing to pay', () => {
-    expect(planPayment(item({amount: -500, reducesDebt: true}), {debt: 0})).toBeNull();
-    expect(planPayment(item({amount: -500, reducesDebt: true}), {debt: -50})).toBeNull();
-  });
-});
-
-describe('planPayAll', () => {
-  test('pays active monthly items in order and leaves yearly ones out', () => {
-    const plans = planPayAll([
-      item({amount: -600}, 'a'),
-      item({amount: 500, frequency: 'year', category: 'income'}, 'b'),
-      item({amount: -200, active: false}, 'c'),
-      item({amount: -50}, 'd')
-    ]);
-    expect(plans.map(plan => plan.itemId)).toEqual(['a', 'd']);
-  });
-
-  test('two debt payments share what is owed', () => {
-    const plans = planPayAll([
-      item({amount: -500, reducesDebt: true}, 'a'),
-      item({amount: -500, reducesDebt: true}, 'b')
-    ], {debt: 700});
-    expect(plans.map(plan => plan.amount)).toEqual([-500, -200]);
-    expect(plans.reduce((sum, plan) => sum + plan.debtChange, 0)).toBe(-700);
   });
 });
 
