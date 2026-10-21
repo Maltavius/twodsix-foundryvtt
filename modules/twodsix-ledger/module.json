@@ -2,10 +2,10 @@
   "id": "twodsix-ledger",
   "title": "Twodsix Ledger",
   "description": "A transaction ledger for the Finances tab of the Twodsix traveller sheet: accounts (Cash, Digital and up to two more), history with filter, search and undo, Pension / Living costs / Ship payments as lists of items you pay by hand, debt as a list of loans, and move money between accounts. Accounts and categories can be set up in the module settings. Swedish and English.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "url": "https://github.com/Maltavius/twodsix-foundryvtt/blob/experiment/ledger-module/modules/twodsix-ledger/README.md",
   "manifest": "https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger-module/modules/twodsix-ledger/module.json",
-  "download": "https://github.com/Maltavius/twodsix-foundryvtt/releases/download/ledger-v0.4.0/twodsix-ledger.zip",
+  "download": "https://github.com/Maltavius/twodsix-foundryvtt/releases/download/ledger-v0.4.1/twodsix-ledger.zip",
   "bugs": "https://github.com/Maltavius/twodsix-foundryvtt/issues",
   "compatibility": {
     "minimum": "14",
