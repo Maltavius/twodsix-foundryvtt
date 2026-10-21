@@ -93,7 +93,8 @@ function getState(sheet) {
   sheet._financeState ??= {
     ui: {filter: "all", search: "", limit: undefined, mode: "add", openGroup: null, formOpen: true, ...loadUiPrefs(sheet.actor)},
     draft: {amount: "", description: "", category: "other", account: "cash", from: "cash", to: "digital"},
-    focus: null
+    focus: null,
+    rowFocus: null
   };
   return sheet._financeState;
 }
@@ -264,6 +265,28 @@ function readFieldPatch(field, name) {
 }
 
 /**
+ * Note which field of an item or loan row has the cursor, so it can be given back after the re-render that follows a
+ * saved change (otherwise Tab appears to skip the next field, because the field it moved to is replaced).
+ * @param {object} sheet
+ * @param {HTMLElement} root
+ * @returns {void}
+ */
+function rememberRowFocus(sheet, root) {
+  const active = root.ownerDocument.activeElement;
+  if (!active || !root.contains(active)) {
+    return;
+  }
+  const field = active.closest("[data-rec-field], [data-loan-field]");
+  const row = active.closest("[data-rec-id], [data-loan-id]");
+  if (!field || !row) {
+    return;
+  }
+  const rowAttr = row.dataset.recId !== undefined ? `[data-rec-id="${CSS.escape(row.dataset.recId)}"]` : `[data-loan-id="${CSS.escape(row.dataset.loanId)}"]`;
+  const fieldAttr = field.dataset.recField !== undefined ? `[data-rec-field="${field.dataset.recField}"]` : `[data-loan-field="${field.dataset.loanField}"]`;
+  getState(sheet).rowFocus = {selector: `${rowAttr} ${fieldAttr}`};
+}
+
+/**
  * Hook up the form after each render. Safe to call when the Finances tab is not editable or not present.
  * @param {object} sheet
  * @returns {void}
@@ -309,6 +332,7 @@ export function bindFinanceTab(sheet) {
     } else {
       return;
     }
+    rememberRowFocus(sheet, root);
     await sheet.render();
   });
 
@@ -345,6 +369,19 @@ export function bindFinanceTab(sheet) {
         sheet.render();
       }, SEARCH_DELAY_MS);
     });
+  }
+
+  // Tab out of a row field saves it and re-renders; put the cursor on the field Tab went to, with its text selected
+  if (state.rowFocus) {
+    const {selector} = state.rowFocus;
+    state.rowFocus = null;
+    const el = root.querySelector(selector);
+    if (el) {
+      el.focus();
+      if (typeof el.select === "function" && el.type === "text") {
+        el.select();
+      }
+    }
   }
 
   // Put the cursor back where it was after a re-render
