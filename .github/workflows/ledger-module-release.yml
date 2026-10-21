@@ -43,6 +43,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          manifest=$(jq -r .manifest module.json)
+          readme="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/modules/twodsix-ledger/README.md"
+          notes="Twodsix Ledger module ${GITHUB_REF_NAME#ledger-v}.
+
+          Install it in Foundry with this manifest URL:
+
+          ${manifest}
+
+          More about the module: ${readme}"
           gh release create "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json \
             --title "Twodsix Ledger ${GITHUB_REF_NAME#ledger-v}" \
-            --notes "Twodsix Ledger module ${GITHUB_REF_NAME#ledger-v}. Install with the manifest URL in the README."
+            --notes "${notes}"
