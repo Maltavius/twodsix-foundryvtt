@@ -1,7 +1,7 @@
 /** @typedef {import("../entities/TwodsixActor").default} TwodsixActor */
 import { TravellerData } from '../data/actors/travellerData.js';
 import { parseLocaleNumber } from '../data/commonSchemaUtils.js';
-import { financeTextToNumber, stripNumberSpaces } from '../features/finances/financeText.js';
+import { financeTextToNumber, isDeltaFinanceText, stripNumberSpaces } from '../features/finances/financeText.js';
 
 /**
  * Update the finances for a traveller actor based on the provided financeDiff.
@@ -46,7 +46,7 @@ function updateFinanceValues(actor, update, financeDiff) {
   const updateMods = {};
   for (const financeField in financeDiff.finances) {
     if (financeField !== "financial-notes") {
-      const isDelta = ["+", "-"].includes(update.system.finances[financeField][0]);
+      const isDelta = isDeltaFinanceText(update.system.finances[financeField]);
 
       if (isDelta) {
         const delta = TravellerData.getParsedFinanceText(update.system.finances[financeField]);

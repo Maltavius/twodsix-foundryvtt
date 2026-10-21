@@ -3,6 +3,7 @@ import {
   financeTextToNumber,
   getFinanceValueFixes,
   getUnitMultiplier,
+  isDeltaFinanceText,
   parseFinanceText,
   stripNumberSpaces
 } from '../../src/module/features/finances/financeText.js';
@@ -166,5 +167,32 @@ describe('getFinanceValueFixes', () => {
 
   test('digital is included', () => {
     expect(getFinanceValueFixes({digital: '700'}, {digital: 0}, simpleParse)).toEqual({digital: 700});
+  });
+});
+
+describe('isDeltaFinanceText', () => {
+  test.each([
+    ['+200', true],
+    ['-200', true],
+    ['\u2212200', true],
+    ['+1 500', true],
+    ['-1,5 kCr', true],
+    ['200', false],
+    ['0', false],
+    ['', false],
+    [undefined, false],
+    ['100 + 200', false]
+  ])('%j -> %s', (text, expected) => {
+    expect(isDeltaFinanceText(text)).toBe(expected);
+  });
+
+  test('a calculation is not evaluated: only the first number counts', () => {
+    expect(financeTextToNumber('100 + 200', simpleParse)).toBe(100);
+  });
+
+  test('a delta text gives the signed amount to add', () => {
+    expect(financeTextToNumber('+200', simpleParse)).toBe(200);
+    expect(financeTextToNumber('-200', simpleParse)).toBe(-200);
+    expect(financeTextToNumber('\u22121 500', simpleParse)).toBe(-1500);
   });
 });

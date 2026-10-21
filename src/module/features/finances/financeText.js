@@ -33,6 +33,16 @@ export function parseFinanceText(financeString) {
 }
 
 /**
+ * Is the text a change to the current value ("+200", "-50", or with the typographic minus "\u2212200") rather than a
+ * new value ("200")? Only a leading sign counts, so "100 + 200" is not a calculation: it is read as 100.
+ * @param {string} text
+ * @returns {boolean}
+ */
+export function isDeltaFinanceText(text) {
+  return /^[+\-\u2212]/.test(String(text ?? ""));
+}
+
+/**
  * Remove spaces used as thousands separators (regular, non-breaking, narrow non-breaking).
  * @param {string} text
  * @returns {string}
