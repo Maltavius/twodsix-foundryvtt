@@ -1197,3 +1197,17 @@
 .finance-ledger .fl-total-net {
   cursor: help;
 }
+
+/* The in-game date sits above Net of debt on the right of the totals bar */
+.finance-ledger .fl-total-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.finance-ledger .fl-totals .fl-calendar-note {
+  font-size: 0.85em;
+  color: color-mix(in srgb, #f3f1ea 72%, transparent);
+  white-space: nowrap;
+}

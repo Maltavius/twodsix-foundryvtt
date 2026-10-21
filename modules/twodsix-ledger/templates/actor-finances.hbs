@@ -6,12 +6,17 @@
       <span class="fl-label">{{localize "TWODSIX_LEDGER.TOTAL_FUNDS"}}</span>
       <span class="fl-total-value">{{finance.totals.total}} <span class="fl-unit">Cr</span></span>
     </div>
-    {{#if finance.totals.showNetOfDebt}}
-    <div class="fl-total-net" data-tooltip="{{localize 'TWODSIX_LEDGER.NET_OF_DEBT_HINT'}}">
-      <span class="fl-label">{{localize "TWODSIX_LEDGER.NET_OF_DEBT"}}</span>
-      <span class="fl-net-value">{{finance.totals.netOfDebt}} Cr</span>
+    <div class="fl-total-side">
+      {{#if finance.groups.gameDate}}
+      <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}"><i class="fa-solid fa-calendar-days"></i> {{finance.groups.gameDate}}</span>
+      {{/if}}
+      {{#if finance.totals.showNetOfDebt}}
+      <div class="fl-total-net" data-tooltip="{{localize 'TWODSIX_LEDGER.NET_OF_DEBT_HINT'}}">
+        <span class="fl-label">{{localize "TWODSIX_LEDGER.NET_OF_DEBT"}}</span>
+        <span class="fl-net-value">{{finance.totals.netOfDebt}} Cr</span>
+      </div>
+      {{/if}}
     </div>
-    {{/if}}
     <button type="button" class="fl-notes-toggle {{#if finance.notesOpen}}is-open{{/if}}" data-action="financeToggleNotes" aria-expanded="{{#if finance.notesOpen}}true{{else}}false{{/if}}" aria-label="{{localize 'TWODSIX.Actor.Finances.FINANCIAL_NOTES'}}" data-tooltip="{{localize 'TWODSIX.Actor.Finances.FINANCIAL_NOTES'}}"><i class="fa-solid fa-note-sticky"></i></button>
   </section>
 
@@ -68,9 +73,6 @@
     <div class="fl-group-panel" data-panel="{{key}}">
       <div class="fl-panel-head">
         <span class="item-title">{{label}}</span>
-        <span class="fl-calendar-note" data-tooltip="{{localize 'TWODSIX_LEDGER.CALENDAR_TOOLTIP'}}">
-          {{#if @root.finance.groups.gameDate}}<i class="fa-solid fa-calendar-days"></i> {{@root.finance.groups.gameDate}}{{else}}<i class="fa-solid fa-circle-info"></i> {{localize "TWODSIX_LEDGER.CALENDAR_SHORT"}}{{/if}}
-        </span>
         <button type="button" class="fl-panel-close" data-action="financeToggleGroup" data-group="{{key}}">{{localize "TWODSIX_LEDGER.CLOSE"}} ▴</button>
       </div>
 
