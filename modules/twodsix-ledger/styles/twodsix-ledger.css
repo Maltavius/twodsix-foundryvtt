@@ -1006,3 +1006,17 @@
   flex: 0 0 auto;
   align-self: flex-end;
 }
+
+/* Only the name grows. The other fields keep their own size, so a field that wraps to a second line does not stretch
+   across the whole row (it used to make the Interval the biggest thing in the row). */
+.finance-ledger .fl-rec .fl-field {
+  flex: 0 0 100px;
+}
+
+.finance-ledger .fl-rec .fl-field.fl-amount {
+  flex: 0 0 84px;
+}
+
+.finance-ledger .fl-rec .fl-field.fl-description {
+  flex: 1 1 140px;
+}
