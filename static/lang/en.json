@@ -1237,7 +1237,9 @@
           "veryLong":"Very Long",
           "vLong": "v.Long",
           "distant": "Distant",
-          "thr": "Thr."
+          "thr": "Thr.",
+          "grenade": "Grenade",
+          "gren": "Gren."
         },
         "RangeBandTypes": {
           "personal": "Personal",
@@ -1625,6 +1627,7 @@
         "Range": "Range",
         "lawLevel": "Law Level",
         "rangeBand": "Range Band",
+        "ThrownRangeTooltip": "Thrown range from Strength {strength}: x{effective} / x{maximum}, in meters",
         "weaponType": "Weapon Type",
         "damageType": "Damage Type",
         "rateOfFire": "Rate of Fire/Auto X",
@@ -3627,7 +3630,7 @@
         "name": "Display Tech Level in Compendium and Item Tab lists"
       },
       "omitPSIifZero": {
-        "hint": "Hides psionic strength characteristic if value set to zero.",
+        "hint": "Hides psionic strength characteristic and psionic abilities if characterisitc value is set to zero.",
         "name": "Omit PSI characteristic from actor sheets if value zero"
       },
       "omitALTifZero": {
@@ -3912,6 +3915,8 @@
       "NoDamageToApply": "Damage or healing values must greater than zero.",
       "MissingUntrainedSkill": "Actor is missing untrained skill. Reload application to fix.",
       "TooManyTargets": "More targets than the number of attacks, targets will be chosen in order selected.",
+      "BeyondMaxThrowTitle": "Beyond Maximum Range",
+      "BeyondMaxThrow": "The target point is beyond this weapon's maximum throwing range. Throw anyway?",
       "WearingMultipleLayers": "Multiple armor layers equipped while wearing non-stackable armor.",
       "ResetEffectForManualDamage": "Effects not included in damage rolls.  Resetting effects in manual rolls to false.",
       "tableNotFound": "Cannot find RollTable '{id}' referenced in Journal Entry.",
