@@ -1140,3 +1140,35 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* The button in the totals bar that shows or hides the financial notes */
+.finance-ledger .fl-totals {
+  position: relative;
+}
+
+.finance-ledger .fl-notes-toggle {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  color: #f3f1ea;
+  background: color-mix(in srgb, #f3f1ea 12%, transparent);
+  border: 1px solid color-mix(in srgb, #f3f1ea 40%, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-notes-toggle:hover,
+.finance-ledger .fl-notes-toggle.is-open {
+  background: color-mix(in srgb, #f3f1ea 28%, transparent);
+  border-color: #f3f1ea;
+}
+
+.finance-ledger .fl-totals {
+  padding-right: 44px; /* room for the notes button */
+}

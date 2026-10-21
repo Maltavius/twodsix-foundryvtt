@@ -12,7 +12,16 @@
       <span class="fl-net-value">{{finance.totals.netOfDebt}} Cr</span>
     </div>
     {{/if}}
+    <button type="button" class="fl-notes-toggle {{#if finance.notesOpen}}is-open{{/if}}" data-action="financeToggleNotes" aria-expanded="{{#if finance.notesOpen}}true{{else}}false{{/if}}" aria-label="{{localize 'TWODSIX.Actor.Finances.FINANCIAL_NOTES'}}" data-tooltip="{{localize 'TWODSIX.Actor.Finances.FINANCIAL_NOTES'}}"><i class="fa-solid fa-note-sticky"></i></button>
   </section>
+
+  {{!-- Notes (unchanged field) --}}
+  {{#if finance.notesOpen}}
+  <section class="financial-notes">
+    <span class="item-title">{{localize "TWODSIX.Actor.Finances.FINANCIAL_NOTES"}}</span>
+    <div contenteditable="true" data-edit="system.finances.financial-notes">{{{system.finances.financial-notes}}}</div>
+  </section>
+  {{/if}}
 
   {{!-- One card per account (Cash first). Cash is the sheet's own field; the others are kept by this module. --}}
   <section class="fl-accounts" data-count="{{finance.accountCards.length}}">
@@ -262,9 +271,4 @@
     </div>
   </section>
 
-  {{!-- Notes (unchanged field) --}}
-  <section class="financial-notes">
-    <span class="item-title">{{localize "TWODSIX.Actor.Finances.FINANCIAL_NOTES"}}</span>
-    <div contenteditable="true" data-edit="system.finances.financial-notes">{{{system.finances.financial-notes}}}</div>
-  </section>
 </div>

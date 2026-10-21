@@ -38,6 +38,7 @@
     "DESCRIPTION": "Description",
     "DIGITAL": "Digital",
     "DIGITAL_HINT": "Bank / credit",
+    "ERROR_NO_FUNDS": "There is not enough money on that account.",
     "ERROR_INVALID_AMOUNT": "Enter an amount, for example 200 or -200.",
     "ERROR_MOVE_ACCOUNTS": "Choose two different accounts.",
     "ERROR_MOVE_AMOUNT": "Enter a positive amount to move.",

@@ -5,7 +5,7 @@
  * The functions in `financeActions` are ApplicationV2 actions: they run with `this` set to the sheet.
  */
 
-import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, parseLedgerAmount, secondaryAccount } from "./ledger.js";
+import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds, parseLedgerAmount, secondaryAccount } from "./ledger.js";
 import {
   MODULE_ID,
   addLoan,
@@ -64,6 +64,9 @@ function loadUiPrefs(actor) {
     if (typeof saved.formOpen === "boolean") {
       prefs.formOpen = saved.formOpen;
     }
+    if (typeof saved.notesOpen === "boolean") {
+      prefs.notesOpen = saved.notesOpen;
+    }
     if (saved.mode === "add" || saved.mode === "move") {
       prefs.mode = saved.mode;
     }
@@ -79,8 +82,8 @@ function loadUiPrefs(actor) {
  */
 function saveUiPrefs(sheet) {
   try {
-    const {openGroup, formOpen, mode} = getState(sheet).ui;
-    globalThis.localStorage?.setItem(prefsKey(sheet.actor), JSON.stringify({openGroup, formOpen, mode}));
+    const {openGroup, formOpen, mode, notesOpen} = getState(sheet).ui;
+    globalThis.localStorage?.setItem(prefsKey(sheet.actor), JSON.stringify({openGroup, formOpen, mode, notesOpen}));
   } catch {
     // Not remembered, that is all
   }
@@ -93,7 +96,7 @@ function saveUiPrefs(sheet) {
  */
 function getState(sheet) {
   sheet._financeState ??= {
-    ui: {filter: "all", search: "", limit: undefined, mode: "add", openGroup: null, formOpen: true, ...loadUiPrefs(sheet.actor)},
+    ui: {filter: "all", search: "", limit: undefined, mode: "add", openGroup: null, formOpen: true, notesOpen: false, ...loadUiPrefs(sheet.actor)},
     draft: {amount: "", description: "", category: "other", account: "cash", from: "cash", to: "digital"},
     focus: null,
     rowFocus: null
@@ -160,6 +163,7 @@ export function prepareFinanceContext(sheet, context) {
       balances: getStoredBalances(sheet.actor)
     }),
     formOpen: state.ui.formOpen,
+    notesOpen: state.ui.notesOpen,
     addFormOpen: state.ui.formOpen && state.ui.mode !== "move",
     moveFormOpen: state.ui.formOpen && state.ui.mode === "move",
     draft,
@@ -521,6 +525,11 @@ export const financeActions = {
       root.querySelector('[data-draft="amount"]')?.focus();
       return;
     }
+    if (!hasFunds(getStoredBalances(this.actor)[draft.account] ?? 0, amount)) {
+      setError(root, game.i18n.localize(`${PREFIX}.ERROR_NO_FUNDS`));
+      root.querySelector('[data-draft="amount"]')?.focus();
+      return;
+    }
     const state = getState(this);
     const entry = {amount, account: draft.account, category: draft.category, description: draft.description.trim()};
     clearDraft(this, root, true);
@@ -548,6 +557,11 @@ export const financeActions = {
     }
     if (draft.from === draft.to || !LEDGER_ACCOUNTS.includes(draft.from) || !LEDGER_ACCOUNTS.includes(draft.to)) {
       setError(root, game.i18n.localize(`${PREFIX}.ERROR_MOVE_ACCOUNTS`));
+      return;
+    }
+    if (!hasFunds(getStoredBalances(this.actor)[draft.from] ?? 0, -amount)) {
+      setError(root, game.i18n.localize(`${PREFIX}.ERROR_NO_FUNDS`));
+      root.querySelector('[data-draft="amount"]')?.focus();
       return;
     }
     const state = getState(this);
@@ -589,6 +603,18 @@ export const financeActions = {
   async financeToggleGroup(event, target) {
     const {ui} = getState(this);
     ui.openGroup = ui.openGroup === target.dataset.group ? null : target.dataset.group;
+    saveUiPrefs(this);
+    await this.render();
+  },
+
+  /**
+   * Show or hide the financial notes (the button in the totals bar).
+   * @this {object} the sheet
+   * @returns {Promise<void>}
+   */
+  async financeToggleNotes() {
+    const {ui} = getState(this);
+    ui.notesOpen = !ui.notesOpen;
     saveUiPrefs(this);
     await this.render();
   },

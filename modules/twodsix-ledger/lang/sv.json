@@ -38,6 +38,7 @@
     "DESCRIPTION": "Beskrivning",
     "DIGITAL": "Digitalt",
     "DIGITAL_HINT": "Bank / kredit",
+    "ERROR_NO_FUNDS": "Det finns inte tillräckligt med pengar på kontot.",
     "ERROR_INVALID_AMOUNT": "Ange ett belopp, till exempel 200 eller -200.",
     "ERROR_MOVE_ACCOUNTS": "Välj två olika konton.",
     "ERROR_MOVE_AMOUNT": "Ange ett positivt belopp att flytta.",
