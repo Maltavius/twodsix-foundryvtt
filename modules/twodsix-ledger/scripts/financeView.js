@@ -17,7 +17,7 @@ import {
   roundMoney
 } from "./ledger.js";
 
-export const DEFAULT_ROW_LIMIT = 50;
+const DEFAULT_ROW_LIMIT = 50;
 export const ROW_LIMIT_STEP = 50;
 
 /**

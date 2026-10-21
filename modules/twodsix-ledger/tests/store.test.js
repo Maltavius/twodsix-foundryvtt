@@ -271,7 +271,9 @@ describe('getCurrentGameDate', () => {
 
     test('uses the text in display.date (what Simple Calendar Reborn returns), without calling the formatter', () => {
       globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
-      const formatDateTime = vi.fn(() => { throw new Error('should not be needed'); });
+      const formatDateTime = vi.fn(() => {
+        throw new Error('should not be needed');
+      });
       globalThis.SimpleCalendar = {api: {timestamp: () => 1, formatDateTime, timestampToDate: () => ({year: 1105, month: 0, day: 0, display: {date: 'Holiday 01, 1105', time: '00:02:07', month: '-1'}})}};
       expect(getCurrentGameDate()).toBe('Holiday 01, 1105');
       expect(formatDateTime).not.toHaveBeenCalled();
@@ -280,7 +282,9 @@ describe('getCurrentGameDate', () => {
     test('a formatter that throws does not lose the date: numbers are used', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
-      globalThis.SimpleCalendar = {api: {timestamp: () => 1, formatDateTime: () => { throw new TypeError('bad arguments'); }, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, formatDateTime: () => {
+        throw new TypeError('bad arguments');
+      }, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
       expect(getCurrentGameDate()).toBe('1105-01-01');
       expect(warn).not.toHaveBeenCalled();
     });
@@ -319,7 +323,9 @@ describe('getCurrentGameDate', () => {
   test('falls back to blank, with a warning, if the calendar API throws', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     globalThis.game.modules = new Map([['foundryvtt-simple-calendar-reborn', {active: true}]]);
-    globalThis.SimpleCalendar = {api: {timestamp: () => { throw new Error('boom'); }, timestampToDate: () => ({})}};
+    globalThis.SimpleCalendar = {api: {timestamp: () => {
+      throw new Error('boom');
+    }, timestampToDate: () => ({})}};
     expect(getCurrentGameDate()).toBe('');
     expect(warn).toHaveBeenCalled();
   });

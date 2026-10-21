@@ -7,12 +7,12 @@
  */
 
 import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds } from "./ledger.js";
-import { FREQUENCIES, GROUPS, getPayKind, itemsInGroup, summarizeItems } from "./recurring.js";
+import { FREQUENCIES, getPayKind, itemsInGroup, summarizeItems } from "./recurring.js";
 import { totalOwed } from "./loans.js";
 
 const PREFIX = "TWODSIX_LEDGER";
-export const DEBT_GROUP = "debt";
-export const CARD_ORDER = ["pension", "living", "ship", DEBT_GROUP];
+const DEBT_GROUP = "debt";
+const CARD_ORDER = ["pension", "living", "ship", DEBT_GROUP];
 
 /**
  * @param {number} value
@@ -166,5 +166,3 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
 
   return {gameDate, cards, panel, hasPanel: panel !== null};
 }
-
-export {GROUPS};

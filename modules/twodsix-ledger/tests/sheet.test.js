@@ -14,7 +14,9 @@ function installHandlebars({systemPartial = () => 'system tab', preload = true} 
   globalThis.Handlebars = {
     partials,
     compile: vi.fn(source => Object.assign(() => 'wrapper', {source})),
-    registerPartial: vi.fn((name, fn) => { partials[name] = fn; })
+    registerPartial: vi.fn((name, fn) => {
+      partials[name] = fn;
+    })
   };
   globalThis.foundry = {
     applications: {
@@ -93,8 +95,12 @@ describe('createLedgerSheet', () => {
     return class Base {
       static DEFAULT_OPTIONS = {classes: ['twodsix'], actions: {existing: () => {}}};
       static PARTS = {main: {template: 'systems/twodsix/templates/actors/traveller-sheet.hbs', scrollable: ['.skills']}};
-      async _prepareContext() { return {editable: true, system: {financeValues: {}}}; }
-      async _renderHTML() { return 'html'; }
+      async _prepareContext() {
+        return {editable: true, system: {financeValues: {}}};
+      }
+      async _renderHTML() {
+        return 'html';
+      }
       async _onRender() {}
     };
   }

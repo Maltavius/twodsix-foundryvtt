@@ -22,7 +22,7 @@ const t = key => game.i18n.localize(`${PREFIX}.${key}`);
 /**
  * @returns {{accounts: Array<{key: string, name: string}>, categories: Array<{key: string, name: string}>}} what is saved
  */
-export function getConfig() {
+function getConfig() {
   try {
     return game.settings.get(MODULE_ID, SETTING) ?? {};
   } catch {

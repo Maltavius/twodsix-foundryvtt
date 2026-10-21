@@ -11,7 +11,7 @@
  * Fields that exist both as text and as a number under the same name.
  * (The ship payments field is left out: its text field is `payments` but its number is `payment`.)
  */
-export const SYNCED_FINANCE_FIELDS = ["cash", "digital", "pension", "debt", "livingCosts"];
+const SYNCED_FINANCE_FIELDS = ["cash", "digital", "pension", "debt", "livingCosts"];
 
 /**
  * Splits a finance text into a number part and a units part.

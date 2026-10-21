@@ -160,7 +160,7 @@ export function prepareFinanceContext(sheet, context) {
       localize: key => game.i18n.localize(key),
       gameDate: getCurrentGameDate(),
       openGroup: state.ui.openGroup,
-      balances: getStoredBalances(sheet.actor)
+      balances
     }),
     formOpen: state.ui.formOpen,
     notesOpen: state.ui.notesOpen,

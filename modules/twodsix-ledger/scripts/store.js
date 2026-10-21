@@ -125,7 +125,7 @@ export function getCurrentGameDate() {
 /**
  * @returns {number|null} the number of the in-game month (the first is 1), or null if the world has no calendar
  */
-export function getCurrentGameMonth() {
+function getCurrentGameMonth() {
   try {
     const api = getSimpleCalendarApi();
     if (api) {

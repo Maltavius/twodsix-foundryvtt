@@ -60,7 +60,8 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 2px 16px;
-  padding: 8px 14px 9px;
+  padding: 8px 44px 9px 14px; /* room on the right for the notes button */
+  position: relative;
   border: 1px solid color-mix(in srgb, #fff 22%, var(--banner-bg));
   border-radius: 6px;
   background: var(--banner-bg);
@@ -109,17 +110,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Cash and digital, and the four older fields ---- */
+/* ---- One card per account ---- */
 
-.finance-ledger .fl-accounts,
-.finance-ledger .fl-fields {
+.finance-ledger .fl-accounts {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--fl-gap);
 }
 
-.finance-ledger .fl-account,
-.finance-ledger .fl-fields > div {
+.finance-ledger .fl-account {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -140,8 +139,7 @@
   text-overflow: ellipsis;
 }
 
-.finance-ledger .fl-account input[type="text"],
-.finance-ledger .fl-fields input[type="text"] {
+.finance-ledger .fl-account input[type="text"] {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -233,12 +231,6 @@
   background: var(--fl-soft);
 }
 
-.finance-ledger .fl-modes {
-  display: flex;
-  gap: 4px;
-}
-
-.finance-ledger .fl-mode,
 .finance-ledger .fl-filter,
 .finance-ledger .fl-undo,
 .finance-ledger .fl-more {
@@ -255,7 +247,6 @@
   cursor: pointer;
 }
 
-.finance-ledger .fl-mode.active,
 .finance-ledger .fl-filter.active {
   background: color-mix(in srgb, currentColor 16%, transparent);
   border-color: currentColor;
@@ -586,10 +577,6 @@
 /* ---- Narrow tab ---- */
 
 @container (max-width: 400px) {
-  .finance-ledger .fl-fields {
-    grid-template-columns: 1fr;
-  }
-
   /* No room for a column of its own: show the account under the description instead */
   .finance-ledger .fl-col-account {
     display: none;
@@ -633,52 +620,13 @@
   opacity: 0.55;
 }
 
-.finance-ledger .fl-rec-main,
-.finance-ledger .fl-rec-extra {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
-  min-width: 0;
-}
-
-.finance-ledger .fl-rec-main .fl-rec-name {
-  flex: 1 1 8em;
-  min-width: 0;
-}
-
 .finance-ledger .fl-rec-amount {
-  flex: 0 0 6.5em;
-  width: 6.5em;
   text-align: right;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
 
-.finance-ledger .fl-rec-freq,
-.finance-ledger .fl-rec-account,
-.finance-ledger .fl-rec-category {
-  flex: 0 1 auto;
-  width: auto;
-  min-width: 0;
-}
-
-.finance-ledger .fl-rec-active {
-  flex: 0 0 auto;
-  margin: 0;
-}
-
-.finance-ledger .fl-rec-debt {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85em;
-  color: var(--fl-muted);
-  white-space: nowrap;
-}
-
 .finance-ledger .fl-rec-pay,
-.finance-ledger .fl-rec-payall,
 .finance-ledger .fl-rec-add,
 .finance-ledger .fl-rec-delete {
   min-height: 32px;
@@ -686,8 +634,7 @@
   cursor: pointer;
 }
 
-.finance-ledger .fl-rec-pay,
-.finance-ledger .fl-rec-payall {
+.finance-ledger .fl-rec-pay {
   padding: 0 12px;
   font-weight: bold;
   color: #fff;
@@ -695,8 +642,7 @@
   border: 1px solid #5c1111;
 }
 
-.finance-ledger .fl-rec-pay:disabled,
-.finance-ledger .fl-rec-payall:disabled {
+.finance-ledger .fl-rec-pay:disabled {
   color: inherit;
   background: var(--fl-soft);
   border-color: var(--fl-line);
@@ -704,10 +650,13 @@
   cursor: not-allowed;
 }
 
+/* Pay and the trash can always stay on the right of the row */
 .finance-ledger .fl-rec-actions {
   display: inline-flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  align-self: flex-end;
   gap: 6px;
-  margin-left: auto;
 }
 
 .finance-ledger .fl-rec-delete {
@@ -884,17 +833,6 @@
   cursor: pointer;
 }
 
-.finance-ledger .fl-rec-labeled {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0;
-  flex: 0 0 auto;
-}
-
-.finance-ledger .fl-rec-labeled .fl-hint {
-  font-size: 0.72em;
-}
-
 .finance-ledger .fl-rec-payother {
   min-height: 32px;
   padding: 0 10px;
@@ -904,10 +842,6 @@
 .finance-ledger .fl-rec-payother:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.finance-ledger .fl-rec-extra {
-  align-items: flex-end;
 }
 
 /* ---- History title with the buttons that open the form ---- */
@@ -941,44 +875,14 @@
 
 /* ---- Item and loan rows look like the Add transaction form: labelled fields in one wrapping row ---- */
 
-.finance-ledger .fl-rec {
-  padding: 6px 0;
-}
-
-.finance-ledger .fl-rec .fl-form-row {
-  gap: 4px 6px;
-}
-
-.finance-ledger .fl-rec .fl-field {
-  flex: 1 1 90px;
-}
-
-.finance-ledger .fl-rec .fl-field.fl-description {
-  flex: 3 1 140px;
-}
-
-.finance-ledger .fl-rec .fl-field.fl-amount {
-  flex: 1 1 80px;
-}
-
-.finance-ledger .fl-rec .fl-field .fl-rec-amount {
-  flex: none;
-  width: 100%;
-  text-align: right;
-}
-
 .finance-ledger .fl-rec .fl-label {
   font-size: 0.7em;
 }
 
 .finance-ledger .fl-rec .fl-rec-active {
+  flex: 0 0 auto;
   align-self: center;
-  margin-top: 1em;
-}
-
-.finance-ledger .fl-rec .fl-rec-actions {
-  margin-left: 0;
-  align-items: flex-end;
+  margin: 1em 0 0;
 }
 
 .finance-ledger .fl-rec .fl-rec-pay,
@@ -999,7 +903,7 @@
   }
 }
 
-/* The fields wrap among themselves; Pay and the trash can always stay on the right */
+/* The fields wrap among themselves, while the buttons (.fl-rec-actions) stay on the right */
 .finance-ledger .fl-rec-row {
   display: flex;
   align-items: flex-end;
@@ -1013,11 +917,6 @@
   align-items: flex-end;
   gap: 4px 6px;
   min-width: 0;
-}
-
-.finance-ledger .fl-rec-row > .fl-rec-actions {
-  flex: 0 0 auto;
-  align-self: flex-end;
 }
 
 /* Only the name grows. The other fields keep their own size, so a field that wraps to a second line does not stretch
@@ -1034,7 +933,7 @@
   flex: 1 1 140px;
 }
 
-/* ---- Headings: a bar over the whole width in the theme's heading colours, square corners, like the mockups ---- */
+/* ---- Headings: a bar over the whole width in the theme's heading colours, rounded top corners like Financial Notes ---- */
 
 .finance-ledger .fl-panel-head,
 .finance-ledger .fl-history-bar {
@@ -1042,8 +941,8 @@
   --fl-bar-bg: var(--s2d6-header-background, #15151a);
   --fl-bar-text: var(--s2d6-title-color, #f3f1ea);
   box-sizing: border-box;
-  padding: 4px 10px;
-  border-radius: 0;
+  padding: 4px 1.2ch;
+  border-radius: 1.5ch 1.5ch 0 0;
   background: var(--fl-bar-bg);
   color: var(--fl-bar-text);
 }
@@ -1065,7 +964,6 @@
   box-shadow: none;
 }
 
-.finance-ledger .fl-panel-head .fl-calendar-note,
 .finance-ledger .fl-panel-head .fl-panel-close {
   color: color-mix(in srgb, var(--fl-bar-text) 78%, transparent);
 }
@@ -1141,11 +1039,7 @@
   text-overflow: ellipsis;
 }
 
-/* The button in the totals bar that shows or hides the financial notes */
-.finance-ledger .fl-totals {
-  position: relative;
-}
-
+/* The yellow note pad button in the totals bar that shows or hides the financial notes */
 .finance-ledger .fl-notes-toggle {
   position: absolute;
   top: 6px;
@@ -1156,42 +1050,17 @@
   margin: 0;
   padding: 0;
   line-height: 1;
-  color: #f3f1ea;
-  background: color-mix(in srgb, #f3f1ea 12%, transparent);
-  border: 1px solid color-mix(in srgb, #f3f1ea 40%, transparent);
+  color: #f6d44b;
+  background: color-mix(in srgb, #f6d44b 14%, transparent);
+  border: 1px solid color-mix(in srgb, #f6d44b 55%, transparent);
   border-radius: 4px;
   cursor: pointer;
 }
 
 .finance-ledger .fl-notes-toggle:hover,
 .finance-ledger .fl-notes-toggle.is-open {
-  background: color-mix(in srgb, #f3f1ea 28%, transparent);
-  border-color: #f3f1ea;
-}
-
-.finance-ledger .fl-totals {
-  padding-right: 44px; /* room for the notes button */
-}
-
-/* The notes button is a yellow note pad */
-.finance-ledger .fl-notes-toggle {
-  color: #f6d44b;
-  background: color-mix(in srgb, #f6d44b 14%, transparent);
-  border-color: color-mix(in srgb, #f6d44b 55%, transparent);
-}
-
-.finance-ledger .fl-notes-toggle:hover,
-.finance-ledger .fl-notes-toggle.is-open {
   background: color-mix(in srgb, #f6d44b 30%, transparent);
   border-color: #f6d44b;
-}
-
-/* Heading bars follow the Financial Notes heading: rounded top corners, the whole width */
-.finance-ledger .fl-panel-head,
-.finance-ledger .fl-history-bar {
-  border-radius: 1.5ch 1.5ch 0 0;
-  padding-left: 1.2ch;
-  padding-right: 1.2ch;
 }
 
 .finance-ledger .fl-total-net {

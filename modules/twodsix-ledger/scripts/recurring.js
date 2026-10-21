@@ -13,13 +13,13 @@
 import { LEDGER_ACCOUNTS, roundMoney, roundUpCr, secondaryAccount } from "./ledger.js";
 
 export const GROUPS = ["pension", "living", "ship"];
-export const DEFAULT_GROUP = "living";
+const DEFAULT_GROUP = "living";
 /** The history category an item is booked under, decided by its group */
 export const GROUP_CATEGORY = {pension: "income", living: "living", ship: "ship"};
 export const FREQUENCIES = ["month", "year"];
-export const DEFAULT_FREQUENCY = "month";
+const DEFAULT_FREQUENCY = "month";
 export const MONTHS_PER_YEAR = 13;
-export const DAYS_PER_MONTH = 28;
+const DAYS_PER_MONTH = 28;
 export const DAYS_PER_YEAR = MONTHS_PER_YEAR * DAYS_PER_MONTH + 1; // 365: the 13 months and Holiday
 
 /**

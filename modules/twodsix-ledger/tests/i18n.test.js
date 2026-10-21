@@ -7,9 +7,11 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { LEDGER_ACCOUNTS, LEDGER_CATEGORIES, SYSTEM_CATEGORIES } from '../scripts/ledger.js';
-import moduleLang from '../lang/en.json' with { type: 'json' };
-import swedishLang from '../lang/sv.json' with { type: 'json' };
-import systemLang from '../../../static/lang/en.json' with { type: 'json' };
+
+const readJson = path => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
+const moduleLang = readJson('../lang/en.json');
+const swedishLang = readJson('../lang/sv.json');
+const systemLang = readJson('../../../static/lang/en.json');
 
 const moduleKeys = moduleLang.TWODSIX_LEDGER;
 const systemKeys = systemLang.TWODSIX.Actor.Finances;
