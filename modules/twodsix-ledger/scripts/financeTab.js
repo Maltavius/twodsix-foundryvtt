@@ -5,12 +5,13 @@
  * The functions in `financeActions` are ApplicationV2 actions: they run with `this` set to the sheet.
  */
 
-import { LEDGER_ACCOUNTS, formatLedgerNumber, parseLedgerAmount } from "./ledger.js";
+import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, parseLedgerAmount, secondaryAccount } from "./ledger.js";
 import {
   MODULE_ID,
   addLoan,
   addRecurringItem,
   addTransaction,
+  balancePath,
   deleteLoan,
   deleteRecurringItem,
   editLoan,
@@ -101,6 +102,27 @@ function getState(sheet) {
 }
 
 /**
+ * Make the accounts of the draft fit the accounts there are now (they can be changed in the module settings). With two
+ * accounts, From and To are always the two different ones. With more, picking one that the other already has empties
+ * the other (see the change handler), so To can be empty until a choice is made.
+ * @param {object} draft
+ * @returns {void}
+ */
+function normalizeAccountDraft(draft) {
+  const has = key => LEDGER_ACCOUNTS.includes(key);
+  if (!has(draft.account)) {
+    draft.account = "cash";
+  }
+  if (!has(draft.from)) {
+    draft.from = "cash";
+  }
+  const others = LEDGER_ACCOUNTS.filter(key => key !== draft.from);
+  if (!has(draft.to) || draft.to === draft.from) {
+    draft.to = others.length === 1 ? others[0] : "";
+  }
+}
+
+/**
  * Add the data for the Finances tab to the sheet's render context.
  * @param {object} sheet - the traveller sheet
  * @param {object} context - the render context, modified in place
@@ -112,6 +134,10 @@ export function prepareFinanceContext(sheet, context) {
   const locale = game.i18n.lang;
   const draft = state.draft;
   const balances = getStoredBalances(sheet.actor);
+  normalizeAccountDraft(draft);
+  if (state.ui.mode === "move" && LEDGER_ACCOUNTS.length < 2) {
+    state.ui.mode = "add";
+  }
   const view = buildFinanceView({
     transactions: getStoredTransactions(sheet.actor),
     balances,
@@ -136,13 +162,15 @@ export function prepareFinanceContext(sheet, context) {
     formOpen: state.ui.formOpen,
     addFormOpen: state.ui.formOpen && state.ui.mode !== "move",
     moveFormOpen: state.ui.formOpen && state.ui.mode === "move",
-    digitalText: formatLedgerNumber(balances.digital, locale),
     draft,
     button: {kind: button.kind, label: game.i18n.localize(button.labelKey)},
     // Options with the selected one flagged, for the <select> elements
     addAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.account})),
     fromAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.from})),
     toAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.to})),
+    fromEmpty: draft.from === "",
+    toEmpty: draft.to === "",
+    moveReady: Boolean(draft.from && draft.to && draft.from !== draft.to),
     categoryOptions: view.categories.map(category => ({...category, selected: category.key === draft.category}))
   };
 }
@@ -286,6 +314,20 @@ function rowFieldSelector(element) {
 }
 
 /**
+ * Lock the Move money button until From and To are two different accounts.
+ * @param {HTMLElement} root
+ * @returns {void}
+ */
+function updateMoveButton(root) {
+  const button = root.querySelector('[data-action="financeMove"]');
+  const from = root.querySelector('[data-draft="from"]')?.value;
+  const to = root.querySelector('[data-draft="to"]')?.value;
+  if (button) {
+    button.disabled = !(from && to && from !== to);
+  }
+}
+
+/**
  * Hook up the form after each render. Safe to call when the Finances tab is not editable or not present.
  * @param {object} sheet
  * @returns {void}
@@ -301,18 +343,19 @@ export function bindFinanceTab(sheet) {
   // Typing in the ledger controls must not submit the whole actor form (and re-render the sheet) on every change.
   root.querySelectorAll(".fl-nosubmit").forEach(el => el.addEventListener("change", event => event.stopPropagation()));
 
-  // Digital is a flag kept by this module: apply what is typed ("5000", or a change like "+200" or "-50") as a normal
-  // update, and the preUpdateActor hook records the difference as an adjustment.
-  root.querySelector("[data-digital-input]")?.addEventListener("change", async event => {
+  // Every account except Cash is kept by this module: apply what is typed ("5000", or a change like "+200" or "-50") as
+  // a normal update, and the preUpdateActor hook records the difference as an adjustment.
+  root.querySelectorAll("[data-account-input]").forEach(input => input.addEventListener("change", async event => {
+    const account = event.target.dataset.accountInput;
     const text = event.target.value.trim();
-    const current = getStoredBalances(sheet.actor).digital;
+    const current = getStoredBalances(sheet.actor)[account] ?? 0;
     const typed = parseLedgerAmount(text, game.i18n.lang);
-    if (Number.isFinite(typed)) {
+    if (LEDGER_ACCOUNTS.includes(account) && Number.isFinite(typed)) {
       const isChange = isDeltaFinanceText(text);
-      await sheet.actor.update({[`flags.${MODULE_ID}.digital`]: isChange ? current + typed : typed});
+      await sheet.actor.update({[balancePath(account)]: isChange ? current + typed : typed});
     }
     await sheet.render();
-  });
+  }));
 
   // Items and loans: one change handler for the whole panel
   root.querySelector("[data-recurring]")?.addEventListener("change", async event => {
@@ -352,16 +395,20 @@ export function bindFinanceTab(sheet) {
     el.addEventListener("change", () => readDraft(sheet, root));
   });
 
-  // Move money: the two accounts are never the same, so choosing one for From switches To to the other, and the other way round
+  // Move money: From and To are never the same account. With two accounts, choosing one switches the other to the
+  // remaining account. With more, the other one is emptied and Move money stays locked until both have been chosen.
   for (const [changed, other] of [["from", "to"], ["to", "from"]]) {
     root.querySelector(`[data-draft="${changed}"]`)?.addEventListener("change", event => {
       const otherSelect = root.querySelector(`[data-draft="${other}"]`);
-      if (otherSelect && otherSelect.value === event.target.value) {
-        otherSelect.value = LEDGER_ACCOUNTS.find(account => account !== event.target.value) ?? otherSelect.value;
+      if (otherSelect && event.target.value && otherSelect.value === event.target.value) {
+        const rest = LEDGER_ACCOUNTS.filter(account => account !== event.target.value);
+        otherSelect.value = rest.length === 1 ? rest[0] : "";
       }
       readDraft(sheet, root);
+      updateMoveButton(root);
     });
   }
+  updateMoveButton(root);
 
   root.querySelectorAll("[data-submit-on-enter]").forEach(el => {
     el.addEventListener("keydown", event => {
@@ -420,7 +467,7 @@ export function bindFinanceTab(sheet) {
  */
 async function askLoanDetails() {
   const t = key => foundry.utils.escapeHTML(game.i18n.localize(`${PREFIX}.${key}`));
-  const accounts = LEDGER_ACCOUNTS.map(key => `<option value="${key}">${t(key.toUpperCase())}</option>`).join("");
+  const accounts = LEDGER_ACCOUNTS.map(key => `<option value="${key}">${foundry.utils.escapeHTML(accountLabel(key, game.i18n.localize.bind(game.i18n)))}</option>`).join("");
   const content = `<div class="form-group"><label>${t("LOAN_NAME")}</label><input type="text" name="name" autofocus></div>
     <div class="form-group"><label>${t("LOAN_AMOUNT")}</label><input type="text" name="amount" inputmode="text"></div>
     <div class="form-group"><label>${t("LOAN_INTO_ACCOUNT")}</label><select name="account">${accounts}</select></div>
@@ -584,7 +631,7 @@ export const financeActions = {
    */
   async financeRecAdd(event, target) {
     const group = GROUPS.includes(target.dataset.group) ? target.dataset.group : "living";
-    await addRecurringItem(this.actor, {name: "", amount: 0, account: "digital", group});
+    await addRecurringItem(this.actor, {name: "", amount: 0, account: secondaryAccount(), group});
     await this.render();
   },
 

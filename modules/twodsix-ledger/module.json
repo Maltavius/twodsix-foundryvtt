@@ -2,7 +2,7 @@
   "id": "twodsix-ledger",
   "title": "Twodsix Ledger",
   "description": "A transaction ledger for the Finances tab of the Twodsix traveller sheet: cash and digital money, move money between them, history with filter, search and undo.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

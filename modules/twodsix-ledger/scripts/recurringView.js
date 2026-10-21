@@ -6,7 +6,7 @@
  * three hold recurring items, the last one holds loans. Each group is a card; the one that is open shows its panel.
  */
 
-import { LEDGER_ACCOUNTS, formatLedgerNumber, hasFunds } from "./ledger.js";
+import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds } from "./ledger.js";
 import { FREQUENCIES, GROUPS, getPayKind, itemsInGroup, summarizeItems } from "./recurring.js";
 import { totalOwed } from "./loans.js";
 
@@ -80,14 +80,14 @@ function countText(count, oneKey, manyKey, localize) {
  * @param {(key: string) => string} args.localize
  * @param {string} [args.gameDate] - the current in-game date, "" if the world has no calendar
  * @param {string|null} [args.openGroup] - the group whose panel is open
- * @param {{cash: number, digital: number}} [args.balances] - what is on each account; a payment that is more than that
+ * @param {Record<string, number>} [args.balances] - what is on each account; a payment that is more than that
  *   cannot be paid. Left out, nothing is checked.
  * @returns {object}
  */
 export function buildGroupsView({items = [], loans = [], locale = "en", localize, gameDate = "", openGroup = null, balances = null}) {
   const affordable = (account, amount) => !balances || hasFunds(balances[account] ?? 0, amount);
   const select = (options, selected) => options.map(option => ({...option, selected: option.key === selected}));
-  const accountOptions = LEDGER_ACCOUNTS.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
+  const accountOptions = LEDGER_ACCOUNTS.map(key => ({key, label: accountLabel(key, localize)}));
   const frequencyOptions = FREQUENCIES.map(key => ({key, label: localize(`${PREFIX}.${key.toUpperCase()}`)}));
   const open = CARD_ORDER.includes(openGroup) ? openGroup : null;
 

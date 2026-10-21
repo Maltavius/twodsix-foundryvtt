@@ -82,8 +82,8 @@ describe('buildFinanceView', () => {
       transactions: [tx('a', 5, {account: 'digital'}), tx('t', 200, {account: 'digital', toAccount: 'cash', category: 'transfer'})],
       balances: {cash: 200, digital: -195}
     });
-    expect(view.rows[0].accountPills).toEqual([{key: 'digital', label: 'DIGITAL'}, {key: 'cash', label: 'CASH'}]);
-    expect(view.rows[1].accountPills).toEqual([{key: 'digital', label: 'DIGITAL'}]);
+    expect(view.rows[0].accountPills).toEqual([{key: 'digital', tone: 'digital', label: 'DIGITAL'}, {key: 'cash', tone: 'cash', label: 'CASH'}]);
+    expect(view.rows[1].accountPills).toEqual([{key: 'digital', tone: 'digital', label: 'DIGITAL'}]);
   });
 
   test('the category key is kept for colouring, and unknown categories count as other', () => {

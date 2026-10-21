@@ -103,6 +103,26 @@
     "UNDO_CONFIRM": "Remove the newest entry (_ENTRY_) and undo its effect on your balances?",
     "UNDO_LAST": "Undo last",
     "UNDO_NOTHING": "There is nothing to undo.",
-    "YEAR": "Year"
+    "YEAR": "Year",
+    "CONFIG_NAME": "Accounts and categories",
+    "CONFIG_LABEL": "Set up accounts and categories",
+    "CONFIG_HINT": "Which accounts and categories the ledger has, for every character in this world.",
+    "CONFIG_TITLE": "Ledger: accounts and categories",
+    "CONFIG_ACCOUNTS": "Accounts",
+    "CONFIG_ACCOUNTS_HINT": "Up to {max} accounts. Cash is the sheet's own field and is always first; you can rename it. Leave a name empty to use the standard name.",
+    "CONFIG_ADD_ACCOUNT": "Add account",
+    "CONFIG_NEW_ACCOUNT": "Name of the account",
+    "CONFIG_CASH_LOCKED": "Cash cannot be removed",
+    "CONFIG_CATEGORIES": "Categories",
+    "CONFIG_CATEGORIES_HINT": "The standard categories can be renamed but not removed, because the ledger uses them. You can add your own.",
+    "CONFIG_ADD_CATEGORY": "Add category",
+    "CONFIG_NEW_CATEGORY": "Name of the category",
+    "CONFIG_CATEGORY_LOCKED": "A standard category cannot be removed",
+    "CONFIG_REMOVE": "Remove",
+    "CONFIG_RESET": "Back to standard",
+    "CONFIG_SAVE": "Save",
+    "CONFIG_IN_USE": "{account} is still used by {actor} (a balance, a history entry, an item or a loan) and cannot be removed.",
+    "CONFIG_CATEGORY_NAME": "A category you add needs a name.",
+    "CONFIG_ACCOUNT_NAME": "An account you add needs a name."
   }
 }

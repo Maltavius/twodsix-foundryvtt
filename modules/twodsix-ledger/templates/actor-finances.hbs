@@ -14,25 +14,29 @@
     {{/if}}
   </section>
 
-  {{!-- Cash and digital --}}
-  <section class="fl-accounts">
+  {{!-- One card per account (Cash first). Cash is the sheet's own field; the others are kept by this module. --}}
+  <section class="fl-accounts" data-count="{{finance.accountCards.length}}">
+    {{#each finance.accountCards}}
+    {{#if isCash}}
     <div class="fl-account fl-card cash" data-account="cash">
-      <span class="fl-card-title"><i class="fa-solid fa-money-bill-wave"></i> {{localize "TWODSIX_LEDGER.CASH"}}</span>
+      <span class="fl-card-title"><i class="fa-solid fa-money-bill-wave"></i> {{label}}</span>
       <div class="fl-card-value">
-        <input name="system.finances.cash" type="text" value="{{system.finances.cash}}" placeholder="0" aria-label="{{localize 'TWODSIX_LEDGER.CASH'}}"/>
+        <input name="system.finances.cash" type="text" value="{{@root.system.finances.cash}}" placeholder="0" aria-label="{{label}}"/>
         <span class="fl-unit">Cr</span>
       </div>
-      <span class="fl-hint">{{localize "TWODSIX_LEDGER.CASH_HINT"}} <i class="fa-solid fa-pen"></i></span>
+      <span class="fl-hint">{{#if hint}}{{hint}}{{else}}{{localize "TWODSIX_LEDGER.CASH_HINT"}}{{/if}} <i class="fa-solid fa-pen"></i></span>
     </div>
-    <div class="fl-account fl-card digital fl-nosubmit" data-account="digital">
-      <span class="fl-card-title"><i class="fa-solid fa-credit-card"></i> {{localize "TWODSIX_LEDGER.DIGITAL"}}</span>
+    {{else}}
+    <div class="fl-account fl-card {{tone}} fl-nosubmit" data-account="{{key}}">
+      <span class="fl-card-title"><i class="fa-solid fa-credit-card"></i> {{label}}</span>
       <div class="fl-card-value">
-        {{!-- Digital is kept by this module, not by the system, so this input has no name and is handled by the module --}}
-        <input type="text" data-digital-input value="{{finance.digitalText}}" placeholder="0" aria-label="{{localize 'TWODSIX_LEDGER.DIGITAL'}}"/>
+        <input type="text" data-account-input="{{key}}" value="{{text}}" placeholder="0" aria-label="{{label}}"/>
         <span class="fl-unit">Cr</span>
       </div>
-      <span class="fl-hint">{{localize "TWODSIX_LEDGER.DIGITAL_HINT"}} <i class="fa-solid fa-pen"></i></span>
+      <span class="fl-hint">{{#if hint}}{{hint}} {{/if}}<i class="fa-solid fa-pen"></i></span>
     </div>
+    {{/if}}
+    {{/each}}
   </section>
 
   {{!-- The four groups that match the old fields: Pension, Living costs, Ship payments and Debt. Click a card to
@@ -140,7 +144,7 @@
     {{#if finance.editable}}
     <div class="fl-bar-buttons">
       <button type="button" class="fl-bar-button {{#if finance.addFormOpen}}is-open{{/if}}" data-action="financeToggleForm" data-mode="add" aria-expanded="{{#if finance.addFormOpen}}true{{else}}false{{/if}}"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.ADD_TRANSACTION"}} {{#if finance.addFormOpen}}▴{{else}}▾{{/if}}</button>
-      <button type="button" class="fl-bar-button {{#if finance.moveFormOpen}}is-open{{/if}}" data-action="financeToggleForm" data-mode="move" aria-expanded="{{#if finance.moveFormOpen}}true{{else}}false{{/if}}"><i class="fa-solid fa-right-left"></i> {{localize "TWODSIX_LEDGER.MOVE_MONEY"}} {{#if finance.moveFormOpen}}▴{{else}}▾{{/if}}</button>
+      {{#if finance.canMove}}<button type="button" class="fl-bar-button {{#if finance.moveFormOpen}}is-open{{/if}}" data-action="financeToggleForm" data-mode="move" aria-expanded="{{#if finance.moveFormOpen}}true{{else}}false{{/if}}"><i class="fa-solid fa-right-left"></i> {{localize "TWODSIX_LEDGER.MOVE_MONEY"}} {{#if finance.moveFormOpen}}▴{{else}}▾{{/if}}</button>{{/if}}
     </div>
     {{/if}}
   </section>
@@ -158,12 +162,14 @@
       <label class="fl-field">
         <span class="fl-label">{{localize "TWODSIX_LEDGER.FROM"}}</span>
         <select data-draft="from">
+          {{#if finance.hasManyAccounts}}<option value="" {{#if finance.fromEmpty}}selected{{/if}}>—</option>{{/if}}
           {{#each finance.fromAccounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
         </select>
       </label>
       <label class="fl-field">
         <span class="fl-label">{{localize "TWODSIX_LEDGER.TO"}}</span>
         <select data-draft="to">
+          {{#if finance.hasManyAccounts}}<option value="" {{#if finance.toEmpty}}selected{{/if}}>—</option>{{/if}}
           {{#each finance.toAccounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
         </select>
       </label>
@@ -189,7 +195,7 @@
         <input type="text" autocomplete="off" data-draft="description" data-submit-on-enter value="{{finance.draft.description}}"/>
       </label>
       {{#if finance.isMoveMode}}
-      <button type="button" class="fl-submit" data-kind="neutral" data-action="financeMove"><span class="fl-button-label">{{localize "TWODSIX_LEDGER.MOVE_BUTTON"}}</span></button>
+      <button type="button" class="fl-submit" data-kind="neutral" data-action="financeMove" {{#unless finance.moveReady}}disabled{{/unless}}><span class="fl-button-label">{{localize "TWODSIX_LEDGER.MOVE_BUTTON"}}</span></button>
       {{else}}
       <button type="button" class="fl-submit" data-kind="{{finance.button.kind}}" data-action="financeAdd"><span class="fl-button-label">{{finance.button.label}}</span></button>
       {{/if}}
@@ -231,7 +237,7 @@
           <tr class="fl-row">
             <td class="fl-col-date {{#if isRealDate}}real-date{{/if}}" {{#if isRealDate}}data-tooltip="{{localize 'TWODSIX_LEDGER.REAL_DATE_TOOLTIP'}}"{{/if}}>{{dateText}}</td>
             <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category fl-cat-{{categoryKey}}">{{categoryLabel}}</span>{{/if}}<span class="fl-category fl-account-inline">{{accountText}}</span></td>
-            <td class="fl-col-account"><span class="fl-accounts-cell {{#if isTransfer}}fl-transfer{{/if}}">{{#each accountPills}}{{#if @first}}<span class="fl-pill {{key}}">{{label}}</span>{{else}}<span class="fl-pill-after"><span class="fl-arrow" aria-hidden="true">→</span><span class="fl-pill {{key}}">{{label}}</span></span>{{/if}}{{/each}}</span></td>
+            <td class="fl-col-account"><span class="fl-accounts-cell {{#if isTransfer}}fl-transfer{{/if}}">{{#each accountPills}}{{#if @first}}<span class="fl-pill {{tone}}">{{label}}</span>{{else}}<span class="fl-pill-after"><span class="fl-arrow" aria-hidden="true">→</span><span class="fl-pill {{tone}}">{{label}}</span></span>{{/if}}{{/each}}</span></td>
             <td class="fl-col-amount {{amountClass}}">{{#if isTransfer}}<i class="fa-solid fa-right-left fl-transfer-icon" data-tooltip="{{localize 'TWODSIX_LEDGER.CATEGORIES.transfer'}}"></i> {{/if}}{{amountText}}</td>
             <td class="fl-col-balance">{{balanceText}}</td>
           </tr>

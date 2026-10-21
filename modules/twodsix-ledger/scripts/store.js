@@ -5,6 +5,7 @@
  * Storage (all on the actor):
  * - cash:     system.financeValues.cash (the system's own number, kept in sync with its text field by the system)
  * - digital:  flags.twodsix-ledger.digital
+ * - other accounts (set up in the module settings): flags.twodsix-ledger.accounts.<key>
  * - ledger:   flags.twodsix-ledger.transactions
  *
  * All writes pass `{twodsixLedger: true}` so that the `preUpdateActor` hook knows the ledger is being kept up to date
@@ -160,10 +161,29 @@ function withMonth(text) {
  * @returns {Record<string, number>} the stored balance of each ledger account
  */
 export function getStoredBalances(actor) {
-  return {
-    cash: Number(actor.system?._source?.financeValues?.cash) || 0,
-    digital: Number(actor.getFlag(MODULE_ID, "digital")) || 0
-  };
+  const extra = actor.getFlag(MODULE_ID, "accounts") ?? {};
+  const balances = {};
+  for (const account of LEDGER_ACCOUNTS) {
+    if (account === "cash") {
+      balances.cash = Number(actor.system?._source?.financeValues?.cash) || 0;
+    } else if (account === "digital") {
+      balances.digital = Number(actor.getFlag(MODULE_ID, "digital")) || 0;
+    } else {
+      balances[account] = Number(extra[account]) || 0;
+    }
+  }
+  return balances;
+}
+
+/**
+ * @param {string} account
+ * @returns {string} where the balance of an account is kept on the actor, as an update path
+ */
+export function balancePath(account) {
+  if (account === "cash") {
+    return "system.financeValues.cash";
+  }
+  return account === "digital" ? `flags.${MODULE_ID}.digital` : `flags.${MODULE_ID}.accounts.${account}`;
 }
 
 /**
@@ -185,11 +205,10 @@ export function getStoredTransactions(actor) {
 async function writeLedger(actor, newBalances, newTransactions, extra = {}) {
   const oldBalances = getStoredBalances(actor);
   const update = {...extra, [`flags.${MODULE_ID}.transactions`]: newTransactions};
-  if (newBalances.cash !== oldBalances.cash) {
-    update["system.financeValues.cash"] = newBalances.cash;
-  }
-  if (newBalances.digital !== oldBalances.digital) {
-    update[`flags.${MODULE_ID}.digital`] = newBalances.digital;
+  for (const account of LEDGER_ACCOUNTS) {
+    if (newBalances[account] !== oldBalances[account]) {
+      update[balancePath(account)] = newBalances[account];
+    }
   }
   return actor.update(update, {twodsixLedger: true});
 }
@@ -487,8 +506,14 @@ export function recordLedgerAdjustments(actor, data, options) {
   if (data?.system?.financeValues && "cash" in data.system.financeValues) {
     newValues.cash = data.system.financeValues.cash;
   }
-  if (ledgerChanges && "digital" in ledgerChanges) {
-    newValues.digital = ledgerChanges.digital;
+  for (const account of LEDGER_ACCOUNTS) {
+    if (account === "cash") {
+      continue;
+    }
+    const value = account === "digital" ? ledgerChanges?.digital : ledgerChanges?.accounts?.[account];
+    if (value !== undefined) {
+      newValues[account] = value;
+    }
   }
   if (Object.keys(newValues).length === 0) {
     return;

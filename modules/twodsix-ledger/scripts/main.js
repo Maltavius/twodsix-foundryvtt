@@ -4,6 +4,7 @@
 
 import { MODULE_ID, recordLedgerAdjustments } from "./store.js";
 import { createLedgerSheet, findSystemTravellerSheet } from "./sheet.js";
+import { applyConfig, registerSettings } from "./settings.js";
 import { getFinanceValueFixes, parseLocaleNumber } from "./financeText.js";
 
 /**
@@ -24,7 +25,13 @@ function registerLedgerSheet() {
   });
 }
 
-Hooks.once("ready", registerLedgerSheet);
+Hooks.once("init", registerSettings);
+// World settings are available from `setup`; the ledger uses the saved accounts and categories from then on
+Hooks.once("setup", applyConfig);
+Hooks.once("ready", () => {
+  applyConfig();
+  registerLedgerSheet();
+});
 
 /** Balance changes made outside the ledger (typing in a field, a macro, another module) get an adjustment entry. */
 Hooks.on("preUpdateActor", (actor, data, options) => {

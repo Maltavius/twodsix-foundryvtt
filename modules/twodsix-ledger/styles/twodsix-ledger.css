@@ -1079,3 +1079,37 @@
   border-color: var(--fl-bar-text);
   background: color-mix(in srgb, var(--fl-bar-text) 30%, transparent);
 }
+
+/* ---- Extra accounts (set up in the module settings): one colour each, by position ---- */
+
+.finance-ledger .fl-card.tone-2 { --accent: #2f9e44; }
+.finance-ledger .fl-card.tone-3 { --accent: #a23fc2; }
+.finance-ledger .fl-card.tone-1 { --accent: var(--fl-digital); }
+
+.finance-ledger .fl-pill.tone-1 {
+  border-color: #5b8fc4;
+  background: #d6e6f5;
+  color: #1b4a78;
+}
+
+.finance-ledger .fl-pill.tone-2 {
+  border-color: #5fae6f;
+  background: #d8efdc;
+  color: #1f5a2b;
+}
+
+.finance-ledger .fl-pill.tone-3 {
+  border-color: #a56cc0;
+  background: #ecd9f5;
+  color: #55266f;
+}
+
+/* A category added in the settings has no colour of its own: it gets the plain look */
+.finance-ledger .fl-category {
+  --cat: currentColor;
+}
+
+.finance-ledger .fl-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

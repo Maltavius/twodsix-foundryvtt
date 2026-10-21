@@ -103,6 +103,26 @@
     "UNDO_CONFIRM": "Ta bort den senaste posten (_ENTRY_) och ångra dess effekt på dina saldon?",
     "UNDO_LAST": "Ångra senaste",
     "UNDO_NOTHING": "Det finns inget att ångra.",
-    "YEAR": "År"
+    "YEAR": "År",
+    "CONFIG_NAME": "Konton och kategorier",
+    "CONFIG_LABEL": "Ställ in konton och kategorier",
+    "CONFIG_HINT": "Vilka konton och kategorier kassaboken har, för alla karaktärer i den här världen.",
+    "CONFIG_TITLE": "Kassabok: konton och kategorier",
+    "CONFIG_ACCOUNTS": "Konton",
+    "CONFIG_ACCOUNTS_HINT": "Högst {max} konton. Cash är bladets eget fält och står alltid först; du kan döpa om det. Lämna namnet tomt för att använda standardnamnet.",
+    "CONFIG_ADD_ACCOUNT": "Lägg till konto",
+    "CONFIG_NEW_ACCOUNT": "Kontots namn",
+    "CONFIG_CASH_LOCKED": "Cash kan inte tas bort",
+    "CONFIG_CATEGORIES": "Kategorier",
+    "CONFIG_CATEGORIES_HINT": "Standardkategorierna kan döpas om men inte tas bort, eftersom kassaboken använder dem. Du kan lägga till egna.",
+    "CONFIG_ADD_CATEGORY": "Lägg till kategori",
+    "CONFIG_NEW_CATEGORY": "Kategorins namn",
+    "CONFIG_CATEGORY_LOCKED": "En standardkategori kan inte tas bort",
+    "CONFIG_REMOVE": "Ta bort",
+    "CONFIG_RESET": "Tillbaka till standard",
+    "CONFIG_SAVE": "Spara",
+    "CONFIG_IN_USE": "{account} används fortfarande av {actor} (ett saldo, en historikpost, en post eller ett lån) och kan inte tas bort.",
+    "CONFIG_CATEGORY_NAME": "En kategori du lägger till måste ha ett namn.",
+    "CONFIG_ACCOUNT_NAME": "Ett konto du lägger till måste ha ett namn."
   }
 }

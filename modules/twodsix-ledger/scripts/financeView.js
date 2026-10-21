@@ -7,6 +7,9 @@
 import {
   LEDGER_ACCOUNTS,
   LEDGER_CATEGORIES,
+  accountLabel,
+  accountTone,
+  categoryLabel,
   buildLedgerRows,
   formatLedgerNumber,
   getTotalFunds,
@@ -94,9 +97,11 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
   const netOfDebt = roundMoney(total - (Number(debt) || 0));
 
   const categoryLabels = Object.fromEntries(
-    [...LEDGER_CATEGORIES, "transfer", "adjustment"].map(category => [category, localize(`${prefix}.CATEGORIES.${category}`)])
+    [...LEDGER_CATEGORIES, "transfer", "adjustment"].map(category => [category, categoryLabel(category, localize)])
   );
-  const accountLabels = {cash: localize(`${prefix}.CASH`), digital: localize(`${prefix}.DIGITAL`)};
+  const accountLabels = Object.fromEntries(LEDGER_ACCOUNTS.map(account => [account, accountLabel(account, localize)]));
+  // Entries for an account that has been removed from the settings still show something readable
+  const labelOf = key => accountLabels[key] ?? accountLabel(key, localize);
 
   const {rows, totalMatching, opening} = buildLedgerRows(transactions, current, {filter, search, categoryLabels, limit});
 
@@ -105,8 +110,8 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
     const date = formatRowDate(transaction);
     const accountKey = row.isTransfer ? "transfer" : transaction.account;
     const accountText = row.isTransfer
-      ? `${accountLabels[transaction.account]} → ${accountLabels[transaction.toAccount]}`
-      : accountLabels[transaction.account];
+      ? `${labelOf(transaction.account)} → ${labelOf(transaction.toAccount)}`
+      : labelOf(transaction.account);
     const showTransferSize = row.isTransfer && filter === "all";
     const amount = showTransferSize ? row.transferAmount : row.viewAmount;
     return {
@@ -121,7 +126,7 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
       accountText,
       /** One pill per account involved: the account, or from and to for a transfer */
       accountPills: (row.isTransfer ? [transaction.account, transaction.toAccount] : [transaction.account])
-        .map(key => ({key, label: accountLabels[key]})),
+        .map(key => ({key, tone: accountTone(key), label: labelOf(key)})),
       isTransfer: row.isTransfer,
       amountText: showTransferSize ? formatLedgerNumber(amount, locale) : formatLedgerNumber(amount, locale, true),
       amountClass: showTransferSize ? "transfer" : signClass(amount),
@@ -141,14 +146,25 @@ export function buildFinanceView({transactions = [], balances = {}, debt = 0, ui
     })),
     totals: {
       total: formatLedgerNumber(total, locale),
-      cash: formatLedgerNumber(current.cash, locale),
-      digital: formatLedgerNumber(current.digital, locale),
+      cash: formatLedgerNumber(current.cash ?? 0, locale),
+      digital: formatLedgerNumber(current.digital ?? 0, locale),
       netOfDebt: formatLedgerNumber(netOfDebt, locale),
       showNetOfDebt: (Number(debt) || 0) !== 0,
       totalClass: signClass(total),
-      cashClass: signClass(current.cash),
-      digitalClass: signClass(current.digital)
+      cashClass: signClass(current.cash ?? 0),
+      digitalClass: signClass(current.digital ?? 0)
     },
+    /** One card per account, in order. Cash is the sheet's own field, the others are kept by this module. */
+    accountCards: LEDGER_ACCOUNTS.map(key => ({
+      key,
+      label: accountLabels[key],
+      tone: accountTone(key),
+      isCash: key === "cash",
+      text: formatLedgerNumber(current[key], locale),
+      hint: key === "cash" || key === "digital" ? localize(`${prefix}.${key.toUpperCase()}_HINT`) : ""
+    })),
+    canMove: LEDGER_ACCOUNTS.length > 1,
+    hasManyAccounts: LEDGER_ACCOUNTS.length > 2,
     categories: LEDGER_CATEGORIES.map(key => ({key, label: categoryLabels[key]})),
     accounts: LEDGER_ACCOUNTS.map(key => ({key, label: accountLabels[key]})),
     rows: viewRows,

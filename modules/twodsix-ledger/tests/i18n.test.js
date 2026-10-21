@@ -19,7 +19,8 @@ function sourceFiles() {
   const scripts = new URL('scripts/', root);
   return [
     ...readdirSync(scripts).filter(name => name.endsWith('.js')).map(name => new URL(name, scripts)),
-    new URL('templates/actor-finances.hbs', root)
+    new URL('templates/actor-finances.hbs', root),
+    new URL('templates/settings.hbs', root)
   ];
 }
 

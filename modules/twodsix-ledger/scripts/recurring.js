@@ -10,7 +10,7 @@
  * item is paid once per such month and a "year" item once per year, which is what the totals below are based on.
  */
 
-import { LEDGER_ACCOUNTS, roundMoney, roundUpCr } from "./ledger.js";
+import { LEDGER_ACCOUNTS, roundMoney, roundUpCr, secondaryAccount } from "./ledger.js";
 
 export const GROUPS = ["pension", "living", "ship"];
 export const DEFAULT_GROUP = "living";
@@ -27,7 +27,7 @@ export const DAYS_PER_YEAR = MONTHS_PER_YEAR * DAYS_PER_MONTH + 1; // 365: the 1
  * @property {string} id
  * @property {string} name
  * @property {number} amount - signed, in whole Cr: negative is a cost, positive is income
- * @property {string} account - "cash" or "digital"
+ * @property {string} account - the key of one of the ledger accounts
  * @property {string} group - "pension", "living" or "ship"
  * @property {string} frequency - "month" or "year"
  * @property {boolean} active - items that are off are kept in the list but never paid or counted
@@ -102,7 +102,7 @@ export function seedRecurringItems({pension = 0, payments = 0, livingCosts = 0} 
     const value = Math.abs(Number(amount));
     if (Number.isFinite(value) && value > 0) {
       items.push(createRecurringItem({
-        name: localize(key), amount: group === "pension" ? value : -value, account: "digital", group, frequency
+        name: localize(key), amount: group === "pension" ? value : -value, account: secondaryAccount(), group, frequency
       }, id));
     }
   };

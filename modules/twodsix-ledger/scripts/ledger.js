@@ -20,6 +20,104 @@ export const LEDGER_CATEGORIES = ["other", "income", "living", "equipment", "med
 /** Categories created by the system itself. */
 export const SYSTEM_CATEGORIES = ["transfer", "adjustment"];
 
+/** The most accounts a traveller can have (the layout of the sheet is made for this many). */
+export const MAX_LEDGER_ACCOUNTS = 4;
+
+/** Categories that come with the module. They can be renamed, but not removed, because other parts of the ledger use them. */
+export const BUILTIN_CATEGORIES = [...LEDGER_CATEGORIES];
+
+const DEFAULT_ACCOUNTS = [...LEDGER_ACCOUNTS];
+const customNames = {accounts: {}, categories: {}};
+
+/**
+ * Change which accounts and categories the ledger has, and what they are called. LEDGER_ACCOUNTS and LEDGER_CATEGORIES
+ * are changed in place, so everything that reads them follows. Cash is always the first account. Anything unusable is
+ * ignored, and there are never more than MAX_LEDGER_ACCOUNTS accounts.
+ * @param {{accounts?: Array<{key: string, name?: string}>, categories?: Array<{key: string, name?: string}>}} [config]
+ * @returns {void}
+ */
+export function configureLedger(config = {}) {
+  const clean = value => String(value ?? "").trim();
+  const accounts = [];
+  const accountNames = {};
+  const listed = Array.isArray(config.accounts) ? config.accounts : [];
+  const cashEntry = listed.find(entry => clean(entry?.key) === "cash");
+  for (const entry of [{key: "cash", name: cashEntry?.name}, ...listed]) {
+    const key = clean(entry?.key);
+    if (!/^[A-Za-z0-9_-]+$/.test(key) || accounts.includes(key) || accounts.length >= MAX_LEDGER_ACCOUNTS) {
+      continue;
+    }
+    accounts.push(key);
+    if (clean(entry.name)) {
+      accountNames[key] = clean(entry.name);
+    }
+  }
+  // Without a list the ledger has the two accounts it started with
+  const useDefault = !Array.isArray(config.accounts) || config.accounts.length === 0;
+  const finalAccounts = useDefault ? [...DEFAULT_ACCOUNTS] : accounts;
+  LEDGER_ACCOUNTS.splice(0, LEDGER_ACCOUNTS.length, ...finalAccounts);
+
+  const categories = [...BUILTIN_CATEGORIES];
+  const categoryNames = {};
+  for (const entry of Array.isArray(config.categories) ? config.categories : []) {
+    const key = clean(entry?.key);
+    if (!/^[A-Za-z0-9_-]+$/.test(key) || ["transfer", "adjustment"].includes(key)) {
+      continue;
+    }
+    if (!categories.includes(key)) {
+      categories.push(key);
+    }
+    if (clean(entry.name)) {
+      categoryNames[key] = clean(entry.name);
+    }
+  }
+  LEDGER_CATEGORIES.splice(0, LEDGER_CATEGORIES.length, ...categories);
+  customNames.accounts = accountNames;
+  customNames.categories = categoryNames;
+}
+
+/**
+ * @param {string} key
+ * @param {(key: string) => string} localize
+ * @returns {string} the name given in the settings, else the name that comes with the module, else the key
+ */
+export function accountLabel(key, localize) {
+  if (customNames.accounts[key]) {
+    return customNames.accounts[key];
+  }
+  return key === "cash" || key === "digital" ? localize(`TWODSIX_LEDGER.${key.toUpperCase()}`) : String(key);
+}
+
+/**
+ * @param {string} key
+ * @param {(key: string) => string} localize
+ * @returns {string} the name given in the settings, else the name that comes with the module, else "" for an unknown key
+ */
+export function categoryLabel(key, localize) {
+  if (customNames.categories[key]) {
+    return customNames.categories[key];
+  }
+  return BUILTIN_CATEGORIES.includes(key) || SYSTEM_CATEGORIES.includes(key) ? localize(`TWODSIX_LEDGER.CATEGORIES.${key}`) : "";
+}
+
+/**
+ * @param {string} key
+ * @returns {string} a name for the colour of the account: cash and digital keep theirs, the others take one by position
+ */
+export function accountTone(key) {
+  if (key === "cash" || key === "digital") {
+    return key;
+  }
+  return `tone-${Math.max(LEDGER_ACCOUNTS.indexOf(key), 0)}`;
+}
+
+/**
+ * @returns {string} the account that is used for things that are not cash: Digital if there is one, else Cash
+ */
+export function secondaryAccount() {
+  return LEDGER_ACCOUNTS.includes("digital") ? "digital" : "cash";
+}
+
 export const DEFAULT_LEDGER_ACCOUNT = "cash";
 export const DEFAULT_LEDGER_CATEGORY = "other";
 

@@ -1,0 +1,38 @@
+<section class="fl-config">
+  <fieldset>
+    <legend>{{localize "TWODSIX_LEDGER.CONFIG_ACCOUNTS"}}</legend>
+    <p class="hint">{{localize "TWODSIX_LEDGER.CONFIG_ACCOUNTS_HINT" max=maxAccounts}}</p>
+    {{#each accounts}}
+    <div class="form-group" data-kind="accounts" data-key="{{key}}">
+      <input type="text" value="{{name}}" placeholder="{{placeholder}}" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}"/>
+      {{#if locked}}
+      <i class="fa-solid fa-lock" data-tooltip="{{localize 'TWODSIX_LEDGER.CONFIG_CASH_LOCKED'}}"></i>
+      {{else}}
+      <button type="button" class="icon fa-solid fa-trash-can" data-action="removeAccount" data-key="{{key}}" data-tooltip="{{localize 'TWODSIX_LEDGER.CONFIG_REMOVE'}}" aria-label="{{localize 'TWODSIX_LEDGER.CONFIG_REMOVE'}}"></button>
+      {{/if}}
+    </div>
+    {{/each}}
+    <button type="button" data-action="addAccount" {{#unless canAddAccount}}disabled{{/unless}}><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.CONFIG_ADD_ACCOUNT"}}</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "TWODSIX_LEDGER.CONFIG_CATEGORIES"}}</legend>
+    <p class="hint">{{localize "TWODSIX_LEDGER.CONFIG_CATEGORIES_HINT"}}</p>
+    {{#each categories}}
+    <div class="form-group" data-kind="categories" data-key="{{key}}">
+      <input type="text" value="{{name}}" placeholder="{{placeholder}}" aria-label="{{localize 'TWODSIX_LEDGER.CATEGORY'}}"/>
+      {{#if locked}}
+      <i class="fa-solid fa-lock" data-tooltip="{{localize 'TWODSIX_LEDGER.CONFIG_CATEGORY_LOCKED'}}"></i>
+      {{else}}
+      <button type="button" class="icon fa-solid fa-trash-can" data-action="removeCategory" data-key="{{key}}" data-tooltip="{{localize 'TWODSIX_LEDGER.CONFIG_REMOVE'}}" aria-label="{{localize 'TWODSIX_LEDGER.CONFIG_REMOVE'}}"></button>
+      {{/if}}
+    </div>
+    {{/each}}
+    <button type="button" data-action="addCategory"><i class="fa-solid fa-plus"></i> {{localize "TWODSIX_LEDGER.CONFIG_ADD_CATEGORY"}}</button>
+  </fieldset>
+
+  <footer class="form-footer">
+    <button type="button" data-action="resetConfig"><i class="fa-solid fa-rotate-left"></i> {{localize "TWODSIX_LEDGER.CONFIG_RESET"}}</button>
+    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> {{localize "TWODSIX_LEDGER.CONFIG_SAVE"}}</button>
+  </footer>
+</section>
