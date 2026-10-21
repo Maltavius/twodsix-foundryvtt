@@ -6,7 +6,23 @@
  */
 
 import { LEDGER_ACCOUNTS, formatLedgerNumber, parseLedgerAmount } from "./ledger.js";
-import { MODULE_ID, addTransaction, getStoredBalances, getStoredTransactions, moveMoney, undoLastTransaction } from "./store.js";
+import {
+  MODULE_ID,
+  addRecurringItem,
+  addTransaction,
+  deleteRecurringItem,
+  editRecurringItem,
+  getCurrentGameDate,
+  getRecurringItems,
+  getStoredBalances,
+  getStoredDebt,
+  getStoredTransactions,
+  moveMoney,
+  payAllRecurring,
+  payRecurringItem,
+  undoLastTransaction
+} from "./store.js";
+import { buildRecurringView } from "./recurringView.js";
 import { isDeltaFinanceText } from "./financeText.js";
 import { ROW_LIMIT_STEP, buildFinanceView, getAddButtonState } from "./financeView.js";
 
@@ -51,6 +67,13 @@ export function prepareFinanceContext(sheet, context) {
   context.finance = {
     ...view,
     editable: Boolean(context.editable),
+    recurring: buildRecurringView({
+      items: getRecurringItems(sheet.actor),
+      debt: getStoredDebt(sheet.actor),
+      locale,
+      localize: key => game.i18n.localize(key),
+      gameDate: getCurrentGameDate()
+    }),
     digitalText: formatLedgerNumber(balances.digital, locale),
     draft,
     button: {kind: button.kind, label: game.i18n.localize(button.labelKey)},
@@ -160,6 +183,24 @@ function updateAddButton(root, amountText) {
 }
 
 /**
+ * What a changed field of a recurring item means, as a patch for the item. Returns null if the text is not usable (an
+ * amount that is not a number), in which case the sheet is simply drawn again with the stored value.
+ * @param {HTMLInputElement|HTMLSelectElement} field
+ * @returns {object|null}
+ */
+function readRecurringField(field) {
+  const name = field.dataset.recField;
+  if (field.type === "checkbox") {
+    return {[name]: field.checked};
+  }
+  if (name === "amount") {
+    const amount = parseLedgerAmount(field.value, game.i18n.lang);
+    return Number.isFinite(amount) ? {amount} : null;
+  }
+  return {[name]: field.value};
+}
+
+/**
  * Hook up the form after each render. Safe to call when the Finances tab is not editable or not present.
  * @param {object} sheet
  * @returns {void}
@@ -184,6 +225,20 @@ export function bindFinanceTab(sheet) {
     if (Number.isFinite(typed)) {
       const isChange = isDeltaFinanceText(text);
       await sheet.actor.update({[`flags.${MODULE_ID}.digital`]: isChange ? current + typed : typed});
+    }
+    await sheet.render();
+  });
+
+  // Recurring items: one change handler for the whole list
+  root.querySelector("[data-recurring]")?.addEventListener("change", async event => {
+    const field = event.target.closest("[data-rec-field]");
+    const row = event.target.closest("[data-rec-id]");
+    if (!field || !row) {
+      return;
+    }
+    const patch = readRecurringField(field);
+    if (patch) {
+      await editRecurringItem(sheet.actor, row.dataset.recId, patch);
     }
     await sheet.render();
   });
@@ -340,6 +395,50 @@ export const financeActions = {
   async financeMore() {
     const state = getState(this);
     state.ui.limit = (state.ui.limit ?? ROW_LIMIT_STEP) + ROW_LIMIT_STEP;
+    await this.render();
+  },
+
+  /**
+   * Add an empty item to the list of recurring items.
+   * @this {object} the sheet
+   * @returns {Promise<void>}
+   */
+  async financeRecAdd() {
+    await addRecurringItem(this.actor, {name: "", amount: 0, account: "digital", frequency: "month"});
+    await this.render();
+  },
+
+  /**
+   * Remove an item from the list (this does not touch the history).
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-id
+   * @returns {Promise<void>}
+   */
+  async financeRecDelete(event, target) {
+    await deleteRecurringItem(this.actor, target.dataset.id);
+    await this.render();
+  },
+
+  /**
+   * Pay (or receive) one item.
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target - has data-id
+   * @returns {Promise<void>}
+   */
+  async financeRecPay(event, target) {
+    await payRecurringItem(this.actor, target.dataset.id);
+    await this.render();
+  },
+
+  /**
+   * Pay every active monthly item.
+   * @this {object} the sheet
+   * @returns {Promise<void>}
+   */
+  async financeRecPayAll() {
+    await payAllRecurring(this.actor);
     await this.render();
   },
 

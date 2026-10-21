@@ -22,6 +22,17 @@ import {
   roundUpCr
 } from './ledger.js';
 
+import { financeTextToNumber, parseLocaleNumber } from './financeText.js';
+import {
+  createRecurringItem,
+  normalizeRecurringItems,
+  planPayAll,
+  planPayment,
+  removeRecurringItem,
+  seedRecurringItems,
+  updateRecurringItem
+} from './recurring.js';
+
 export const MODULE_ID = "twodsix-ledger";
 
 /** @typedef {import("../../entities/TwodsixActor").default} TwodsixActor */
@@ -122,11 +133,12 @@ export function getStoredTransactions(actor) {
  * @param {TwodsixActor} actor
  * @param {Record<string, number>} newBalances
  * @param {Array<object>} newTransactions
+ * @param {object} [extra] - other update paths to write in the same update (for example the debt)
  * @returns {Promise<TwodsixActor>}
  */
-async function writeLedger(actor, newBalances, newTransactions) {
+async function writeLedger(actor, newBalances, newTransactions, extra = {}) {
   const oldBalances = getStoredBalances(actor);
-  const update = {[`flags.${MODULE_ID}.transactions`]: newTransactions};
+  const update = {...extra, [`flags.${MODULE_ID}.transactions`]: newTransactions};
   if (newBalances.cash !== oldBalances.cash) {
     update["system.financeValues.cash"] = newBalances.cash;
   }
@@ -205,8 +217,132 @@ export async function undoLastTransaction(actor) {
   if (!removed) {
     return null;
   }
-  await writeLedger(actor, revertTransaction(getStoredBalances(actor), removed), transactions);
+  const extra = {};
+  if (removed.debtChange) {
+    // The entry was a debt payment: put the debt back as well
+    extra["system.financeValues.debt"] = Math.max(getStoredDebt(actor) - removed.debtChange, 0);
+  }
+  await writeLedger(actor, revertTransaction(getStoredBalances(actor), removed), transactions, extra);
   return removed;
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @returns {number} the traveller's current debt, as a number
+ */
+export function getStoredDebt(actor) {
+  return Number(actor.system?._source?.financeValues?.debt) || 0;
+}
+
+/**
+ * The recurring items. A traveller who has never had a list gets one built from the sheet's old fields (Pension, Ship
+ * payments, Living costs); it is only saved when something is changed, so just opening the tab writes nothing.
+ * @param {TwodsixActor} actor
+ * @returns {Array<object>}
+ */
+export function getRecurringItems(actor) {
+  const stored = actor.getFlag(MODULE_ID, "recurring");
+  if (stored !== undefined && stored !== null) {
+    return normalizeRecurringItems(foundry.utils.deepClone(stored));
+  }
+  const finances = actor.system?._source?.finances ?? {};
+  const number = key => financeTextToNumber(finances[key], parseLocaleNumber) || 0;
+  return seedRecurringItems(
+    {pension: number("pension"), payments: number("payments"), livingCosts: number("livingCosts")},
+    key => game.i18n.localize(key)
+  );
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @param {Array<object>} items
+ * @returns {Promise<TwodsixActor>}
+ */
+async function saveRecurringItems(actor, items) {
+  return actor.update({[`flags.${MODULE_ID}.recurring`]: items}, {twodsixLedger: true});
+}
+
+/**
+ * Add a new item to the list.
+ * @param {TwodsixActor} actor
+ * @param {object} [data] - fields of the item; anything missing gets a default
+ * @returns {Promise<object>} the item that was added
+ */
+export async function addRecurringItem(actor, data = {}) {
+  const item = createRecurringItem(data, foundry.utils.randomID());
+  await saveRecurringItems(actor, [...getRecurringItems(actor), item]);
+  return item;
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @param {object} patch - the fields to change
+ * @returns {Promise<void>}
+ */
+export async function editRecurringItem(actor, id, patch) {
+  await saveRecurringItems(actor, updateRecurringItem(getRecurringItems(actor), id, patch));
+}
+
+/**
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @returns {Promise<void>}
+ */
+export async function deleteRecurringItem(actor, id) {
+  await saveRecurringItems(actor, removeRecurringItem(getRecurringItems(actor), id));
+}
+
+/**
+ * Make the ledger entries for some payments in a single update, so that balances, debt and history cannot drift apart.
+ * @param {TwodsixActor} actor
+ * @param {Array<object>} plans - from planPayment / planPayAll
+ * @param {string} [gameDate]
+ * @returns {Promise<Array<object>>} the entries that were added
+ */
+async function postPayments(actor, plans, gameDate) {
+  if (!plans.length) {
+    return [];
+  }
+  const date = gameDate ?? getCurrentGameDate();
+  let balances = getStoredBalances(actor);
+  const entries = plans.map(plan => {
+    const entry = createTransaction({
+      amount: plan.amount, account: plan.account, category: plan.category, description: plan.description,
+      gameDate: date, userId: game.user?.id
+    }, foundry.utils.randomID());
+    if (plan.debtChange) {
+      entry.debtChange = plan.debtChange;
+    }
+    balances = applyTransaction(balances, entry);
+    return entry;
+  });
+  const debtChange = plans.reduce((sum, plan) => sum + plan.debtChange, 0);
+  const extra = debtChange ? {"system.financeValues.debt": Math.max(getStoredDebt(actor) + debtChange, 0)} : {};
+  await writeLedger(actor, balances, [...getStoredTransactions(actor), ...entries], extra);
+  return entries;
+}
+
+/**
+ * Pay (or receive) one item.
+ * @param {TwodsixActor} actor
+ * @param {string} id
+ * @returns {Promise<object|null>} the entry, or null if there was nothing to pay
+ */
+export async function payRecurringItem(actor, id) {
+  const item = getRecurringItems(actor).find(entry => entry.id === id);
+  const plan = item ? planPayment(item, {debt: getStoredDebt(actor)}) : null;
+  const [entry] = plan ? await postPayments(actor, [plan]) : [];
+  return entry ?? null;
+}
+
+/**
+ * Pay every active monthly item.
+ * @param {TwodsixActor} actor
+ * @returns {Promise<Array<object>>} the entries that were added
+ */
+export async function payAllRecurring(actor) {
+  return postPayments(actor, planPayAll(getRecurringItems(actor), {debt: getStoredDebt(actor)}));
 }
 
 /**

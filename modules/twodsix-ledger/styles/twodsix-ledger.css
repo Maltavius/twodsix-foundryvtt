@@ -598,3 +598,155 @@
     display: block;
   }
 }
+
+/* ---- Recurring items ---- */
+
+.finance-ledger .fl-debt-field > .debt {
+  grid-column: 1 / -1;
+}
+
+.finance-ledger .fl-recurring {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px 8px;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-soft);
+}
+
+.finance-ledger .fl-recurring-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.finance-ledger .fl-calendar-note {
+  font-size: 0.85em;
+  color: var(--fl-muted);
+  cursor: help;
+}
+
+.finance-ledger .fl-rec-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.finance-ledger .fl-rec {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.finance-ledger .fl-rec:last-child {
+  border-bottom: 0;
+}
+
+.finance-ledger .fl-rec.is-off .fl-rec-name,
+.finance-ledger .fl-rec.is-off .fl-rec-amount {
+  opacity: 0.55;
+}
+
+.finance-ledger .fl-rec-main,
+.finance-ledger .fl-rec-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+.finance-ledger .fl-rec-main .fl-rec-name {
+  flex: 1 1 8em;
+  min-width: 0;
+}
+
+.finance-ledger .fl-rec-amount {
+  flex: 0 0 6.5em;
+  width: 6.5em;
+  text-align: right;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-ledger .fl-rec-freq,
+.finance-ledger .fl-rec-account,
+.finance-ledger .fl-rec-category {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.finance-ledger .fl-rec-active {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.finance-ledger .fl-rec-debt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+  color: var(--fl-muted);
+  white-space: nowrap;
+}
+
+.finance-ledger .fl-rec-pay,
+.finance-ledger .fl-rec-payall,
+.finance-ledger .fl-rec-add,
+.finance-ledger .fl-rec-delete {
+  min-height: 32px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-rec-pay,
+.finance-ledger .fl-rec-payall {
+  padding: 0 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #8b1a1a;
+  border: 1px solid #5c1111;
+}
+
+.finance-ledger .fl-rec-pay:disabled,
+.finance-ledger .fl-rec-payall:disabled {
+  color: inherit;
+  background: var(--fl-soft);
+  border-color: var(--fl-line);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.finance-ledger .fl-rec-actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.finance-ledger .fl-rec-delete {
+  width: 32px;
+  padding: 0;
+}
+
+.finance-ledger .fl-rec-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.finance-ledger .fl-rec-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 0.9em;
+}
