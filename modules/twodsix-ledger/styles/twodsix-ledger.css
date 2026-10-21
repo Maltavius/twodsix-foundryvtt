@@ -925,3 +925,63 @@
   border-color: #c4561a;
   background: color-mix(in srgb, #c4561a 14%, transparent);
 }
+
+/* ---- Item and loan rows look like the Add transaction form: labelled fields in one wrapping row ---- */
+
+.finance-ledger .fl-rec {
+  padding: 6px 0;
+}
+
+.finance-ledger .fl-rec .fl-form-row {
+  gap: 4px 6px;
+}
+
+.finance-ledger .fl-rec .fl-field {
+  flex: 1 1 90px;
+}
+
+.finance-ledger .fl-rec .fl-field.fl-description {
+  flex: 3 1 140px;
+}
+
+.finance-ledger .fl-rec .fl-field.fl-amount {
+  flex: 1 1 80px;
+}
+
+.finance-ledger .fl-rec .fl-field .fl-rec-amount {
+  flex: none;
+  width: 100%;
+  text-align: right;
+}
+
+.finance-ledger .fl-rec .fl-label {
+  font-size: 0.7em;
+}
+
+.finance-ledger .fl-rec .fl-rec-active {
+  align-self: center;
+  margin-top: 1em;
+}
+
+.finance-ledger .fl-rec .fl-rec-actions {
+  margin-left: 0;
+  align-items: flex-end;
+}
+
+.finance-ledger .fl-rec .fl-rec-pay,
+.finance-ledger .fl-rec .fl-rec-payother,
+.finance-ledger .fl-rec .fl-rec-delete {
+  height: 2.2em;
+  min-height: 0;
+}
+
+/* Wide enough for everything on one line: only the first row shows the field names, like a table header */
+@container (min-width: 520px) {
+  .finance-ledger .fl-rec:not(:first-child) .fl-label {
+    display: none;
+  }
+
+  .finance-ledger .fl-rec:not(:first-child) .fl-rec-active {
+    margin-top: 0;
+  }
+}

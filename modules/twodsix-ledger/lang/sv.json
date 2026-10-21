@@ -41,7 +41,7 @@
     "ERROR_INVALID_AMOUNT": "Ange ett belopp, till exempel 200 eller -200.",
     "ERROR_MOVE_ACCOUNTS": "Välj två olika konton.",
     "ERROR_MOVE_AMOUNT": "Ange ett positivt belopp att flytta.",
-    "FREQUENCY": "Hur ofta",
+    "FREQUENCY": "Intervall",
     "FROM": "Från",
     "GAME_DATE": "Datum i spelet",
     "GROUP_DEBT": "Skuld",

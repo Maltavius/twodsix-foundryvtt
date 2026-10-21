@@ -66,21 +66,21 @@
         {{#if isDebt}}
         {{#each rows}}
         <li class="fl-rec" data-loan-id="{{id}}">
-          <div class="fl-rec-main">
-            <input type="text" class="fl-rec-name" data-loan-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}"/>
-            <label class="fl-rec-labeled"><span class="fl-hint">{{localize "TWODSIX_LEDGER.REMAINING"}}</span>
-              <input type="text" class="fl-rec-amount" data-loan-field="remaining" value="{{remainingText}}" inputmode="text"/></label>
-          </div>
-          <div class="fl-rec-extra">
-            <label class="fl-rec-labeled"><span class="fl-hint">{{localize "TWODSIX_LEDGER.MONTHLY_PAYMENT"}}</span>
-              <input type="text" class="fl-rec-amount" data-loan-field="monthly" value="{{monthlyText}}" inputmode="text" placeholder="0"/></label>
-            <select class="fl-rec-account" data-loan-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
-              {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-            </select>
+          <div class="fl-form-row">
+            <label class="fl-field fl-description"><span class="fl-label">{{localize "TWODSIX_LEDGER.LOAN_NAME"}}</span>
+              <input type="text" class="fl-rec-name" data-loan-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.LOAN_NAME'}}"/></label>
+            <label class="fl-field fl-amount"><span class="fl-label">{{localize "TWODSIX_LEDGER.REMAINING"}}</span>
+              <input type="text" class="fl-rec-amount" data-loan-field="remaining" value="{{remainingText}}" inputmode="text" aria-label="{{localize 'TWODSIX_LEDGER.REMAINING'}}"/></label>
+            <label class="fl-field fl-amount"><span class="fl-label">{{localize "TWODSIX_LEDGER.MONTHLY_PAYMENT"}}</span>
+              <input type="text" class="fl-rec-amount" data-loan-field="monthly" value="{{monthlyText}}" inputmode="text" placeholder="0" aria-label="{{localize 'TWODSIX_LEDGER.MONTHLY_PAYMENT'}}"/></label>
+            <label class="fl-field"><span class="fl-label">{{localize "TWODSIX_LEDGER.ACCOUNT"}}</span>
+              <select class="fl-rec-account" data-loan-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
+                {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select></label>
             <span class="fl-rec-actions">
               <button type="button" class="fl-rec-pay" data-action="financeLoanPay" data-id="{{id}}" {{#unless canPay}}disabled{{/unless}} {{#if payHint}}data-tooltip="{{payHint}}"{{/if}}>{{payLabel}}</button>
               <button type="button" class="fl-rec-payother" data-action="financeLoanPayCustom" data-id="{{id}}" {{#unless canPayCustom}}disabled{{/unless}}>{{localize "TWODSIX_LEDGER.PAY_OTHER"}}</button>
-              <button type="button" class="fl-rec-delete" data-action="financeLoanDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-xmark"></i></button>
+              <button type="button" class="fl-rec-delete" data-action="financeLoanDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-trash-can"></i></button>
             </span>
           </div>
         </li>
@@ -88,21 +88,23 @@
         {{else}}
         {{#each rows}}
         <li class="fl-rec {{#unless active}}is-off{{/unless}}" data-rec-id="{{id}}">
-          <div class="fl-rec-main">
+          <div class="fl-form-row">
             <input type="checkbox" class="fl-rec-active" data-rec-field="active" {{#if active}}checked{{/if}} aria-label="{{localize 'TWODSIX_LEDGER.ACTIVE'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.ACTIVE'}}"/>
-            <input type="text" class="fl-rec-name" data-rec-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}"/>
-            <input type="text" class="fl-rec-amount {{amountClass}}" data-rec-field="amount" value="{{amountText}}" inputmode="text" aria-label="{{localize 'TWODSIX_LEDGER.AMOUNT_COLUMN'}}"/>
-            <select class="fl-rec-freq" data-rec-field="frequency" aria-label="{{localize 'TWODSIX_LEDGER.FREQUENCY'}}">
-              {{#each frequencies}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-            </select>
-          </div>
-          <div class="fl-rec-extra">
-            <select class="fl-rec-account" data-rec-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
-              {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-            </select>
+            <label class="fl-field fl-description"><span class="fl-label">{{localize "TWODSIX_LEDGER.ITEM_NAME"}}</span>
+              <input type="text" class="fl-rec-name" data-rec-field="name" value="{{name}}" placeholder="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}" aria-label="{{localize 'TWODSIX_LEDGER.ITEM_NAME'}}"/></label>
+            <label class="fl-field fl-amount"><span class="fl-label">{{localize "TWODSIX_LEDGER.AMOUNT"}}</span>
+              <input type="text" class="fl-rec-amount {{amountClass}}" data-rec-field="amount" value="{{amountText}}" inputmode="text" aria-label="{{localize 'TWODSIX_LEDGER.AMOUNT_COLUMN'}}"/></label>
+            <label class="fl-field"><span class="fl-label">{{localize "TWODSIX_LEDGER.ACCOUNT"}}</span>
+              <select class="fl-rec-account" data-rec-field="account" aria-label="{{localize 'TWODSIX_LEDGER.ACCOUNT'}}">
+                {{#each accounts}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select></label>
+            <label class="fl-field"><span class="fl-label">{{localize "TWODSIX_LEDGER.FREQUENCY"}}</span>
+              <select class="fl-rec-freq" data-rec-field="frequency" aria-label="{{localize 'TWODSIX_LEDGER.FREQUENCY'}}">
+                {{#each frequencies}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select></label>
             <span class="fl-rec-actions">
               <button type="button" class="fl-rec-pay" data-action="financeRecPay" data-id="{{id}}" {{#unless canPay}}disabled{{/unless}} {{#if payHint}}data-tooltip="{{payHint}}"{{/if}}>{{payLabel}}</button>
-              <button type="button" class="fl-rec-delete" data-action="financeRecDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-xmark"></i></button>
+              <button type="button" class="fl-rec-delete" data-action="financeRecDelete" data-id="{{id}}" aria-label="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}" data-tooltip="{{localize 'TWODSIX_LEDGER.DELETE_ITEM'}}"><i class="fa-solid fa-trash-can"></i></button>
             </span>
           </div>
         </li>

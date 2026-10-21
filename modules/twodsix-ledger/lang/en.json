@@ -41,7 +41,7 @@
     "ERROR_INVALID_AMOUNT": "Enter an amount, for example 200 or -200.",
     "ERROR_MOVE_ACCOUNTS": "Choose two different accounts.",
     "ERROR_MOVE_AMOUNT": "Enter a positive amount to move.",
-    "FREQUENCY": "How often",
+    "FREQUENCY": "Interval",
     "FROM": "From",
     "GAME_DATE": "In-game date",
     "GROUP_DEBT": "Debt",
