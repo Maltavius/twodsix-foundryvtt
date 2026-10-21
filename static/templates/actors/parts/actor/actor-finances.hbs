@@ -146,7 +146,7 @@
             <td class="fl-col-date {{#if isRealDate}}real-date{{/if}}" {{#if isRealDate}}data-tooltip="{{localize 'TWODSIX.Actor.Finances.REAL_DATE_TOOLTIP'}}"{{/if}}>{{dateText}}</td>
             <td class="fl-col-desc"><span class="fl-desc-text">{{description}}</span>{{#if showCategory}}<span class="fl-category fl-cat-{{categoryKey}}">{{categoryLabel}}</span>{{/if}}<span class="fl-category fl-account-inline">{{accountText}}</span></td>
             <td class="fl-col-account"><span class="fl-accounts-cell {{#if isTransfer}}fl-transfer{{/if}}">{{#each accountPills}}{{#if @first}}<span class="fl-pill {{key}}">{{label}}</span>{{else}}<span class="fl-pill-after"><span class="fl-arrow" aria-hidden="true">→</span><span class="fl-pill {{key}}">{{label}}</span></span>{{/if}}{{/each}}</span></td>
-            <td class="fl-col-amount {{amountClass}}">{{amountText}}</td>
+            <td class="fl-col-amount {{amountClass}}">{{#if isTransfer}}<i class="fa-solid fa-right-left fl-transfer-icon" data-tooltip="{{localize 'TWODSIX.Actor.Finances.CATEGORIES.transfer'}}"></i> {{/if}}{{amountText}}</td>
             <td class="fl-col-balance">{{balanceText}}</td>
           </tr>
           {{/each}}

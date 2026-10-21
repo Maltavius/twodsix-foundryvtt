@@ -7,7 +7,7 @@
 .finance-ledger {
   --fl-line: color-mix(in srgb, currentColor 30%, transparent);
   --fl-soft: color-mix(in srgb, currentColor 7%, transparent);
-  --fl-muted: color-mix(in srgb, currentColor 62%, transparent);
+  --fl-muted: color-mix(in srgb, currentColor 74%, transparent);
   /* Mixed with the text colour so green and red stay readable on both light and dark sheets */
   --fl-positive-base: var(--s2d6-crit-success, #2f7822);
   --fl-negative-base: var(--s2d6-crit-fail, #aa0200);
@@ -458,7 +458,13 @@
 }
 
 .finance-ledger td.fl-col-amount.transfer {
-  color: var(--fl-muted);
+  color: inherit;
+}
+
+.finance-ledger .fl-transfer-icon {
+  margin-right: 2px;
+  font-size: 0.85em;
+  opacity: 0.85;
 }
 
 .finance-ledger .fl-category {
@@ -516,7 +522,7 @@
 .finance-ledger .fl-category {
   --cat: currentColor;
   font-weight: bold;
-  color: color-mix(in srgb, var(--cat) 72%, currentColor);
+  color: color-mix(in srgb, var(--cat) 60%, currentColor);
 }
 
 .finance-ledger .fl-cat-living { --cat: #d9730d; }
@@ -525,9 +531,12 @@
 .finance-ledger .fl-cat-equipment { --cat: #2f7fd1; }
 .finance-ledger .fl-cat-ship { --cat: #0f9aa8; }
 .finance-ledger .fl-cat-trade { --cat: #b8872b; }
-.finance-ledger .fl-cat-other,
-.finance-ledger .fl-cat-transfer,
-.finance-ledger .fl-cat-adjustment { --cat: #8a8a85; }
+.finance-ledger .fl-category.fl-cat-other,
+.finance-ledger .fl-category.fl-cat-transfer,
+.finance-ledger .fl-category.fl-cat-adjustment {
+  /* No hue to add: nearly the full text colour, so it stays readable on the darker striped rows */
+  color: color-mix(in srgb, currentColor 82%, transparent);
+}
 
 .finance-ledger .fl-account-inline {
   display: none;
