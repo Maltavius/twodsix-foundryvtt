@@ -102,6 +102,48 @@ function readDraft(sheet, root) {
 }
 
 /**
+ * Empty the amount and description (and optionally reset the category), both in the stored draft and in the form on
+ * screen. The sheet can re-render while an update is still in flight, and a re-render may keep what is typed in the
+ * fields, so the form is cleared directly instead of relying on the next render.
+ * @param {object} sheet
+ * @param {HTMLElement} root
+ * @param {boolean} resetCategory
+ * @returns {void}
+ */
+function clearDraft(sheet, root, resetCategory) {
+  const draft = getState(sheet).draft;
+  draft.amount = "";
+  draft.description = "";
+  if (resetCategory) {
+    draft.category = "other";
+  }
+  for (const name of ["amount", "description", ...(resetCategory ? ["category"] : [])]) {
+    const el = root.querySelector(`[data-draft="${name}"]`);
+    if (el) {
+      el.value = draft[name];
+    }
+  }
+  updateAddButton(root, "");
+}
+
+/**
+ * Make the form on screen show the stored draft (a re-render can leave old text in the fields).
+ * @param {object} sheet
+ * @param {HTMLElement} root
+ * @returns {void}
+ */
+function applyDraft(sheet, root) {
+  const draft = getState(sheet).draft;
+  for (const name of Object.keys(draft)) {
+    const el = root.querySelector(`[data-draft="${name}"]`);
+    if (el && el.value !== draft[name]) {
+      el.value = draft[name];
+    }
+  }
+  updateAddButton(root, draft.amount);
+}
+
+/**
  * Make the add button reflect the amount currently typed: neutral, green for income, red for expense.
  * @param {HTMLElement} root
  * @param {string} amountText
@@ -128,6 +170,7 @@ export function bindFinanceTab(sheet) {
     return;
   }
   const state = getState(sheet);
+  applyDraft(sheet, root);
 
   // Typing in the ledger controls must not submit the whole actor form (and re-render the sheet) on every change.
   root.querySelectorAll(".fl-nosubmit").forEach(el => el.addEventListener("change", event => event.stopPropagation()));
@@ -219,16 +262,10 @@ export const financeActions = {
       return;
     }
     const state = getState(this);
-    await addTransaction(this.actor, {
-      amount,
-      account: draft.account,
-      category: draft.category,
-      description: draft.description.trim()
-    });
-    state.draft.amount = "";
-    state.draft.description = "";
-    state.draft.category = "other";
+    const entry = {amount, account: draft.account, category: draft.category, description: draft.description.trim()};
+    clearDraft(this, root, true);
     state.focus = {role: "amount"};
+    await addTransaction(this.actor, entry);
     await this.render();
   },
 
@@ -254,10 +291,10 @@ export const financeActions = {
       return;
     }
     const state = getState(this);
-    await moveMoney(this.actor, {from: draft.from, to: draft.to, amount, description: draft.description.trim()});
-    state.draft.amount = "";
-    state.draft.description = "";
+    const entry = {from: draft.from, to: draft.to, amount, description: draft.description.trim()};
+    clearDraft(this, root, false);
     state.focus = {role: "amount"};
+    await moveMoney(this.actor, entry);
     await this.render();
   },
 
