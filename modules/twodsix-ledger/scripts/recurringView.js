@@ -44,6 +44,24 @@ function formatSummary(summary, locale, localize) {
 }
 
 /**
+ * The amounts of a group as separate parts, so the sheet can show the number big and "/month" small and grey.
+ * @param {{monthly: {net: number, count: number}, yearly: {net: number, count: number}}} summary
+ * @param {string} locale
+ * @param {(key: string) => string} localize
+ * @returns {Array<{value: string, unit: string, className: string}>} "0" with no unit if there is nothing
+ */
+function summaryParts(summary, locale, localize) {
+  const parts = [];
+  if (summary.monthly.count) {
+    parts.push({value: formatLedgerNumber(summary.monthly.net, locale, true), unit: localize(`${PREFIX}.PER_MONTH`), className: signClass(summary.monthly.net)});
+  }
+  if (summary.yearly.count) {
+    parts.push({value: formatLedgerNumber(summary.yearly.net, locale, true), unit: localize(`${PREFIX}.PER_YEAR`), className: signClass(summary.yearly.net)});
+  }
+  return parts.length ? parts : [{value: "0", unit: "", className: ""}];
+}
+
+/**
  * @param {number} count
  * @param {string} oneKey
  * @param {string} manyKey
@@ -77,19 +95,16 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
       const monthly = loans.reduce((sum, loan) => sum + (loan.remaining > 0 ? Math.min(loan.monthly, loan.remaining) : 0), 0);
       return {
         key, label, isDebt: true, open: open === key,
-        amountText: formatLedgerNumber(owed, locale),
-        amountClass: owed > 0 ? "negative" : "",
+        amounts: [{value: formatLedgerNumber(owed, locale), unit: "Cr", className: owed > 0 ? "negative" : ""}],
         subText: monthly > 0
           ? `${countText(loans.length, "LOAN_ONE", "LOAN_MANY", localize)} · ${formatLedgerNumber(-monthly, locale, true)}${localize(`${PREFIX}.PER_MONTH`)}`
           : countText(loans.length, "LOAN_ONE", "LOAN_MANY", localize)
       };
     }
     const summary = summarizeItems(itemsInGroup(items, key));
-    const net = summary.monthly.net || summary.yearly.net;
     return {
       key, label, isDebt: false, open: open === key,
-      amountText: formatSummary(summary, locale, localize),
-      amountClass: signClass(net),
+      amounts: summaryParts(summary, locale, localize),
       subText: countText(summary.count, "ITEM_ONE", "ITEM_MANY", localize)
     };
   });

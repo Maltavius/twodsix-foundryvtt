@@ -740,18 +740,32 @@
 
 .finance-ledger .fl-group-cards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Two across by default; four in a wide tab and a single column in a very narrow one (see the queries below) */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--fl-gap);
+}
+
+@container (min-width: 560px) {
+  .finance-ledger .fl-group-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 299px) {
+  .finance-ledger .fl-group-cards,
+  .finance-ledger .fl-accounts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .finance-ledger .fl-group-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  min-height: 44px;
+  gap: 4px;
+  min-height: 78px;
   margin: 0;
-  padding: 7px 9px;
+  padding: 8px 12px;
   text-align: left;
   color: inherit;
   background: var(--fl-soft);
@@ -767,24 +781,38 @@
 
 .finance-ledger .fl-group-card.is-open {
   border: 2px solid #c4561a;
-  padding: 6px 8px;
+  padding: 7px 11px;
   background: color-mix(in srgb, #c4561a 12%, transparent);
 }
 
 .finance-ledger .fl-group-label {
-  font-size: 0.85em;
-  font-weight: 600;
-}
-
-.finance-ledger .fl-group-amount {
-  font-size: 1.15em;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.05em;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
+.finance-ledger .fl-group-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.finance-ledger .fl-group-amount {
+  font-size: 1.45em;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-ledger .fl-group-amount .fl-unit {
+  font-size: 0.6em;
+  font-weight: normal;
+  color: var(--fl-muted);
+  opacity: 1;
+}
+
 .finance-ledger .fl-group-sub {
-  font-size: 0.78em;
+  margin-top: auto;
+  font-size: 0.8em;
   color: var(--fl-muted);
 }
 
@@ -873,10 +901,4 @@
 .finance-ledger .fl-bar-button.is-open {
   border-color: #c4561a;
   background: color-mix(in srgb, #c4561a 14%, transparent);
-}
-
-@container (max-width: 400px) {
-  .finance-ledger .fl-group-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

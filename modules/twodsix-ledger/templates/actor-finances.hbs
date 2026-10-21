@@ -42,7 +42,9 @@
       {{#each finance.groups.cards}}
       <button type="button" class="fl-group-card {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
         <span class="fl-group-label">{{label}}</span>
-        <span class="fl-group-amount {{amountClass}}">{{amountText}}{{#if isDebt}} <span class="fl-unit">Cr</span>{{/if}}</span>
+        <span class="fl-group-values">
+          {{#each amounts}}<span class="fl-group-amount {{className}}">{{value}}{{#if unit}} <span class="fl-unit">{{unit}}</span>{{/if}}</span>{{/each}}
+        </span>
         <span class="fl-group-sub">{{subText}} {{#if open}}▴{{else}}▾{{/if}}</span>
       </button>
       {{/each}}

@@ -25,25 +25,28 @@ describe('the cards', () => {
       item({amount: 500, group: 'pension', frequency: 'year'}, 'p'),
       item({amount: 300, group: 'pension'}, 'q')
     ]);
-    expect(card(result, 'living')).toMatchObject({amountText: '-800TWODSIX_LEDGER.PER_MONTH', amountClass: 'negative', subText: '2 TWODSIX_LEDGER.ITEM_MANY'});
-    expect(card(result, 'pension')).toMatchObject({amountText: '+300TWODSIX_LEDGER.PER_MONTH +500TWODSIX_LEDGER.PER_YEAR', amountClass: 'positive'});
+    expect(card(result, 'living')).toMatchObject({amounts: [{value: '-800', unit: 'TWODSIX_LEDGER.PER_MONTH', className: 'negative'}], subText: '2 TWODSIX_LEDGER.ITEM_MANY'});
+    expect(card(result, 'pension').amounts).toEqual([
+      {value: '+300', unit: 'TWODSIX_LEDGER.PER_MONTH', className: 'positive'},
+      {value: '+500', unit: 'TWODSIX_LEDGER.PER_YEAR', className: 'positive'}
+    ]);
   });
 
   test('an empty group shows 0 and no items', () => {
-    expect(card(view(), 'ship')).toMatchObject({amountText: '0', amountClass: '', subText: '0 TWODSIX_LEDGER.ITEM_MANY'});
+    expect(card(view(), 'ship')).toMatchObject({amounts: [{value: '0', unit: '', className: ''}], subText: '0 TWODSIX_LEDGER.ITEM_MANY'});
     expect(card(view([item({}, 'a')]), 'living').subText).toBe('1 TWODSIX_LEDGER.ITEM_ONE');
   });
 
   test('the debt card shows what is owed and, if there are fixed payments, what is paid each month', () => {
     const none = view([], [loan({remaining: 12000}, 'a'), loan({remaining: 13000}, 'b')]);
-    expect(card(none, 'debt')).toMatchObject({amountText: '25,000', amountClass: 'negative', isDebt: true, subText: '2 TWODSIX_LEDGER.LOAN_MANY'});
+    expect(card(none, 'debt')).toMatchObject({amounts: [{value: '25,000', unit: 'Cr', className: 'negative'}], isDebt: true, subText: '2 TWODSIX_LEDGER.LOAN_MANY'});
     const paying = view([], [loan({remaining: 12000, monthly: 500}, 'a'), loan({remaining: 100, monthly: 500}, 'b')]);
     expect(card(paying, 'debt').subText).toBe('2 TWODSIX_LEDGER.LOAN_MANY · -600TWODSIX_LEDGER.PER_MONTH');
-    expect(card(view([], []), 'debt')).toMatchObject({amountText: '0', amountClass: ''});
+    expect(card(view([], []), 'debt').amounts).toEqual([{value: '0', unit: 'Cr', className: ''}]);
   });
 
   test('numbers follow the locale', () => {
-    expect(card(buildGroupsView({items: [item({amount: -1500}, 'a')], localize, locale: 'sv'}), 'living').amountText).toBe('−1 500TWODSIX_LEDGER.PER_MONTH');
+    expect(card(buildGroupsView({items: [item({amount: -1500}, 'a')], localize, locale: 'sv'}), 'living').amounts[0].value).toBe('\u22121\u00a0500');
   });
 });
 
