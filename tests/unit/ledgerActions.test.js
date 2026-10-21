@@ -255,6 +255,22 @@ describe('getCurrentGameDate', () => {
       expect(getCurrentGameDate()).not.toBe('1104-04-01');
     });
 
+    test('uses the text in display.date (what Simple Calendar Reborn returns), without calling the formatter', () => {
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
+      const formatDateTime = vi.fn(() => { throw new Error('should not be needed'); });
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, formatDateTime, timestampToDate: () => ({year: 1105, month: 0, day: 0, display: {date: 'Holiday 01, 1105', time: '00:02:07', month: '-1'}})}};
+      expect(getCurrentGameDate()).toBe('Holiday 01, 1105');
+      expect(formatDateTime).not.toHaveBeenCalled();
+    });
+
+    test('a formatter that throws does not lose the date: numbers are used', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, formatDateTime: () => { throw new TypeError('bad arguments'); }, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
+      expect(getCurrentGameDate()).toBe('1105-01-01');
+      expect(warn).not.toHaveBeenCalled();
+    });
+
     test('the date is written the way the calendar shows it when it can format it (object result)', () => {
       globalThis.game.modules = modulesMap('foundryvtt-simple-calendar-reborn');
       globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0}), formatDateTime: () => ({date: 'Holiday 01, 1105', time: '00:02:07'})}};
@@ -273,10 +289,15 @@ describe('getCurrentGameDate', () => {
       expect(getCurrentGameDate()).toBe('1105-05-10');
     });
 
-    test('the global alone is not enough: the module must be active', () => {
+    test('works whatever the module is called, as long as its API is there', () => {
       globalThis.game.modules = new Map();
+      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0, display: {date: 'Holiday 01, 1105'}})}};
+      expect(getCurrentGameDate()).toBe('Holiday 01, 1105');
+    });
+
+    test('an API without the functions we need is ignored', () => {
+      globalThis.SimpleCalendar = {api: {}};
       globalThis.game.time = coreCalendar;
-      globalThis.SimpleCalendar = {api: {timestamp: () => 1, timestampToDate: () => ({year: 1105, month: 0, day: 0})}};
       expect(getCurrentGameDate()).toBe('');
     });
   });

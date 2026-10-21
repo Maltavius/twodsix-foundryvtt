@@ -30,36 +30,37 @@ function formatDateParts(year, month, day) {
 }
 
 /**
- * The Simple Calendar API, if a Simple Calendar module is active. The original module and its forks (for example
- * "Simple Calendar Reborn") have different module ids but all provide the global `SimpleCalendar.api`.
+ * The Simple Calendar API, if a Simple Calendar module is loaded. The original module and its forks (for example
+ * "Simple Calendar Reborn") have different module ids but all provide the global `SimpleCalendar.api`, which only
+ * exists while the module is running.
  * @returns {object|null}
  */
 function getSimpleCalendarApi() {
   const api = globalThis.SimpleCalendar?.api;
-  if (!api) {
-    return null;
-  }
-  // game.modules is a Map of id to module
-  const modules = typeof game.modules?.[Symbol.iterator] === "function" ? Array.from(game.modules) : [];
-  const isActive = Boolean(game.modules?.get?.("foundryvtt-simple-calendar")?.active)
-    || modules.some(([id, module]) => module?.active && /simple-calendar/i.test(id));
-  return isActive ? api : null;
+  return typeof api?.timestamp === "function" && typeof api?.timestampToDate === "function" ? api : null;
 }
 
 /**
  * The date as Simple Calendar itself shows it (for example "Holiday 01, 1105"), so the ledger matches the calendar
- * window. Returns "" if the calendar cannot format it.
+ * window. Returns "" if no such text can be found.
  * @param {object} api - the Simple Calendar API
  * @param {object} date - date parts from the API
  * @returns {string}
  */
 function formatWithSimpleCalendar(api, date) {
-  if (typeof api.formatDateTime !== "function") {
+  // The date parts already carry the text the calendar shows
+  const displayed = date?.display?.date;
+  if (typeof displayed === "string" && displayed.trim()) {
+    return displayed.trim();
+  }
+  // Older versions: ask the calendar to format it. A failure here must not lose the date, so it is contained.
+  try {
+    const formatted = typeof api.formatDateTime === "function" ? api.formatDateTime(date) : undefined;
+    const text = typeof formatted === "string" ? formatted : formatted?.date;
+    return typeof text === "string" ? text.trim() : "";
+  } catch {
     return "";
   }
-  const formatted = api.formatDateTime(date);
-  const text = typeof formatted === "string" ? formatted : formatted?.date;
-  return typeof text === "string" ? text.trim() : "";
 }
 
 /**
