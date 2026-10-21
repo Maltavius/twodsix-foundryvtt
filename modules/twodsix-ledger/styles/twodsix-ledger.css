@@ -985,3 +985,24 @@
     margin-top: 0;
   }
 }
+
+/* The fields wrap among themselves; Pay and the trash can always stay on the right */
+.finance-ledger .fl-rec-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.finance-ledger .fl-rec-fields {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+.finance-ledger .fl-rec-row > .fl-rec-actions {
+  flex: 0 0 auto;
+  align-self: flex-end;
+}
