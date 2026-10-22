@@ -509,7 +509,8 @@
   color: #1b4a78;
 }
 
-/* Category labels: one colour per category, mixed with the text colour so they stay readable on both light and dark */
+/* Category labels: one colour per category, mixed with the text colour so they stay readable on both light and dark.
+   A category added in the settings has no colour of its own and gets the plain look (--cat: currentColor). */
 .finance-ledger .fl-category {
   --cat: currentColor;
   font-weight: bold;
@@ -1013,11 +1014,6 @@
   border-color: #a56cc0;
   background: #ecd9f5;
   color: #55266f;
-}
-
-/* A category added in the settings has no colour of its own: it gets the plain look */
-.finance-ledger .fl-category {
-  --cat: currentColor;
 }
 
 .finance-ledger .fl-submit:disabled {
