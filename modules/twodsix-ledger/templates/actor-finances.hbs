@@ -64,7 +64,7 @@
         {{#each cards}}
         {{#if compact}}
         {{!-- Nothing in this group: one line, "Pension 0 ✎", so two of them fit in the place of one full card --}}
-        <button type="button" class="fl-group-card is-empty {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
+        <button type="button" class="fl-group-card is-empty {{#if open}}is-open{{/if}}" data-tooltip="{{label}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
           <span class="fl-group-label">{{label}}</span>
           <span class="fl-group-amount">0</span>
           <i class="fa-solid fa-pen fl-group-edit"></i>
