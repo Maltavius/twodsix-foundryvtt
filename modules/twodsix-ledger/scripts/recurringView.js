@@ -75,13 +75,17 @@ function countText(count, oneKey, manyKey, localize) {
 /**
  * Empty groups take half the height of the others, so two of them share one place in the row. The first empty group
  * keeps its own place and takes the next empty one with it; a group that has something in it always has a place alone.
- * When every group is empty they all stay side by side, as four small cards.
+ * When every group is empty they all stay side by side, as four small cards. `compact` marks the cards that are drawn
+ * small: only an empty group that has a full place to itself looks like a normal card.
  * @param {Array<{empty: boolean}>} cards - in the order they are shown
  * @returns {Array<{cards: Array<object>, shared: boolean}>} the places, in order
  */
 export function groupIntoSlots(cards) {
   if (cards.length && cards.every(card => card.empty)) {
     // Nothing in any group: one row of small cards, none on top of another
+    for (const card of cards) {
+      card.compact = true;
+    }
     return cards.map(card => ({cards: [card], shared: false}));
   }
   const slots = [];
@@ -99,6 +103,10 @@ export function groupIntoSlots(cards) {
   }
   for (const slot of slots) {
     slot.shared = slot.cards.length > 1;
+    // An empty group alone in its place has the room of a full card, so it looks like one (with "0 items")
+    for (const card of slot.cards) {
+      card.compact = card.empty && slot.shared;
+    }
   }
   return slots;
 }

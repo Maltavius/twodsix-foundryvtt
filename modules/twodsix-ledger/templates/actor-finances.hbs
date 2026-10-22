@@ -62,7 +62,7 @@
       {{#each finance.groups.slots}}
       <div class="fl-group-slot">
         {{#each cards}}
-        {{#if empty}}
+        {{#if compact}}
         {{!-- Nothing in this group: one line, "Pension 0 ✎", so two of them fit in the place of one full card --}}
         <button type="button" class="fl-group-card is-empty {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
           <span class="fl-group-label">{{label}}</span>

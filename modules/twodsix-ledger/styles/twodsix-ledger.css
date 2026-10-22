@@ -748,9 +748,10 @@
   font-size: 1.15em;
 }
 
+/* The same size as the pen under Cash and Digital (0.8em hint text, 0.85em icon) */
 .finance-ledger .fl-group-edit {
   margin-left: auto;
-  font-size: 0.8em;
+  font-size: 0.68em;
   color: var(--fl-muted);
 }
 
