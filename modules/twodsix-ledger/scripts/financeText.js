@@ -9,9 +9,18 @@
 
 /**
  * Fields that exist both as text and as a number under the same name.
- * (The ship payments field is left out: its text field is `payments` but its number is `payment`.)
+ * Ship payments is added by syncedFields when the sheet has the number under that name: twodsix 7.7.0 called the number
+ * `payment` (text `payments`), 7.7.1 renamed it to `payments`.
  */
 const SYNCED_FINANCE_FIELDS = ["cash", "digital", "pension", "debt", "livingCosts"];
+
+/**
+ * @param {object} [financeValues] - the numbers of the sheet
+ * @returns {string[]} the fields whose text and number belong together on this version of the system
+ */
+function syncedFields(financeValues) {
+  return financeValues && "payments" in financeValues ? [...SYNCED_FINANCE_FIELDS, "payments"] : SYNCED_FINANCE_FIELDS;
+}
 
 /**
  * Splits a finance text into a number part and a units part.
@@ -94,7 +103,7 @@ export function financeTextToNumber(text, parseNumber) {
  */
 export function getFinanceValueFixes(finances, financeValues, parseNumber) {
   const fixes = {};
-  for (const field of SYNCED_FINANCE_FIELDS) {
+  for (const field of syncedFields(financeValues)) {
     const current = financeValues?.[field];
     if (Number.isFinite(current) && current !== 0) {
       continue;

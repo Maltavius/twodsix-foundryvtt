@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+
+- Works with twodsix 7.7.1. The system renamed the number behind Ship payments from `payment` to `payments`; the
+  ledger now fills it in for characters from chargen or imports, like the other fields, and still works with 7.7.0.
+
 ## 0.4.2
 
 - New setting **Number format** (per player): choose space, comma, dot or apostrophe as the thousands separator, or follow

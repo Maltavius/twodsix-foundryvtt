@@ -159,8 +159,13 @@ describe('getFinanceValueFixes', () => {
     expect(getFinanceValueFixes({cash: '1,5 MCr', debt: '2 000'}, {}, simpleParse)).toEqual({cash: 1.5e6, debt: 2000});
   });
 
-  test('the ship payments field is left alone (its text and number names differ)', () => {
+  test('twodsix 7.7.0: the ship payments field is left alone (its number is called payment, not payments)', () => {
     expect(getFinanceValueFixes({payments: '800'}, {payment: 0}, simpleParse)).toEqual({});
+  });
+
+  test('twodsix 7.7.1: ship payments is filled in like the other fields, and a number that is set stays', () => {
+    expect(getFinanceValueFixes({payments: '800'}, {payments: 0}, simpleParse)).toEqual({payments: 800});
+    expect(getFinanceValueFixes({payments: '800'}, {payments: 500}, simpleParse)).toEqual({});
   });
 
   test('digital is included', () => {
