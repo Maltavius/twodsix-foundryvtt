@@ -347,7 +347,8 @@ export function bindFinanceTab(sheet) {
   // Typing in the ledger controls must not submit the whole actor form (and re-render the sheet) on every change.
   root.querySelectorAll(".fl-nosubmit").forEach(el => el.addEventListener("change", event => event.stopPropagation()));
 
-  // Every account except Cash is kept by this module: apply what is typed ("5000", or a change like "+200" or "-50") as
+  // Every account field works the same way (Cash writes the system's own number, and the system keeps its text field in
+  // step): apply what is typed ("5000", or a change like "+200" or "-50") as
   // a normal update, and the preUpdateActor hook records the difference as an adjustment.
   root.querySelectorAll("[data-account-input]").forEach(input => input.addEventListener("change", async event => {
     const account = event.target.dataset.accountInput;

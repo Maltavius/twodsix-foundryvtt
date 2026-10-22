@@ -37,7 +37,7 @@ jobs:
 
       - name: Build the zip (module.json must be at the root of it)
         run: |
-          zip -r ../../twodsix-ledger.zip module.json README.md scripts styles templates lang
+          zip -r ../../twodsix-ledger.zip module.json README.md CHANGELOG.md scripts styles templates lang
 
       - name: Create the release
         env:
@@ -45,13 +45,16 @@ jobs:
         run: |
           manifest=$(jq -r .manifest module.json)
           readme="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/modules/twodsix-ledger/README.md"
+          changelog="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/modules/twodsix-ledger/CHANGELOG.md"
           notes="Twodsix Ledger module ${GITHUB_REF_NAME#ledger-v}.
 
           Install it in Foundry with this manifest URL:
 
           ${manifest}
 
-          More about the module: ${readme}"
+          More about the module: ${readme}
+
+          What changed: ${changelog}"
           gh release create "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json \
             --title "Twodsix Ledger ${GITHUB_REF_NAME#ledger-v}" \
             --notes "${notes}"
