@@ -35,6 +35,14 @@ jobs:
             *) echo "The download address in module.json (${download}) does not point at the release ${GITHUB_REF_NAME}." >&2; exit 1 ;;
           esac
 
+      - name: Check that CHANGELOG.md has an entry for this version
+        run: |
+          version=$(jq -r .version module.json)
+          if ! grep -q "^## ${version}\$" CHANGELOG.md; then
+            echo "CHANGELOG.md has no entry '## ${version}'. Write what changed before releasing." >&2
+            exit 1
+          fi
+
       - name: Build the zip (module.json must be at the root of it)
         run: |
           zip -r ../../twodsix-ledger.zip module.json README.md CHANGELOG.md scripts styles templates lang
@@ -45,16 +53,23 @@ jobs:
         run: |
           manifest=$(jq -r .manifest module.json)
           readme="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/modules/twodsix-ledger/README.md"
-          changelog="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/modules/twodsix-ledger/CHANGELOG.md"
-          notes="Twodsix Ledger module ${GITHUB_REF_NAME#ledger-v}.
-
-          Install it in Foundry with this manifest URL:
-
-          ${manifest}
-
-          More about the module: ${readme}
-
-          What changed: ${changelog}"
+          version="${GITHUB_REF_NAME#ledger-v}"
+          # The part of CHANGELOG.md that belongs to this version: from its "## <version>" heading to the next "## "
+          changes=$(awk -v heading="## ${version}" '$0 == heading {found = 1; next} found && /^## / {exit} found {print}' CHANGELOG.md)
+          {
+            echo "Twodsix Ledger module ${version}."
+            echo
+            echo "Install it in Foundry with this manifest URL:"
+            echo
+            echo "${manifest}"
+            echo
+            echo "More about the module: ${readme}"
+            echo
+            echo "## What changed"
+            echo
+            echo "### ${version}"
+            echo "${changes}"
+          } > ../../release-notes.md
           gh release create "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json \
             --title "Twodsix Ledger ${GITHUB_REF_NAME#ledger-v}" \
-            --notes "${notes}"
+            --notes-file ../../release-notes.md
