@@ -728,12 +728,33 @@
 /* An empty group is one line: name, 0 and a pen that says it can be clicked */
 .finance-ledger .fl-group-card.is-empty {
   flex-direction: row;
-  flex-wrap: wrap;
   align-items: baseline;
   align-content: center;
   gap: 0 8px;
   min-height: 0;
   padding: 6px 10px;
+}
+
+/* Name, 0 and pen stay on one line; a long name breaks onto a second line instead of pushing the pen down */
+.finance-ledger .fl-group-card.is-empty {
+  flex-wrap: nowrap;
+}
+
+.finance-ledger .fl-group-card.is-empty .fl-group-label {
+  min-width: 0;
+}
+
+.finance-ledger .fl-group-card.is-empty .fl-group-amount {
+  white-space: nowrap;
+}
+
+/* Four small cards side by side: a little smaller text */
+@container (min-width: 520px) {
+  .finance-ledger .fl-group-cards.all-empty .fl-group-card.is-empty {
+    gap: 0 6px;
+    padding-inline: 8px;
+    font-size: 0.85em;
+  }
 }
 
 .finance-ledger .fl-group-card.is-empty.is-open {

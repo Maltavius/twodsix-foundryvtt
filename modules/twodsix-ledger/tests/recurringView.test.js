@@ -149,6 +149,8 @@ describe('places for the cards (empty groups are small and share a place)', () =
     const compact = Object.fromEntries(slots.flatMap(slot => slot.cards).map(entry => [entry.key, entry.compact]));
     expect(compact).toEqual({pension: true, ship: true, living: false, debt: false});
     expect(view().cards.every(entry => entry.compact)).toBe(true);
+    expect(view().allEmpty).toBe(true);
+    expect(view([item({group: 'living'}, 'a')]).allEmpty).toBe(false);
   });
 
   test('a group is empty when it has no items or loans', () => {

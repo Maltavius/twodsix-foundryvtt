@@ -58,7 +58,7 @@
   {{!-- The four groups that match the old fields: Pension, Living costs, Ship payments and Debt. Click a card to
         open its list. --}}
   <section class="fl-groups fl-nosubmit" data-recurring>
-    <div class="fl-group-cards" style="--fl-slots: {{finance.groups.slots.length}}">
+    <div class="fl-group-cards {{#if finance.groups.allEmpty}}all-empty{{/if}}" style="--fl-slots: {{finance.groups.slots.length}}">
       {{#each finance.groups.slots}}
       <div class="fl-group-slot">
         {{#each cards}}

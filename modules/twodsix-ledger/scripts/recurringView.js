@@ -205,5 +205,5 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
     };
   }
 
-  return {gameDate, cards, slots, panel, hasPanel: panel !== null};
+  return {gameDate, cards, slots, allEmpty: cards.every(card => card.empty), panel, hasPanel: panel !== null};
 }
