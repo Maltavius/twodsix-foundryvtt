@@ -7,6 +7,8 @@
   English interface with, for example, Swedish number formatting.
 - Cash is now shown with the same number format as the other accounts (it used to show the text exactly as stored, often
   without a thousands separator). It is edited like the other accounts: `5000` sets it, `+200` and `-50` change it.
+- Pension, Living costs, Ship payments and Debt take half the height while they are empty: one line, "Pension 0 ✎",
+  and two empty ones share the place of one full card. When all four are empty they sit side by side as four small cards.
 - The category colours in the history are back (a leftover style rule had switched them off).
 
 ## 0.4.1

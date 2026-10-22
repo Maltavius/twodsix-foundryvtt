@@ -58,15 +58,28 @@
   {{!-- The four groups that match the old fields: Pension, Living costs, Ship payments and Debt. Click a card to
         open its list. --}}
   <section class="fl-groups fl-nosubmit" data-recurring>
-    <div class="fl-group-cards">
-      {{#each finance.groups.cards}}
-      <button type="button" class="fl-group-card {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
-        <span class="fl-group-label">{{label}}</span>
-        <span class="fl-group-values">
-          {{#each amounts}}<span class="fl-group-value"><span class="fl-group-amount {{className}}">{{value}}</span>{{#if unit}}<span class="fl-group-unit">{{unit}}</span>{{/if}}</span>{{/each}}
-        </span>
-        <span class="fl-group-sub">{{subText}} {{#if open}}▴{{else}}▾{{/if}}</span>
-      </button>
+    <div class="fl-group-cards" style="--fl-slots: {{finance.groups.slots.length}}">
+      {{#each finance.groups.slots}}
+      <div class="fl-group-slot">
+        {{#each cards}}
+        {{#if empty}}
+        {{!-- Nothing in this group: one line, "Pension 0 ✎", so two of them fit in the place of one full card --}}
+        <button type="button" class="fl-group-card is-empty {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
+          <span class="fl-group-label">{{label}}</span>
+          <span class="fl-group-amount">0</span>
+          <i class="fa-solid fa-pen fl-group-edit"></i>
+        </button>
+        {{else}}
+        <button type="button" class="fl-group-card {{#if open}}is-open{{/if}}" data-group="{{key}}" data-action="financeToggleGroup" aria-expanded="{{#if open}}true{{else}}false{{/if}}">
+          <span class="fl-group-label">{{label}}</span>
+          <span class="fl-group-values">
+            {{#each amounts}}<span class="fl-group-value"><span class="fl-group-amount {{className}}">{{value}}</span>{{#if unit}}<span class="fl-group-unit">{{unit}}</span>{{/if}}</span>{{/each}}
+          </span>
+          <span class="fl-group-sub">{{subText}} {{#if open}}▴{{else}}▾{{/if}}</span>
+        </button>
+        {{/if}}
+        {{/each}}
+      </div>
       {{/each}}
     </div>
 

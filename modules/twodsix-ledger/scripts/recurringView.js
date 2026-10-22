@@ -73,6 +73,37 @@ function countText(count, oneKey, manyKey, localize) {
 }
 
 /**
+ * Empty groups take half the height of the others, so two of them share one place in the row. The first empty group
+ * keeps its own place and takes the next empty one with it; a group that has something in it always has a place alone.
+ * When every group is empty they all stay side by side, as four small cards.
+ * @param {Array<{empty: boolean}>} cards - in the order they are shown
+ * @returns {Array<{cards: Array<object>, shared: boolean}>} the places, in order
+ */
+export function groupIntoSlots(cards) {
+  if (cards.length && cards.every(card => card.empty)) {
+    // Nothing in any group: one row of small cards, none on top of another
+    return cards.map(card => ({cards: [card], shared: false}));
+  }
+  const slots = [];
+  const waiting = [];
+  for (const card of cards) {
+    if (!card.empty) {
+      slots.push({cards: [card], shared: false});
+    } else if (waiting.length) {
+      waiting.pop().cards.push(card);
+    } else {
+      const slot = {cards: [card], shared: false};
+      slots.push(slot);
+      waiting.push(slot);
+    }
+  }
+  for (const slot of slots) {
+    slot.shared = slot.cards.length > 1;
+  }
+  return slots;
+}
+
+/**
  * @param {object} args
  * @param {Array<object>} args.items - recurring items
  * @param {Array<object>} args.loans
@@ -97,7 +128,7 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
       const owed = totalOwed(loans);
       const monthly = loans.reduce((sum, loan) => sum + (loan.remaining > 0 ? Math.min(loan.monthly, loan.remaining) : 0), 0);
       return {
-        key, label, isDebt: true, open: open === key,
+        key, label, isDebt: true, open: open === key, empty: loans.length === 0,
         amounts: [{value: formatLedgerNumber(owed, locale), unit: "Cr", className: owed > 0 ? "negative" : ""}],
         subText: monthly > 0
           ? `${countText(loans.length, "LOAN_ONE", "LOAN_MANY", localize)} · ${formatLedgerNumber(-monthly, locale, true)}${localize(`${PREFIX}.PER_MONTH`)}`
@@ -106,11 +137,13 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
     }
     const summary = summarizeItems(itemsInGroup(items, key));
     return {
-      key, label, isDebt: false, open: open === key,
+      key, label, isDebt: false, open: open === key, empty: summary.count === 0,
       amounts: summaryParts(summary, locale, localize),
       subText: countText(summary.count, "ITEM_ONE", "ITEM_MANY", localize)
     };
   });
+
+  const slots = groupIntoSlots(cards);
 
   let panel = null;
   if (open === DEBT_GROUP) {
@@ -164,5 +197,5 @@ export function buildGroupsView({items = [], loans = [], locale = "en", localize
     };
   }
 
-  return {gameDate, cards, panel, hasPanel: panel !== null};
+  return {gameDate, cards, slots, panel, hasPanel: panel !== null};
 }

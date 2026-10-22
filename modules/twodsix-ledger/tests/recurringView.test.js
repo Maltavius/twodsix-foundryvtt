@@ -123,3 +123,30 @@ describe('when the account is too poor', () => {
   });
 });
 
+
+describe('places for the cards (empty groups are small and share a place)', () => {
+  const keys = slots => slots.map(slot => slot.cards.map(entry => entry.key));
+
+  test('with something in every group each card has its own place', () => {
+    const items = ['pension', 'living', 'ship'].map(group => item({group}, group));
+    expect(keys(view(items, [loan({}, 'l')]).slots)).toEqual([['pension'], ['living'], ['ship'], ['debt']]);
+  });
+
+  test('two empty groups share a place, the first one keeping its position', () => {
+    const {slots} = view([item({group: 'living'}, 'a')]);
+    expect(keys(slots)).toEqual([['pension', 'ship'], ['living'], ['debt']]);
+    expect(slots.map(slot => slot.shared)).toEqual([true, false, false]);
+  });
+
+  test('when every group is empty they stay side by side', () => {
+    const {slots} = view();
+    expect(keys(slots)).toEqual([['pension'], ['living'], ['ship'], ['debt']]);
+    expect(slots.every(slot => !slot.shared)).toBe(true);
+  });
+
+  test('a group is empty when it has no items or loans', () => {
+    expect(view().cards.every(entry => entry.empty)).toBe(true);
+    expect(card(view([item({group: 'ship'}, 'a')]), 'ship').empty).toBe(false);
+    expect(card(view([], [loan({}, 'l')]), 'debt').empty).toBe(false);
+  });
+});

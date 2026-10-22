@@ -691,8 +691,20 @@
 .finance-ledger .fl-group-cards {
   /* Four across for as long as they fit (the unit is hidden first when it gets tight), then two, then one */
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--fl-slots, 4), minmax(0, 1fr));
   gap: var(--fl-gap);
+}
+
+/* A place in the row of cards: one full card, or two empty ones on top of each other */
+.finance-ledger .fl-group-slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fl-gap);
+  min-width: 0;
+}
+
+.finance-ledger .fl-group-slot > .fl-group-card {
+  flex: 1 1 auto;
 }
 
 .finance-ledger .fl-group-card {
@@ -711,6 +723,35 @@
   border-radius: 6px;
   cursor: pointer;
   line-height: 1.2;
+}
+
+/* An empty group is one line: name, 0 and a pen that says it can be clicked */
+.finance-ledger .fl-group-card.is-empty {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: center;
+  gap: 0 8px;
+  min-height: 0;
+  padding: 6px 10px;
+}
+
+.finance-ledger .fl-group-card.is-empty.is-open {
+  padding: 5px 9px;
+}
+
+.finance-ledger .fl-group-card.is-empty .fl-group-label {
+  flex: 0 1 auto;
+}
+
+.finance-ledger .fl-group-card.is-empty .fl-group-amount {
+  font-size: 1.15em;
+}
+
+.finance-ledger .fl-group-edit {
+  margin-left: auto;
+  font-size: 0.8em;
+  color: var(--fl-muted);
 }
 
 .finance-ledger .fl-group-card:hover {
