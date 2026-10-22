@@ -121,6 +121,15 @@
     "CONFIG_SAVE": "Save",
     "CONFIG_IN_USE": "{account} is still used by {actor} (a balance, a history entry, an item or a loan) and cannot be removed.",
     "CONFIG_CATEGORY_NAME": "A category you add needs a name.",
-    "CONFIG_ACCOUNT_NAME": "An account you add needs a name."
+    "CONFIG_ACCOUNT_NAME": "An account you add needs a name.",
+    "NUMBER_FORMAT_NAME": "Number format",
+    "NUMBER_FORMAT_HINT": "How amounts are written and read in the ledger, only for you. By default it follows the language of the interface, so you can use English with, for example, Swedish number formatting.",
+    "NUMBER_FORMATS": {
+      "auto": "Follow the interface language",
+      "space": "1 234 567,5 (space, Swedish)",
+      "comma": "1,234,567.5 (comma)",
+      "dot": "1.234.567,5 (dot, German)",
+      "apostrophe": "1’234’567.5 (apostrophe, Swiss)"
+    }
   }
 }

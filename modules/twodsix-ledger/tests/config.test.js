@@ -4,11 +4,15 @@ import {
   LEDGER_ACCOUNTS,
   LEDGER_CATEGORIES,
   MAX_LEDGER_ACCOUNTS,
+  NUMBER_FORMATS,
   accountLabel,
   accountTone,
   categoryLabel,
   configureLedger,
   createTransaction,
+  formatLedgerNumber,
+  numberLocale,
+  parseLedgerAmount,
   secondaryAccount
 } from '../scripts/ledger.js';
 import { buildFinanceView } from '../scripts/financeView.js';
@@ -106,5 +110,28 @@ describe('with other accounts', () => {
     const rows = buildGroupsView({items: [item], loans: [], localize, openGroup: 'living', balances: {cash: 0, bank: 100}}).panel.rows;
     expect(rows[0].accounts.map(option => option.label)).toEqual(['TWODSIX_LEDGER.CASH', 'Bank']);
     expect(rows[0].canPay).toBe(false);
+  });
+});
+
+describe('number format choice', () => {
+  test('auto and unknown choices follow the interface language, the others fix the locale', () => {
+    expect(numberLocale('auto', 'en')).toBe('en');
+    expect(numberLocale(undefined, 'sv')).toBe('sv');
+    expect(numberLocale('nonsense', 'de')).toBe('de');
+    expect(numberLocale('space', 'en')).toBe('sv-SE');
+  });
+
+  test('English interface with Swedish number formatting writes and reads 1 234 567,5', () => {
+    const locale = numberLocale('space', 'en');
+    expect(formatLedgerNumber(1234567, locale).replace(/\s/g, ' ')).toBe('1 234 567');
+    expect(parseLedgerAmount('1 234,5', locale)).toBe(1235);
+    expect(parseLedgerAmount('1,5k', locale)).toBe(1500);
+  });
+
+  test('every choice is read back by the parser, including the typographic apostrophe', () => {
+    for (const key of Object.keys(NUMBER_FORMATS)) {
+      const locale = numberLocale(key, 'en');
+      expect(parseLedgerAmount(formatLedgerNumber(1234567, locale), locale)).toBe(1234567);
+    }
   });
 });

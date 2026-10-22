@@ -25,6 +25,9 @@ https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger
 The GM sets up the accounts and categories under Module Settings. Cash is always the first account, there can be up to four
 accounts, and the standard categories can be renamed but not removed.
 
+Each player can choose how numbers are written under Number format (space, comma, dot or apostrophe as thousands separator).
+By default it follows the interface language, so you can use English with, for example, Swedish number formatting.
+
 ## Data
 
 Everything is stored on the character. Disable the module and the data is kept; enable it again and the ledger is back.

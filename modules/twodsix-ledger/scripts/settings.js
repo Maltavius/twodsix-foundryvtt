@@ -11,6 +11,7 @@ import {
   BUILTIN_CATEGORIES,
   LEDGER_ACCOUNTS,
   MAX_LEDGER_ACCOUNTS,
+  NUMBER_FORMATS,
   accountLabel,
   configureLedger
 } from "./ledger.js";
@@ -210,6 +211,16 @@ export function registerSettings() {
       applyConfig();
       refreshSheets();
     }
+  });
+  game.settings.register(MODULE_ID, "numberFormat", {
+    name: `${PREFIX}.NUMBER_FORMAT_NAME`,
+    hint: `${PREFIX}.NUMBER_FORMAT_HINT`,
+    scope: "client",
+    config: true,
+    type: String,
+    default: "auto",
+    choices: Object.fromEntries(Object.keys(NUMBER_FORMATS).map(key => [key, `${PREFIX}.NUMBER_FORMATS.${key}`])),
+    onChange: refreshSheets
   });
   game.settings.registerMenu(MODULE_ID, "configure", {
     name: `${PREFIX}.CONFIG_NAME`,

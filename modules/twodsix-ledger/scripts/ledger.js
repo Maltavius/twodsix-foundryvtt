@@ -284,6 +284,27 @@ export function buildLedgerRows(transactions, currentBalances, options = {}) {
 }
 
 /**
+ * The ways numbers can be written, chosen by each player in the module settings. Each one stands for a locale that
+ * writes numbers that way ("auto" follows the language of the interface).
+ */
+export const NUMBER_FORMATS = {
+  auto: null,
+  space: "sv-SE",
+  comma: "en-US",
+  dot: "de-DE",
+  apostrophe: "de-CH"
+};
+
+/**
+ * @param {string} [choice] - a key of NUMBER_FORMATS
+ * @param {string} [interfaceLang] - the language of the interface, used for "auto" and for an unknown choice
+ * @returns {string} the locale numbers are written and read in
+ */
+export function numberLocale(choice, interfaceLang = "en") {
+  return NUMBER_FORMATS[choice] ?? interfaceLang;
+}
+
+/**
  * Parse an amount typed by a player.
  * Accepts a leading + or - (also the typographic minus), spaces and non-breaking spaces as thousand separators,
  * the locale's decimal separator (a dot is accepted as well), and an optional k/M/G suffix, optionally followed by "Cr".
@@ -298,6 +319,7 @@ export function parseLedgerAmount(text, locale = "en") {
   }
   const cleaned = text
     .replace(/[\u2212\u2013\u2014]/g, "-")
+    .replace(/\u2019/g, "'")
     .replace(/[\s\u00a0\u202f]/g, "");
   const match = /^(?<sign>[+-]?)(?<num>[0-9.,']+)(?<units>[kKMG]?)(?:Cr|cr)?$/.exec(cleaned);
   if (!match) {

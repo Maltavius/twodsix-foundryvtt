@@ -5,7 +5,7 @@
  * The functions in `financeActions` are ApplicationV2 actions: they run with `this` set to the sheet.
  */
 
-import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds, parseLedgerAmount, secondaryAccount } from "./ledger.js";
+import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds, numberLocale, parseLedgerAmount, secondaryAccount } from "./ledger.js";
 import {
   MODULE_ID,
   addLoan,
@@ -134,7 +134,7 @@ function normalizeAccountDraft(draft) {
 export function prepareFinanceContext(sheet, context) {
   const state = getState(sheet);
   const system = sheet.actor.system;
-  const locale = game.i18n.lang;
+  const locale = getLocale();
   const draft = state.draft;
   const balances = getStoredBalances(sheet.actor);
   normalizeAccountDraft(draft);
@@ -271,7 +271,7 @@ function updateAddButton(root, amountText) {
   if (!button) {
     return;
   }
-  const state = getAddButtonState(amountText, game.i18n.lang);
+  const state = getAddButtonState(amountText, getLocale());
   button.dataset.kind = state.kind;
   button.querySelector(".fl-button-label").textContent = game.i18n.localize(state.labelKey);
 }
@@ -292,7 +292,7 @@ function readFieldPatch(field, name, group) {
     if (text === "" && name === "monthly") {
       return {monthly: 0};
     }
-    const amount = parseLedgerAmount(text, game.i18n.lang);
+    const amount = parseLedgerAmount(text, getLocale());
     if (!Number.isFinite(amount)) {
       return null;
     }
@@ -353,7 +353,7 @@ export function bindFinanceTab(sheet) {
     const account = event.target.dataset.accountInput;
     const text = event.target.value.trim();
     const current = getStoredBalances(sheet.actor)[account] ?? 0;
-    const typed = parseLedgerAmount(text, game.i18n.lang);
+    const typed = parseLedgerAmount(text, getLocale());
     if (LEDGER_ACCOUNTS.includes(account) && Number.isFinite(typed)) {
       const isChange = isDeltaFinanceText(text);
       await sheet.actor.update({[balancePath(account)]: isChange ? current + typed : typed});
@@ -501,10 +501,16 @@ async function askAmount(title) {
 }
 
 /**
- * @returns {string} the language of the user interface, which decides how numbers are written
+ * @returns {string} the locale that decides how numbers are written and read: the player's own choice in the module settings, or the language of the interface
  */
 function getLocale() {
-  return game.i18n.lang;
+  let choice;
+  try {
+    choice = game.settings.get(MODULE_ID, "numberFormat");
+  } catch {
+    choice = "auto";
+  }
+  return numberLocale(choice, game.i18n.lang);
 }
 
 export const financeActions = {

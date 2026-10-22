@@ -121,6 +121,15 @@
     "CONFIG_SAVE": "Spara",
     "CONFIG_IN_USE": "{account} används fortfarande av {actor} (ett saldo, en historikpost, en post eller ett lån) och kan inte tas bort.",
     "CONFIG_CATEGORY_NAME": "En kategori du lägger till måste ha ett namn.",
-    "CONFIG_ACCOUNT_NAME": "Ett konto du lägger till måste ha ett namn."
+    "CONFIG_ACCOUNT_NAME": "Ett konto du lägger till måste ha ett namn.",
+    "NUMBER_FORMAT_NAME": "Talformat",
+    "NUMBER_FORMAT_HINT": "Hur belopp skrivs och läses i huvudboken, bara för dig. Som standard följer det gränssnittets språk, så du kan ha engelska med till exempel svensk talformatering.",
+    "NUMBER_FORMATS": {
+      "auto": "Följ gränssnittets språk",
+      "space": "1 234 567,5 (mellanslag, svenskt)",
+      "comma": "1,234,567.5 (komma)",
+      "dot": "1.234.567,5 (punkt, tyskt)",
+      "apostrophe": "1’234’567.5 (apostrof, schweiziskt)"
+    }
   }
 }
