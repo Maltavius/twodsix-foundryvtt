@@ -731,6 +731,7 @@
   align-items: baseline;
   align-content: center;
   gap: 0 8px;
+  height: auto; /* Foundry gives buttons a fixed height, which would cut off a name that breaks onto a second line */
   min-height: 0;
   padding: 6px 10px;
 }
@@ -748,12 +749,17 @@
   white-space: nowrap;
 }
 
-/* Four small cards side by side: a little smaller text */
-@container (min-width: 520px) {
-  .finance-ledger .fl-group-cards.all-empty .fl-group-card.is-empty {
-    gap: 0 6px;
-    padding-inline: 8px;
-    font-size: 0.85em;
+/* Four small cards side by side need room for the longest name in any language ("Skeppsbetalningar"): below that they go
+   two by two, which is still lower than one full row of cards */
+@container (max-width: 679px) {
+  .finance-ledger .fl-group-cards.all-empty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 259px) {
+  .finance-ledger .fl-group-cards.all-empty {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
