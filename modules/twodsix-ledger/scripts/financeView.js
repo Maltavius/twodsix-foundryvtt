@@ -32,17 +32,19 @@ export const ROW_LIMIT_STEP = 50;
  * Pick the label of the button for the add form from the text currently typed in the amount box.
  * @param {string} amountText
  * @param {string} [locale]
+ * @param {boolean} [withItem] - an item that was dropped on the form will be added to the inventory as well
  * @returns {{kind: "neutral"|"income"|"expense", labelKey: string}}
  */
-export function getAddButtonState(amountText, locale = "en") {
+export function getAddButtonState(amountText, locale = "en", withItem = false) {
   const value = parseLedgerAmount(String(amountText ?? ""), locale);
+  const suffix = withItem ? "_ITEM" : "";
   if (Number.isFinite(value) && value > 0) {
-    return {kind: "income", labelKey: "TWODSIX_LEDGER.ADD_INCOME"};
+    return {kind: "income", labelKey: `TWODSIX_LEDGER.ADD_INCOME${suffix}`};
   }
   if (Number.isFinite(value) && value < 0) {
-    return {kind: "expense", labelKey: "TWODSIX_LEDGER.ADD_EXPENSE"};
+    return {kind: "expense", labelKey: `TWODSIX_LEDGER.ADD_EXPENSE${suffix}`};
   }
-  return {kind: "neutral", labelKey: "TWODSIX_LEDGER.ADD"};
+  return {kind: "neutral", labelKey: withItem ? "TWODSIX_LEDGER.ADD_WITH_ITEM" : "TWODSIX_LEDGER.ADD"};
 }
 
 /**

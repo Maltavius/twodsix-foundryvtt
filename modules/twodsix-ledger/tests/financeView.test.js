@@ -11,6 +11,18 @@ const build = (overrides = {}) => buildFinanceView({
   transactions: [], balances: {cash: 0, digital: 0}, locale: 'en', localize, ...overrides
 });
 
+describe('getAddButtonState with a dropped item', () => {
+  test('the label says that the item is added too', () => {
+    expect(getAddButtonState('-100', 'en', true)).toEqual({kind: 'expense', labelKey: 'TWODSIX_LEDGER.ADD_EXPENSE_ITEM'});
+    expect(getAddButtonState('+100', 'en', true)).toEqual({kind: 'income', labelKey: 'TWODSIX_LEDGER.ADD_INCOME_ITEM'});
+    expect(getAddButtonState('', 'en', true)).toEqual({kind: 'neutral', labelKey: 'TWODSIX_LEDGER.ADD_WITH_ITEM'});
+  });
+
+  test('without an item nothing changes', () => {
+    expect(getAddButtonState('-100', 'en').labelKey).toBe('TWODSIX_LEDGER.ADD_EXPENSE');
+  });
+});
+
 describe('getAddButtonState', () => {
   test.each([
     ['', 'neutral', 'ADD'],

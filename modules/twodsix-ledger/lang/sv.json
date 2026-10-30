@@ -131,6 +131,10 @@
       "dot": "1.234.567,5 (punkt, tyskt)",
       "apostrophe": "1’234’567.5 (apostrof, schweiziskt)"
     },
-    "DROP_NO_PRICE": "{name} har inget pris, så bara namnet fylldes i."
+    "DROP_NO_PRICE": "{name} har inget pris, så bara namnet fylldes i.",
+    "ADD_EXPENSE_ITEM": "Lägg till utgift & föremål",
+    "ADD_INCOME_ITEM": "Lägg till inkomst & föremål",
+    "ADD_WITH_ITEM": "Lägg till transaktion & föremål",
+    "ADD_ITEM_HINT": "Lägger även till {name} i inventoryt. Töm beskrivningen för att lämna föremålet utanför."
   }
 }

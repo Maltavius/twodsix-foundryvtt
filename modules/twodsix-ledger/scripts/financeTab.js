@@ -93,6 +93,8 @@ async function fillFromItem(sheet, item) {
   if (category) {
     state.draft.category = category;
   }
+  // An item that is not on this character yet is added to the inventory together with the transaction
+  state.droppedItem = item.parent?.id === sheet.actor.id ? null : {uuid: item.uuid, name: item.name};
   state.ui.formOpen = true;
   state.ui.mode = "add";
   saveUiPrefs(sheet);
@@ -175,7 +177,7 @@ export function prepareFinanceContext(sheet, context) {
     locale,
     localize: key => game.i18n.localize(key)
   });
-  const button = getAddButtonState(draft.amount, locale);
+  const button = getAddButtonState(draft.amount, locale, Boolean(state.droppedItem));
   context.finance = {
     ...view,
     editable: Boolean(context.editable),
@@ -194,6 +196,7 @@ export function prepareFinanceContext(sheet, context) {
     moveFormOpen: state.ui.formOpen && state.ui.mode === "move",
     draft,
     button: {kind: button.kind, label: game.i18n.localize(button.labelKey)},
+    droppedItemHint: state.droppedItem ? game.i18n.format(`${PREFIX}.ADD_ITEM_HINT`, {name: state.droppedItem.name}) : "",
     // Options with the selected one flagged, for the <select> elements
     addAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.account})),
     fromAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.from})),
@@ -297,7 +300,7 @@ function updateAddButton(root, amountText) {
   if (!button) {
     return;
   }
-  const state = getAddButtonState(amountText, getLocale());
+  const state = getAddButtonState(amountText, getLocale(), button.dataset.item === "1");
   button.dataset.kind = state.kind;
   button.querySelector(".fl-button-label").textContent = game.i18n.localize(state.labelKey);
 }
@@ -420,6 +423,16 @@ export function bindFinanceTab(sheet) {
       readDraft(sheet, root);
       if (el.dataset.draft === "amount") {
         updateAddButton(root, el.value);
+      }
+      if (el.dataset.draft === "description" && !el.value.trim() && state.droppedItem) {
+        // Emptying the description lets go of the dropped item
+        state.droppedItem = null;
+        const button = root.querySelector('[data-action="financeAdd"]');
+        if (button) {
+          delete button.dataset.item;
+          button.removeAttribute("data-tooltip");
+          updateAddButton(root, getState(sheet).draft.amount);
+        }
       }
       setError(root, "");
     });
@@ -596,9 +609,17 @@ export const financeActions = {
     }
     const state = getState(this);
     const entry = {amount, account: draft.account, category: draft.category, description: draft.description.trim()};
+    const droppedItem = state.droppedItem;
+    state.droppedItem = null;
     clearDraft(this, root, true);
     state.focus = {role: "amount"};
     await addTransaction(this.actor, entry);
+    if (droppedItem) {
+      const item = await fromUuid(droppedItem.uuid);
+      if (item) {
+        await this.actor.handleDroppedItem(item);
+      }
+    }
     await this.render();
   },
 

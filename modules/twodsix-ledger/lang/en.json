@@ -131,6 +131,10 @@
       "dot": "1.234.567,5 (dot, German)",
       "apostrophe": "1’234’567.5 (apostrophe, Swiss)"
     },
-    "DROP_NO_PRICE": "{name} has no price, so only the name was filled in."
+    "DROP_NO_PRICE": "{name} has no price, so only the name was filled in.",
+    "ADD_EXPENSE_ITEM": "Add Expense & Item",
+    "ADD_INCOME_ITEM": "Add Income & Item",
+    "ADD_WITH_ITEM": "Add Transaction & Item",
+    "ADD_ITEM_HINT": "Adds {name} to the inventory as well. Empty the description to leave the item out."
   }
 }

@@ -223,7 +223,7 @@
       {{#if finance.isMoveMode}}
       <button type="button" class="fl-submit" data-kind="neutral" data-action="financeMove" {{#unless finance.moveReady}}disabled{{/unless}}><span class="fl-button-label">{{localize "TWODSIX_LEDGER.MOVE_BUTTON"}}</span></button>
       {{else}}
-      <button type="button" class="fl-submit" data-kind="{{finance.button.kind}}" data-action="financeAdd"><span class="fl-button-label">{{finance.button.label}}</span></button>
+      <button type="button" class="fl-submit" data-kind="{{finance.button.kind}}" data-action="financeAdd"{{#if finance.droppedItemHint}} data-item="1" data-tooltip="{{finance.droppedItemHint}}"{{/if}}><span class="fl-button-label">{{finance.button.label}}</span></button>
       {{/if}}
     </div>
     <p class="fl-hint">{{#if finance.isMoveMode}}{{localize "TWODSIX_LEDGER.MOVE_HINT"}}{{else}}{{localize "TWODSIX_LEDGER.AMOUNT_HINT"}}{{/if}}</p>
