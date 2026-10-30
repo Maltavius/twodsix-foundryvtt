@@ -130,6 +130,7 @@
       "comma": "1,234,567.5 (comma)",
       "dot": "1.234.567,5 (dot, German)",
       "apostrophe": "1’234’567.5 (apostrophe, Swiss)"
-    }
+    },
+    "DROP_NO_PRICE": "{name} has no price, so only the name was filled in."
   }
 }

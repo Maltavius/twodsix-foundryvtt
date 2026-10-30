@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Drag an item (from the inventory, the sidebar or a compendium) onto the Transaction history bar or the form: Add
+  transaction opens with the item's name, its price as a negative amount and the category Equipment. Nothing is added
+  until you press Add, so you can change the amount, account or text first. An item without a price only fills in the
+  name.
+
 ## 0.4.3
 
 - Works with twodsix 7.7.1. The system renamed the number behind Ship payments from `payment` to `payments`; the

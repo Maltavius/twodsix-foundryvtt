@@ -378,6 +378,24 @@ export function formatLedgerNumber(value, locale = "en", showSign = false) {
 }
 
 /**
+ * What an item that is dropped on Add transaction turns into: its name, and what it costs as a negative amount (money
+ * leaving the account), with the category Equipment when the ledger has it.
+ * @param {{name?: string, price?: number}} item
+ * @param {string} [locale] - how the amount is written
+ * @returns {{description: string, amount: string, category: string|null, hasPrice: boolean}} amount is "" without a price
+ */
+export function draftFromItem(item, locale = "en") {
+  const price = Number(item?.price);
+  const hasPrice = Number.isFinite(price) && price > 0;
+  return {
+    description: String(item?.name ?? "").trim(),
+    amount: hasPrice ? formatLedgerNumber(-price, locale) : "",
+    category: LEDGER_CATEGORIES.includes("equipment") ? "equipment" : null,
+    hasPrice
+  };
+}
+
+/**
  * Create a normalized transaction object.
  * @param {object} data
  * @param {number} data.amount - signed for normal entries, positive for transfers

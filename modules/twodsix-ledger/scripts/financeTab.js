@@ -5,7 +5,7 @@
  * The functions in `financeActions` are ApplicationV2 actions: they run with `this` set to the sheet.
  */
 
-import { LEDGER_ACCOUNTS, accountLabel, formatLedgerNumber, hasFunds, numberLocale, parseLedgerAmount, secondaryAccount } from "./ledger.js";
+import { LEDGER_ACCOUNTS, accountLabel, draftFromItem, formatLedgerNumber, hasFunds, numberLocale, parseLedgerAmount, secondaryAccount } from "./ledger.js";
 import {
   MODULE_ID,
   addLoan,
@@ -74,6 +74,32 @@ function loadUiPrefs(actor) {
   } catch {
     return {};
   }
+}
+
+/**
+ * Open Add transaction and fill it in from an item that was dropped on it.
+ * @param {object} sheet
+ * @param {Item|null} item
+ * @returns {Promise<void>}
+ */
+async function fillFromItem(sheet, item) {
+  if (!item) {
+    return;
+  }
+  const {description, amount, category, hasPrice} = draftFromItem({name: item.name, price: item.system?.price}, getLocale());
+  const state = getState(sheet);
+  state.draft.description = description;
+  state.draft.amount = amount;
+  if (category) {
+    state.draft.category = category;
+  }
+  state.ui.formOpen = true;
+  state.ui.mode = "add";
+  saveUiPrefs(sheet);
+  if (!hasPrice) {
+    ui.notifications.warn(game.i18n.format(`${PREFIX}.DROP_NO_PRICE`, {name: item.name}));
+  }
+  await sheet.render();
 }
 
 /**
@@ -399,6 +425,37 @@ export function bindFinanceTab(sheet) {
     });
     el.addEventListener("change", () => readDraft(sheet, root));
   });
+
+  // An item dragged onto the bar or the form fills in Add transaction with its name and price (nothing is added until
+  // Add is pressed). Anything else that is dragged there goes on to the sheet as usual.
+  if (root.querySelector('[data-action="financeToggleForm"]')) {
+    for (const zone of root.querySelectorAll(".fl-history-bar, .fl-form")) {
+      zone.addEventListener("dragover", event => {
+        event.preventDefault();
+        zone.classList.add("is-drop");
+      });
+      zone.addEventListener("dragleave", event => {
+        if (!zone.contains(event.relatedTarget)) {
+          zone.classList.remove("is-drop");
+        }
+      });
+      zone.addEventListener("drop", async event => {
+        zone.classList.remove("is-drop");
+        let data = null;
+        try {
+          data = JSON.parse(event.dataTransfer?.getData("text/plain"));
+        } catch {
+          // Not something Foundry dragged: leave it to the sheet
+        }
+        if (data?.type !== "Item" || !data.uuid) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        await fillFromItem(sheet, await fromUuid(data.uuid));
+      });
+    }
+  }
 
   // Move money: From and To are never the same account. With two accounts, choosing one switches the other to the
   // remaining account. With more, the other one is emptied and Move money stays locked until both have been chosen.

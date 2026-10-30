@@ -5,6 +5,7 @@ import {
   buildLedgerRows,
   computeRunningBalances,
   createTransaction,
+  draftFromItem,
   formatLedgerNumber,
   getTotalFunds,
   getTransactionEffects,
@@ -208,5 +209,29 @@ describe('formatting and creation', () => {
   test('buildAdjustmentEntries ignores missing or non-numeric values', () => {
     expect(buildAdjustmentEntries({cash: 1, digital: 2}, {cash: NaN}, () => 'x')).toEqual([]);
     expect(buildAdjustmentEntries({cash: 1, digital: 2}, {}, () => 'x')).toEqual([]);
+  });
+});
+
+describe('draftFromItem', () => {
+  test('the name, the price as a negative amount and the category Equipment', () => {
+    expect(draftFromItem({name: ' Laser pistol ', price: 1500}, 'en')).toEqual({
+      description: 'Laser pistol', amount: '-1,500', category: 'equipment', hasPrice: true
+    });
+  });
+
+  test('the amount is written the way the player has chosen, and reads back as the same number', () => {
+    const {amount} = draftFromItem({name: 'Rifle', price: 12500}, 'sv-SE');
+    expect(amount.replace(/\s/g, ' ').replace('\u2212', '-')).toBe('-12 500');
+    expect(parseLedgerAmount(amount, 'sv-SE')).toBe(-12500);
+  });
+
+  test('without a price only the name is filled in', () => {
+    for (const price of [0, -5, undefined, NaN, 'abc']) {
+      expect(draftFromItem({name: 'Rope', price}, 'en')).toMatchObject({description: 'Rope', amount: '', hasPrice: false});
+    }
+  });
+
+  test('a decimal price is kept, and a missing name gives an empty description', () => {
+    expect(draftFromItem({price: 2.5}, 'en')).toMatchObject({description: '', amount: '-2.5'});
   });
 });

@@ -1158,3 +1158,10 @@
   align-items: baseline;
   gap: 0 12px;
 }
+
+/* An item is being dragged over the place where it can be dropped to fill in Add transaction */
+.finance-ledger .fl-history-bar.is-drop,
+.finance-ledger .fl-form.is-drop {
+  outline: 2px dashed #c4561a;
+  outline-offset: -2px;
+}

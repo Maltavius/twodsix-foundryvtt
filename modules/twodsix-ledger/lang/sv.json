@@ -130,6 +130,7 @@
       "comma": "1,234,567.5 (komma)",
       "dot": "1.234.567,5 (punkt, tyskt)",
       "apostrophe": "1’234’567.5 (apostrof, schweiziskt)"
-    }
+    },
+    "DROP_NO_PRICE": "{name} har inget pris, så bara namnet fylldes i."
   }
 }
