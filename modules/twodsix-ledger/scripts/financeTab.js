@@ -439,10 +439,10 @@ export function bindFinanceTab(sheet) {
     el.addEventListener("change", () => readDraft(sheet, root));
   });
 
-  // An item dragged onto the bar or the form fills in Add transaction with its name and price (nothing is added until
-  // Add is pressed). Anything else that is dragged there goes on to the sheet as usual.
+  // An item dragged onto the Finances tab fills in Add transaction with its name and price (nothing is added until Add
+  // is pressed). Anything else that is dragged there goes on to the sheet as usual.
   if (root.querySelector('[data-action="financeToggleForm"]')) {
-    for (const zone of root.querySelectorAll(".fl-history-bar, .fl-form")) {
+    for (const zone of [root]) {
       zone.addEventListener("dragover", event => {
         event.preventDefault();
         zone.classList.add("is-drop");

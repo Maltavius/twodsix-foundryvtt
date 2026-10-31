@@ -1159,9 +1159,8 @@
   gap: 0 12px;
 }
 
-/* An item is being dragged over the place where it can be dropped to fill in Add transaction */
-.finance-ledger .fl-history-bar.is-drop,
-.finance-ledger .fl-form.is-drop {
+/* Something is being dragged over the Finances tab, where an item can be dropped to fill in Add transaction */
+.finance-ledger.is-drop {
   outline: 2px dashed #c4561a;
   outline-offset: -2px;
 }
