@@ -220,6 +220,7 @@
         <span class="fl-label">{{localize "TWODSIX_LEDGER.DESCRIPTION"}}</span>
         <input type="text" autocomplete="off" data-draft="description" data-submit-on-enter value="{{finance.draft.description}}"/>
       </label>
+      <button type="button" class="fl-clear" data-action="financeClear" data-tooltip="{{localize 'TWODSIX_LEDGER.CLEAR_FORM'}}" aria-label="{{localize 'TWODSIX_LEDGER.CLEAR_FORM'}}" {{#if finance.draftEmpty}}hidden{{/if}}><i class="fa-solid fa-trash-can"></i></button>
       {{#if finance.isMoveMode}}
       <button type="button" class="fl-submit" data-kind="neutral" data-action="financeMove" {{#unless finance.moveReady}}disabled{{/unless}}><span class="fl-button-label">{{localize "TWODSIX_LEDGER.MOVE_BUTTON"}}</span></button>
       {{else}}

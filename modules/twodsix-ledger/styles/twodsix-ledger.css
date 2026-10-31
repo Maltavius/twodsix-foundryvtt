@@ -1164,3 +1164,16 @@
   outline: 2px dashed #c4561a;
   outline-offset: -2px;
 }
+
+/* Empties the form; it is only there while there is something to empty */
+.finance-ledger .fl-clear {
+  flex: 0 0 auto;
+  height: 2.2em;
+  margin: 0;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.finance-ledger .fl-clear[hidden] {
+  display: none;
+}

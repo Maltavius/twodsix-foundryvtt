@@ -135,6 +135,7 @@
     "ADD_EXPENSE_ITEM": "Lägg till utgift & föremål",
     "ADD_INCOME_ITEM": "Lägg till inkomst & föremål",
     "ADD_WITH_ITEM": "Lägg till transaktion & föremål",
-    "ADD_ITEM_HINT": "Lägger även till {name} i inventoryt. Töm beskrivningen för att lämna föremålet utanför."
+    "ADD_ITEM_HINT": "Lägger även till {name} i inventoryt. Töm beskrivningen för att lämna föremålet utanför.",
+    "CLEAR_FORM": "Töm formuläret"
   }
 }

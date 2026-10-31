@@ -135,6 +135,7 @@
     "ADD_EXPENSE_ITEM": "Add Expense & Item",
     "ADD_INCOME_ITEM": "Add Income & Item",
     "ADD_WITH_ITEM": "Add Transaction & Item",
-    "ADD_ITEM_HINT": "Adds {name} to the inventory as well. Empty the description to leave the item out."
+    "ADD_ITEM_HINT": "Adds {name} to the inventory as well. Empty the description to leave the item out.",
+    "CLEAR_FORM": "Empty the form"
   }
 }

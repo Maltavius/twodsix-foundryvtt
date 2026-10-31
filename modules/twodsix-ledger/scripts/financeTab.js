@@ -77,6 +77,23 @@ function loadUiPrefs(actor) {
 }
 
 /**
+ * Can the dropped item be bought, that is, is it a kind of item that has a price (weapons, armour, equipment and so on,
+ * not skills, traits or careers)? Decided from the kind of item, which the data model of the system tells. If the item
+ * cannot be looked up on the spot, the answer is no, so the sheet handles the drop as it always does.
+ * @param {string} uuid
+ * @returns {boolean}
+ */
+function isPurchasable(uuid) {
+  let type;
+  try {
+    type = fromUuidSync(uuid, {strict: false})?.type;
+  } catch {
+    type = undefined;
+  }
+  return Boolean(type && CONFIG.Item?.dataModels?.[type]?.schema?.fields?.price);
+}
+
+/**
  * Open Add transaction and fill it in from an item that was dropped on it.
  * @param {object} sheet
  * @param {Item|null} item
@@ -196,6 +213,7 @@ export function prepareFinanceContext(sheet, context) {
     moveFormOpen: state.ui.formOpen && state.ui.mode === "move",
     draft,
     button: {kind: button.kind, label: game.i18n.localize(button.labelKey)},
+    draftEmpty: !(draft.amount || draft.description || state.droppedItem),
     droppedItemHint: state.droppedItem ? game.i18n.format(`${PREFIX}.ADD_ITEM_HINT`, {name: state.droppedItem.name}) : "",
     // Options with the selected one flagged, for the <select> elements
     addAccounts: view.accounts.map(account => ({...account, selected: account.key === draft.account})),
@@ -248,6 +266,32 @@ function readDraft(sheet, root) {
 }
 
 /**
+ * Make the buttons of the form match the draft: the label of Add (and whether an item comes with it), and the trash
+ * button, which is only there while there is something to empty.
+ * @param {object} sheet
+ * @param {HTMLElement} root
+ * @returns {void}
+ */
+function refreshFormButtons(sheet, root) {
+  const {draft, droppedItem} = getState(sheet);
+  const add = root.querySelector('[data-action="financeAdd"]');
+  if (add) {
+    if (droppedItem) {
+      add.dataset.item = "1";
+      add.dataset.tooltip = game.i18n.format(`${PREFIX}.ADD_ITEM_HINT`, {name: droppedItem.name});
+    } else {
+      delete add.dataset.item;
+      add.removeAttribute("data-tooltip");
+    }
+    updateAddButton(root, draft.amount);
+  }
+  const clear = root.querySelector('[data-action="financeClear"]');
+  if (clear) {
+    clear.hidden = !(draft.amount || draft.description || droppedItem);
+  }
+}
+
+/**
  * Empty the amount and description (and optionally reset the category), both in the stored draft and in the form on
  * screen. The sheet can re-render while an update is still in flight, and a re-render may keep what is typed in the
  * fields, so the form is cleared directly instead of relying on the next render.
@@ -269,7 +313,7 @@ function clearDraft(sheet, root, resetCategory) {
       el.value = draft[name];
     }
   }
-  updateAddButton(root, "");
+  refreshFormButtons(sheet, root);
 }
 
 /**
@@ -286,7 +330,7 @@ function applyDraft(sheet, root) {
       el.value = draft[name];
     }
   }
-  updateAddButton(root, draft.amount);
+  refreshFormButtons(sheet, root);
 }
 
 /**
@@ -421,26 +465,18 @@ export function bindFinanceTab(sheet) {
   root.querySelectorAll("[data-draft]").forEach(el => {
     el.addEventListener("input", () => {
       readDraft(sheet, root);
-      if (el.dataset.draft === "amount") {
-        updateAddButton(root, el.value);
-      }
-      if (el.dataset.draft === "description" && !el.value.trim() && state.droppedItem) {
-        // Emptying the description lets go of the dropped item
+      if (el.dataset.draft === "description" && !el.value.trim()) {
+        // Emptying the description lets go of a dropped item
         state.droppedItem = null;
-        const button = root.querySelector('[data-action="financeAdd"]');
-        if (button) {
-          delete button.dataset.item;
-          button.removeAttribute("data-tooltip");
-          updateAddButton(root, getState(sheet).draft.amount);
-        }
       }
+      refreshFormButtons(sheet, root);
       setError(root, "");
     });
     el.addEventListener("change", () => readDraft(sheet, root));
   });
 
   // An item dragged onto the Finances tab fills in Add transaction with its name and price (nothing is added until Add
-  // is pressed). Anything else that is dragged there goes on to the sheet as usual.
+  // is pressed). Anything else that is dragged there, skills for example, goes on to the sheet as usual.
   if (root.querySelector('[data-action="financeToggleForm"]')) {
     for (const zone of [root]) {
       zone.addEventListener("dragover", event => {
@@ -460,7 +496,7 @@ export function bindFinanceTab(sheet) {
         } catch {
           // Not something Foundry dragged: leave it to the sheet
         }
-        if (data?.type !== "Item" || !data.uuid) {
+        if (data?.type !== "Item" || !data.uuid || !isPurchasable(data.uuid)) {
           return;
         }
         event.preventDefault();
@@ -621,6 +657,22 @@ export const financeActions = {
       }
     }
     await this.render();
+  },
+
+  /**
+   * Empty the form (amount, description, category and a dropped item).
+   * @this {object} the sheet
+   * @returns {void}
+   */
+  financeClear() {
+    const root = getRoot(this);
+    if (!root) {
+      return;
+    }
+    getState(this).droppedItem = null;
+    clearDraft(this, root, true);
+    setError(root, "");
+    root.querySelector('[data-draft="amount"]')?.focus();
   },
 
   /**
