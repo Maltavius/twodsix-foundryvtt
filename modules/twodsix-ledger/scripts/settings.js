@@ -7,7 +7,7 @@
  */
 
 import { MODULE_ID } from "./store.js";
-import { COMPACT_SETTING, INVENTORY_SETTING, PORTRAIT_SETTING } from "./inventoryTab.js";
+import { COMPACT_SETTING, INVENTORY_SETTING, PORTRAIT_SETTING, forgetOpenedWeapons } from "./inventoryTab.js";
 import {
   BUILTIN_CATEGORIES,
   LEDGER_ACCOUNTS,
@@ -248,7 +248,11 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: false,
-    onChange: refreshSheets
+    // Weapons opened or closed by hand follow the new setting too
+    onChange: () => {
+      forgetOpenedWeapons();
+      refreshSheets();
+    }
   });
   game.settings.registerMenu(MODULE_ID, "configure", {
     name: `${PREFIX}.CONFIG_NAME`,

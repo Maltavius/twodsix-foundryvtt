@@ -21,8 +21,9 @@
     weapons with an ammo value, and the icons no longer wrap to a second line in any of the lists.
   - Auto 3 is shown after the name of weapons with automatic fire, and the buttons say Burst and Full Auto without the
     rate of fire. At the right end of the name column a pill with the magazine count (green, yellow or red, or Unloaded)
-    and an arrow shows or hides the fire modes and the magazine row with its bar; only the name itself attacks. With the new setting "Compact
-    weapon rows" they start hidden.
+    and an arrow shows or hides the fire modes and the magazine row with its bar; only the name itself attacks. With
+    the new setting "Compact weapon rows" they start hidden; changing the setting also resets weapons opened or closed
+    by hand.
   - Reload is a plain icon like the others (with a tooltip), with a small arrow when there is more than one magazine to
     choose, in the icon column of the magazine row.
   - Reserve counts every magazine that is not loaded, part-used ones too ("2 in reserve, 1 part-used"). The system's

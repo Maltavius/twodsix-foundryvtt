@@ -5,6 +5,7 @@ import {
   handleEquipDrop,
   inventoryActions,
   bindInventoryTab,
+  forgetOpenedWeapons,
   layoutSections,
   lastFireMode,
   prepareInventoryContext,
@@ -96,6 +97,12 @@ describe('prepareInventoryContext', () => {
     prepareInventoryContext(sheet, again);
     expect(again.inventory.weapons.w2.open).toBe(true);
     expect(again.inventory.weapons.w1.open).toBe(false);
+
+    // Changing the setting makes every weapon follow it again
+    forgetOpenedWeapons();
+    const reset = makeContext().context;
+    prepareInventoryContext(sheet, reset);
+    expect(reset.inventory.weapons.w2.open).toBe(false);
   });
 
   test('the weapon in brackets after a magazine only when its name does not say it', () => {

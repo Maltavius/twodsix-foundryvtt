@@ -48,6 +48,11 @@ export function inventoryEnabled() {
   }
 }
 
+/** Forget which weapons were opened or closed by hand, so they all follow the Compact weapon rows setting again. */
+export function forgetOpenedWeapons() {
+  openedWeapons.clear();
+}
+
 /**
  * @returns {boolean} whether the weapon rows start closed (only the status after the name shows)
  */
