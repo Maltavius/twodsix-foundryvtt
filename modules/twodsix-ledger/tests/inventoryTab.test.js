@@ -114,6 +114,18 @@ describe('prepareInventoryContext', () => {
     expect(context.inventory.parentSuffix).toEqual({m2: 'Gun w1'});
   });
 
+  test('what a stack holds, and a tooltip on the Qty of magazines', () => {
+    const {context} = makeContext();
+    context.container.consumable[0].system.subtype = 'magazine';
+    prepareInventoryContext({}, context);
+    expect(context.inventory.stacks.m1).toEqual({
+      extra: 'TWODSIX_LEDGER.INVENTORY.STACK_FULL_MANY:2',
+      countTooltip: 'TWODSIX_LEDGER.INVENTORY.STACK_TOOLTIP:75,80,2',
+      qtyTooltip: 'TWODSIX_LEDGER.INVENTORY.QTY_TOOLTIP'
+    });
+    expect(context.inventory.stacks.m2).toEqual({extra: '', countTooltip: '', qtyTooltip: ''});
+  });
+
   test('secondary armour protection with its types', () => {
     const {context} = makeContext();
     prepareInventoryContext({}, context);

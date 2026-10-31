@@ -319,3 +319,17 @@ export function equipStateForDrop({itemEquipped, targetEquipped}) {
   }
   return null;
 }
+
+/** Consumable subtypes that are reloaded (a stack of magazines or power cells). */
+export const RELOADABLE_SUBTYPES = ["magazine", "power_cell"];
+
+/**
+ * What a stack of consumables holds. The system keeps one count per item: it is the part-used one, and the rest of the
+ * stack is full.
+ * @param {object} consumable
+ * @returns {{current: number, max: number, full: number}} full: how many more full ones the stack holds
+ */
+export function stackContents(consumable) {
+  const {current, max, quantity} = counts(consumable);
+  return {current, max, full: Math.max(0, quantity - 1)};
+}

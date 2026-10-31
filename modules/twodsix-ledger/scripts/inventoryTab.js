@@ -18,7 +18,9 @@ import {
   isEquipped,
   loadedConsumableIds,
   reloadChoices,
+  RELOADABLE_SUBTYPES,
   sortEquippedFirst,
+  stackContents,
   unlinkedConsumables
 } from "./inventory.js";
 
@@ -160,6 +162,21 @@ export function prepareInventoryContext(sheet, context) {
     }
   }
 
+  // A stack shows what it holds ("5/6 + 1 full"), and magazines explain their Qty
+  const stacks = {};
+  for (const item of consumables) {
+    if (item.system?.isAttachment) {
+      continue;
+    }
+    const {current, max, full} = stackContents(item);
+    const reloadable = RELOADABLE_SUBTYPES.includes(item.system?.subtype);
+    stacks[item.id] = {
+      extra: full > 0 ? t(full === 1 ? "STACK_FULL_ONE" : "STACK_FULL_MANY", {count: full}) : "",
+      countTooltip: full > 0 ? t("STACK_TOOLTIP", {current, max, count: full}) : "",
+      qtyTooltip: reloadable ? t("QTY_TOOLTIP") : ""
+    };
+  }
+
   // The system writes the weapon's name after a linked magazine; leave it out when the name already says it
   const parentSuffix = {};
   for (const item of consumables) {
@@ -171,6 +188,7 @@ export function prepareInventoryContext(sheet, context) {
 
   context.container = container;
   context.inventory = {
+    stacks,
     parentSuffix,
     groupStart,
     weapons,

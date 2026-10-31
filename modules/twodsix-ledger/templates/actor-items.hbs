@@ -4,7 +4,8 @@
      (+X); Equipment & Tools has a weight column; Storage & Junk and armour have their own column classes; TL and Qty
      have column classes so they can be left out on a narrow sheet (Qty stays in Consumables and Attachments, where it
      is edited); Damage has a short label; a magazine's weapon is
-     shown in brackets only when its name does not already contain it; the list's name stands in the heading row where
+     shown in brackets only when its name does not already contain it; Count shows what a stack holds ("5/6 + 1 full")
+     and Qty of a magazine has a tooltip; the list's name stands in the heading row where
      "Name" was, instead of in a tab above it. Compare
      with the system's file when the system changes it. --}}
 {{!-- Sheet Body --}}
@@ -424,8 +425,8 @@
                       </span>
                       <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#if (lookup @root.inventory.parentSuffix item.id)}} ({{lookup @root.inventory.parentSuffix item.id}}){{/if}}</span>
                       <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
-                      <input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
-                      <span class="item-name centre">{{item.system.currentCount}}/{{item.system.max}}</span>
+                      {{#with (lookup @root.inventory.stacks item.id) as |stack|}}<input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"{{#if stack.qtyTooltip}} data-tooltip="{{stack.qtyTooltip}}"{{/if}}/>{{/with}}
+                      {{#with (lookup @root.inventory.stacks item.id) as |stack|}}<span class="item-name centre tl-stack"{{#if stack.countTooltip}} data-tooltip="{{stack.countTooltip}}"{{/if}}>{{item.system.currentCount}}/{{item.system.max}}{{#if stack.extra}} <span class="tl-stack-extra">{{stack.extra}}</span>{{/if}}</span>{{/with}}
                       {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
                     </span>
                 </li>

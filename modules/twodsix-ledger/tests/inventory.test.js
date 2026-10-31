@@ -13,6 +13,7 @@ import {
   matchingUnlinked,
   reloadChoices,
   sortEquippedFirst,
+  stackContents,
   unlinkedConsumables
 } from '../scripts/inventory.js';
 
@@ -204,5 +205,13 @@ describe('after a reload of a 5/6 magazine with one more in the stack', () => {
     const gun = weapon([loaded, putAside], 'm1', 6);
     expect(describeWeaponAmmo(gun)).toMatchObject({current: 6, reserve: 1, partial: 1});
     expect(reloadChoices(gun).map(choice => [choice.kind, choice.id])).toEqual([['select', 'p1']]);
+  });
+});
+
+describe('stackContents', () => {
+  test('one part-used and the rest full', () => {
+    expect(stackContents(magazine('m', 5, 6, 2))).toEqual({current: 5, max: 6, full: 1});
+    expect(stackContents(magazine('m', 5, 6, 1))).toEqual({current: 5, max: 6, full: 0});
+    expect(stackContents(magazine('m', 0, 6, 0))).toEqual({current: 0, max: 6, full: 0});
   });
 });

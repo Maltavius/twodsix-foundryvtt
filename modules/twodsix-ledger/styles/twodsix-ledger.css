@@ -1596,6 +1596,16 @@
   color: var(--tl-muted);
 }
 
+/* What a stack of consumables holds: "5/6 + 1 full" */
+.tl-inventory .tl-stack {
+  white-space: nowrap;
+}
+
+.tl-inventory .tl-stack-extra {
+  font-size: 0.8em;
+  color: var(--tl-muted);
+}
+
 /* Loaded magazines left out of the Consumables list */
 .tl-inventory .tl-loaded-note {
   display: flex;

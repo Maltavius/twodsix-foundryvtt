@@ -167,7 +167,11 @@
       "RESERVE_PARTIAL_MANY": "{count} in reserve, {partial} part-used",
       "DAMAGE_SHORT": "Dmg",
       "EXPAND_NAME": "Automatically expand weapons",
-      "EXPAND_HINT": "Show the fire modes and the loaded magazine under every weapon from the start. When it is off, click the magazine pill after a weapon's name to show them."
+      "EXPAND_HINT": "Show the fire modes and the loaded magazine under every weapon from the start. When it is off, click the magazine pill after a weapon's name to show them.",
+      "STACK_FULL_ONE": "+ {count} full",
+      "STACK_FULL_MANY": "+ {count} full",
+      "STACK_TOOLTIP": "One at {current}/{max} and {count} more full",
+      "QTY_TOOLTIP": "Number of magazines. The count is for one of them; the rest are full."
     },
     "PORTRAIT_NAME": "Portrait keeps its aspect ratio",
     "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut."

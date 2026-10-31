@@ -41,6 +41,8 @@
     the weapon's pen and the green check under the trash.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").
+  - Count in the Consumables list shows what a stack holds: "5/6 + 1 full" for Qty 2. The system keeps one count per
+    stack, for one magazine, and the rest are full. Qty of a magazine or power cell says so on hover.
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the
     protection types on hover. Equipment & Tools has a weight column.
 - A trash button next to Add empties the form (amount, description, category and a dropped item). It is only there while

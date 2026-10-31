@@ -167,7 +167,11 @@
       "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade",
       "DAMAGE_SHORT": "Skada",
       "EXPAND_NAME": "Fäll ut vapen automatiskt",
-      "EXPAND_HINT": "Visa eldlägen och laddat magasin under varje vapen från början. När den är av klickar du på magasinpillret efter vapnets namn för att visa dem."
+      "EXPAND_HINT": "Visa eldlägen och laddat magasin under varje vapen från början. När den är av klickar du på magasinpillret efter vapnets namn för att visa dem.",
+      "STACK_FULL_ONE": "+ {count} fullt",
+      "STACK_FULL_MANY": "+ {count} fulla",
+      "STACK_TOOLTIP": "Ett på {current}/{max} och {count} till fulla",
+      "QTY_TOOLTIP": "Antal magasin. Räknaren gäller ett av dem, resten är fulla."
     },
     "PORTRAIT_NAME": "Porträttet behåller sina proportioner",
     "PORTRAIT_HINT": "Porträttet på rollformuläret får plats i sin ram i stället för att sträckas ut eller beskäras."
