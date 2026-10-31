@@ -1301,8 +1301,11 @@
   grid-column: 1 / -2;
 }
 
-.tl-inventory .tl-section li.tl-ammo > .tl-ammo-reserve {
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-rest {
   grid-column: span 2;
+}
+
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-reserve {
   color: var(--tl-muted);
 }
 

@@ -135,8 +135,8 @@
           {{#with (lookup (lookup @root.inventory.weapons item.id) "ammo") as |ammo|}}
           {{!-- Two cells like the weapon row: everything about the magazine, and the icons in the icon column --}}
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
-            {{!-- Loaded: the magazine in the weapon's columns (name: gauge and count; TL: empty; Qty: magazines in the
-                 stack; Wt: empty; Range and Damage: reserve). Unloaded: one cell across. --}}
+            {{!-- Loaded: the magazine in the weapon's columns (name: gauge and count; TL: empty; Qty: the reserve as
+                 +2, magazines besides the loaded one; the rest empty). Unloaded: one cell across. --}}
             {{#if ammo.loaded}}
             <span class="tl-ammo-main" data-tooltip="{{ammo.loaded.name}} · {{ammo.text}}">
               <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
@@ -148,9 +148,9 @@
               </span>
             </span>
             <span class="item-name centre tl-col-tl"></span>
-            <span class="item-name centre tl-col-qty" data-tooltip="{{localize 'TWODSIX_LEDGER.INVENTORY.QTY_TOOLTIP'}}">{{ammo.loaded.quantity}}</span>
+            <span class="item-name centre tl-col-qty tl-ammo-reserve" data-tooltip="{{ammo.loaded.name}} · {{ammo.text}}">+{{ammo.reserve}}</span>
             <span class="item-name centre"></span>
-            <span class="item-name centre tl-ammo-reserve" data-tooltip="{{ammo.loaded.name}} · {{ammo.text}}">+{{ammo.reserve}}</span>
+            <span class="item-name centre tl-ammo-rest"></span>
             {{else}}
             <span class="tl-ammo-main tl-ammo-wide">
               <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
