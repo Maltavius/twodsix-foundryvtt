@@ -1171,7 +1171,16 @@
   height: 2.2em;
   margin: 0;
   padding: 0 10px;
+  border: 1px solid #d9730d;
+  border-radius: 4px;
+  background: color-mix(in srgb, #d9730d 16%, transparent);
+  color: #d9730d;
   cursor: pointer;
+}
+
+.finance-ledger .fl-clear:not(:disabled):hover {
+  border-color: #d9730d;
+  background: color-mix(in srgb, #d9730d 30%, transparent);
 }
 
 .finance-ledger .fl-clear[hidden] {
