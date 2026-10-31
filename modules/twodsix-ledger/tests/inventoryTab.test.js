@@ -22,12 +22,12 @@ const weapon = (id, equipped, consumableData, loaded = '', ammo = 0) => ({
 });
 
 let settingValue;
-let compactValue;
+let expandValue;
 beforeEach(() => {
   settingValue = true;
-  compactValue = false;
+  expandValue = true;
   globalThis.game = {
-    settings: {get: vi.fn((scope, key) => (key === 'inventoryCompact' ? compactValue : settingValue))},
+    settings: {get: vi.fn((scope, key) => (key === 'inventoryExpandWeapons' ? expandValue : settingValue))},
     i18n: {localize: key => key, format: (key, data) => `${key}:${Object.values(data).join(',')}`}
   };
   globalThis.ui = {notifications: {warn: vi.fn()}};
@@ -83,8 +83,8 @@ describe('prepareInventoryContext', () => {
     expect(weapons.w3).toMatchObject({ammo: null, auto: null, hasDetails: false, open: false});
   });
 
-  test('compact rows start closed, and a weapon can be opened by hand', () => {
-    compactValue = true;
+  test('without Automatically expand weapons the rows start closed, and a weapon can be opened by hand', () => {
+    expandValue = false;
     const sheet = {actor: {id: 'compact-actor', items: new Map()}, render: vi.fn()};
     const {context} = makeContext();
     prepareInventoryContext(sheet, context);
@@ -440,7 +440,7 @@ describe('portrait setting', () => {
   test('the sheet gets the class that keeps the portrait\'s aspect ratio only when the setting is on', () => {
     const toggle = vi.fn();
     const sheet = {element: {classList: {toggle}, querySelector: () => null}};
-    compactValue = false;
+    expandValue = true;
     globalThis.game.settings.get = vi.fn((scope, key) => key === 'portraitKeepAspect');
     bindInventoryTab(sheet);
     expect(toggle).toHaveBeenCalledWith('twodsix-ledger-portrait-contain', true);

@@ -23,7 +23,7 @@ import {
 } from "./inventory.js";
 
 export const INVENTORY_SETTING = "improvedInventory";
-export const COMPACT_SETTING = "inventoryCompact";
+export const EXPAND_SETTING = "inventoryExpandWeapons";
 export const PORTRAIT_SETTING = "portraitKeepAspect";
 export const PORTRAIT_CLASS = "twodsix-ledger-portrait-contain";
 const PREFIX = "TWODSIX_LEDGER.INVENTORY";
@@ -48,17 +48,17 @@ export function inventoryEnabled() {
   }
 }
 
-/** Forget which weapons were opened or closed by hand, so they all follow the Compact weapon rows setting again. */
+/** Forget which weapons were opened or closed by hand, so they all follow the Automatically expand weapons setting again. */
 export function forgetOpenedWeapons() {
   openedWeapons.clear();
 }
 
 /**
- * @returns {boolean} whether the weapon rows start closed (only the status after the name shows)
+ * @returns {boolean} whether the rows under a weapon (fire modes and magazine) start open
  */
-export function inventoryCompact() {
+export function weaponsExpanded() {
   try {
-    return game.settings.get(MODULE_ID, COMPACT_SETTING) === true;
+    return game.settings.get(MODULE_ID, EXPAND_SETTING) === true;
   } catch {
     return false;
   }
@@ -129,14 +129,14 @@ export function prepareInventoryContext(sheet, context) {
   markGroup(consumables.filter(item => item.system?.isAttachment), hide.attachment);
 
   const rules = fireRules(context.settings);
-  const compact = inventoryCompact();
+  const expanded = weaponsExpanded();
   const unlinked = unlinkedConsumables(sheet.actor?.items?.values?.() ?? []);
   const weapons = {};
   for (const weapon of container.weapon ?? []) {
     const info = describeWeaponAmmo(weapon, unlinked);
     const ammo = info ? {...info, text: ammoText(info)} : null;
     const hasDetails = Boolean(ammo) || hasFireModes(weapon, rules);
-    const open = hasDetails && (openedWeapons.get(`${sheet.actor?.id}.${weapon.id}`) ?? !compact);
+    const open = hasDetails && (openedWeapons.get(`${sheet.actor?.id}.${weapon.id}`) ?? expanded);
     weapons[weapon.id] = {
       ammo,
       auto: autoRate(weapon, rules),
@@ -460,7 +460,7 @@ export const inventoryActions = {
       return;
     }
     const key = `${this.actor.id}.${item.id}`;
-    const open = openedWeapons.get(key) ?? !inventoryCompact();
+    const open = openedWeapons.get(key) ?? weaponsExpanded();
     openedWeapons.set(key, !open);
     this.render();
   },

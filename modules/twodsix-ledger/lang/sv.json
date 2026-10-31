@@ -163,11 +163,11 @@
       "SECONDARY_TYPES": "Sekundärt skydd: {types}",
       "SHOW_DETAILS": "Visa eldlägen och magasin",
       "HIDE_DETAILS": "Dölj eldlägen och magasin",
-      "COMPACT_NAME": "Kompakta vapenrader",
-      "COMPACT_HINT": "Vapen visar bara sin status efter namnet (magasin, Auto). Klicka på statusen för att visa eldlägen och magasin.",
       "RESERVE_PARTIAL_ONE": "{count} i reserv, varav {partial} påbörjat",
       "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade",
-      "DAMAGE_SHORT": "Skada"
+      "DAMAGE_SHORT": "Skada",
+      "EXPAND_NAME": "Fäll ut vapen automatiskt",
+      "EXPAND_HINT": "Visa eldlägen och laddat magasin under varje vapen från början. När den är av klickar du på magasinpillret efter vapnets namn för att visa dem."
     },
     "PORTRAIT_NAME": "Porträttet behåller sina proportioner",
     "PORTRAIT_HINT": "Porträttet på rollformuläret får plats i sin ram i stället för att sträckas ut eller beskäras."

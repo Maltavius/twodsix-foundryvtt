@@ -32,7 +32,8 @@ https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger
 - Armour shows radiation protection and secondary protection; Equipment & Tools shows weight.
 
 Each player can switch back to the system's own Inventory tab with the setting "Improved Inventory tab", and choose
-"Compact weapon rows" to see only the status after each weapon's name until it is clicked. The setting "Portrait keeps
+"Automatically expand weapons" (off by default) to show the fire modes and magazine under every weapon from the start;
+otherwise a click on the magazine pill after a weapon's name shows them. The setting "Portrait keeps
 its aspect ratio" makes the portrait fit inside its frame instead of being stretched or cut.
 
 ## Settings

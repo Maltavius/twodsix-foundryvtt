@@ -7,7 +7,7 @@
  */
 
 import { MODULE_ID } from "./store.js";
-import { COMPACT_SETTING, INVENTORY_SETTING, PORTRAIT_SETTING, forgetOpenedWeapons } from "./inventoryTab.js";
+import { EXPAND_SETTING, INVENTORY_SETTING, PORTRAIT_SETTING, forgetOpenedWeapons } from "./inventoryTab.js";
 import {
   BUILTIN_CATEGORIES,
   LEDGER_ACCOUNTS,
@@ -241,9 +241,9 @@ export function registerSettings() {
     default: false,
     onChange: refreshSheets
   });
-  game.settings.register(MODULE_ID, COMPACT_SETTING, {
-    name: `${PREFIX}.INVENTORY.COMPACT_NAME`,
-    hint: `${PREFIX}.INVENTORY.COMPACT_HINT`,
+  game.settings.register(MODULE_ID, EXPAND_SETTING, {
+    name: `${PREFIX}.INVENTORY.EXPAND_NAME`,
+    hint: `${PREFIX}.INVENTORY.EXPAND_HINT`,
     scope: "client",
     config: true,
     type: Boolean,

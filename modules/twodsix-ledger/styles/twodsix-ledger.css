@@ -1267,7 +1267,7 @@
 /* A description gets room to wrap instead of pushing the name aside */
 .tl-inventory .tl-section-equipment .items-equipment > :nth-child(6),
 .tl-inventory .tl-section-augments .items-augments > :nth-child(5) {
-  max-width: 18em;
+  max-width: 11em;
 }
 
 /* The list's name stands in the heading row where "Name" was; the row gets the rounded top of the old tab */

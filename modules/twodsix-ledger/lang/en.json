@@ -163,11 +163,11 @@
       "SECONDARY_TYPES": "Secondary protection: {types}",
       "SHOW_DETAILS": "Show fire modes and magazine",
       "HIDE_DETAILS": "Hide fire modes and magazine",
-      "COMPACT_NAME": "Compact weapon rows",
-      "COMPACT_HINT": "Weapons show only their status after the name (magazine, Auto). Click the status to show fire modes and the magazine.",
       "RESERVE_PARTIAL_ONE": "{count} in reserve, {partial} part-used",
       "RESERVE_PARTIAL_MANY": "{count} in reserve, {partial} part-used",
-      "DAMAGE_SHORT": "Dmg"
+      "DAMAGE_SHORT": "Dmg",
+      "EXPAND_NAME": "Automatically expand weapons",
+      "EXPAND_HINT": "Show the fire modes and the loaded magazine under every weapon from the start. When it is off, click the magazine pill after a weapon's name to show them."
     },
     "PORTRAIT_NAME": "Portrait keeps its aspect ratio",
     "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut."
