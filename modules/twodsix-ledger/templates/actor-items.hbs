@@ -135,21 +135,29 @@
           {{#with (lookup (lookup @root.inventory.weapons item.id) "ammo") as |ammo|}}
           {{!-- Two cells like the weapon row: everything about the magazine, and the icons in the icon column --}}
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
-            <span class="tl-ammo-main">
+            {{!-- Loaded: the magazine in the weapon's columns (name: gauge and count; TL: empty; Qty: magazines in the
+                 stack; Wt: its weight; Range and Damage: reserve). Unloaded: one cell across. --}}
+            {{#if ammo.loaded}}
+            <span class="tl-ammo-main" data-tooltip="{{ammo.loaded.name}} · {{ammo.text}}">
               <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
-              {{#if ammo.loaded}}
-                <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
-                <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
-                <span class="combined-buttons">
-                  <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
-                  <button type="button" class="right-button adjust-consumable" data-action="adjustConsumable" data-value="-1" {{#if ammo.full}}disabled{{/if}}>+</button>
-                </span>
-                <span class="tl-ammo-text" data-tooltip="{{ammo.loaded.name}}">{{ammo.loaded.name}} · {{ammo.text}}</span>
-              {{else}}
-                <span class="tl-badge">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
-                <span class="tl-ammo-text">{{ammo.text}}</span>
-              {{/if}}
+              <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
+              <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
+              <span class="combined-buttons">
+                <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
+                <button type="button" class="right-button adjust-consumable" data-action="adjustConsumable" data-value="-1" {{#if ammo.full}}disabled{{/if}}>+</button>
+              </span>
             </span>
+            <span class="item-name centre tl-col-tl"></span>
+            <span class="item-name centre tl-col-qty" data-tooltip="{{localize 'TWODSIX_LEDGER.INVENTORY.QTY_TOOLTIP'}}">{{ammo.loaded.quantity}}</span>
+            <span class="item-name centre">{{ammo.loaded.weight}}</span>
+            <span class="item-name centre tl-ammo-reserve" data-tooltip="{{ammo.loaded.name}} · {{ammo.text}}">+{{ammo.reserve}}</span>
+            {{else}}
+            <span class="tl-ammo-main tl-ammo-wide">
+              <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
+              <span class="tl-badge">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
+              <span class="tl-ammo-text">{{ammo.text}}</span>
+            </span>
+            {{/if}}
             <span class="item-controls tl-ammo-icons">
               {{!-- Under the weapon's icons: Reload under equip, a gap under chat, pen under pen, check under trash --}}
                 {{#if ammo.canReload}}

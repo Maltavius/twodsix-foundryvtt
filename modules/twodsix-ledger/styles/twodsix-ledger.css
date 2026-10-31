@@ -1292,12 +1292,29 @@
 }
 
 /* The magazine row: everything about the magazine across the columns, its icons in the icon column */
+/* Loaded: the gauge in the dice and name columns, the reserve across Range and Damage; unloaded: one cell across */
 .tl-inventory .tl-section li.tl-ammo > .tl-ammo-main {
+  grid-column: span 2;
+}
+
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-main.tl-ammo-wide {
   grid-column: 1 / -2;
+}
+
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-reserve {
+  grid-column: span 2;
+  color: var(--tl-muted);
 }
 
 .tl-inventory .tl-section li.tl-ammo > .tl-ammo-icons {
   grid-column: -2 / -1;
+}
+
+/* Qty in Consumables is a small field, not as wide as the column */
+.tl-inventory .items-consumable .item-value-edit {
+  justify-self: center;
+  width: 5ch;
+  min-width: 0;
 }
 
 /* A list that is too narrow for its name column leaves out TL and Qty (the sheet's script sets tl-narrow on that list

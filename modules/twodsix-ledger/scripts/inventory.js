@@ -192,7 +192,12 @@ export function describeWeaponAmmo(weapon, unlinked = []) {
   const {current, max} = counts(loaded);
   return {
     ...common,
-    loaded: {id: loaded.id, name: loaded.name},
+    loaded: {
+      id: loaded.id,
+      name: loaded.name,
+      quantity: Math.max(0, Number(loaded.system?.quantity) || 0),
+      weight: loaded.system?.weight ?? ""
+    },
     current,
     max,
     percent: max > 0 ? Math.min(100, Math.round(current / max * 100)) : 0,

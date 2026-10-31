@@ -171,7 +171,7 @@
       "STACK_FULL_ONE": "+ {count} full",
       "STACK_FULL_MANY": "+ {count} full",
       "STACK_TOOLTIP": "One at {current}/{max} and {count} more full",
-      "QTY_TOOLTIP": "Number of magazines. The count is for one of them; the rest are full."
+      "QTY_TOOLTIP": "Number of magazines in the stack. The count is for one of them; the rest are full."
     },
     "PORTRAIT_NAME": "Portrait keeps its aspect ratio",
     "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut."
