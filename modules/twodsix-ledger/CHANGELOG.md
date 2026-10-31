@@ -7,7 +7,8 @@
 - Drag an item (from the inventory, the sidebar or a compendium) onto the Finances tab, anywhere on it: Add
   transaction opens with the item's name, its price as a negative amount and the category Equipment. Nothing is added
   until you press Add, so you can change the amount, account or text first. An item without a price only fills in the
-  name. Only things that can be bought count: skills, traits, careers and the like are dropped on the sheet as usual.
+  name. Only things that can be bought count: skills, spells, psionic abilities, traits, careers, species, ship positions
+  and storage are dropped on the sheet as usual.
 - An item that is not on the character yet is also added to the inventory when you press Add: the button then reads
   "Add Expense & Item" (or Income, or Transaction). Emptying the description lets go of the item. An item that is
   already in the inventory is not added a second time.

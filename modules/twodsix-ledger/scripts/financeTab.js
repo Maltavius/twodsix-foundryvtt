@@ -76,9 +76,12 @@ function loadUiPrefs(actor) {
   }
 }
 
+/** Kinds of item that are not bought, even if some of them have a price field: they are dropped on the sheet as usual. */
+const NOT_FOR_SALE = ["skills", "spell", "psiAbility", "trait", "career", "species", "ship_position", "storage"];
+
 /**
  * Can the dropped item be bought, that is, is it a kind of item that has a price (weapons, armour, equipment and so on,
- * not skills, traits or careers)? Decided from the kind of item, which the data model of the system tells. If the item
+ * not skills, traits, careers or storage)? Decided from the kind of item, which the data model of the system tells. If the item
  * cannot be looked up on the spot, the answer is no, so the sheet handles the drop as it always does.
  * @param {string} uuid
  * @returns {boolean}
@@ -90,7 +93,7 @@ function isPurchasable(uuid) {
   } catch {
     type = undefined;
   }
-  return Boolean(type && CONFIG.Item?.dataModels?.[type]?.schema?.fields?.price);
+  return Boolean(type && !NOT_FOR_SALE.includes(type) && CONFIG.Item?.dataModels?.[type]?.schema?.fields?.price);
 }
 
 /**
