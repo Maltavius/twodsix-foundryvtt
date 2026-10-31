@@ -30,9 +30,11 @@
     drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
     with it, as with the equip button.
   - Each list sizes its columns to its own content, and the name column takes the rest. A list with no items lines up
-    with the list above it. The icons sit at the right end of each row; on the magazine row Reload sits under the
-    equip icon, the pen under the weapon's pen and the green check under the trash. All columns show at the width the sheet opens with. When the sheet is made narrower, TL and Qty are left out and Damage is labelled
-    Dmg; Qty stays in Consumables and Attachments, where it is edited.
+    with the list above it. A list whose name column gets too narrow leaves out TL and Qty and labels Damage Dmg; the
+    other lists keep theirs. Qty stays in Consumables and Attachments, where it is edited.
+  - The list's name stands in the black heading row where "Name" was, instead of in a tab above it: one row less per
+    list. The icons sit at the right end of each row; on the magazine row Reload sits under the
+    equip icon, the pen under the weapon's pen and the green check under the trash.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the

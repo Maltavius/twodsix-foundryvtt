@@ -4,16 +4,16 @@
      (+X); Equipment & Tools has a weight column; Storage & Junk and armour have their own column classes; TL and Qty
      have column classes so they can be left out on a narrow sheet (Qty stays in Consumables and Attachments, where it
      is edited); Damage has a short label; a magazine's weapon is
-     shown in brackets only when its name does not already contain it. Compare
+     shown in brackets only when its name does not already contain it; the list's name stands in the heading row where
+     "Name" was, instead of in a tab above it. Compare
      with the system's file when the system changes it. --}}
 {{!-- Sheet Body --}}
 <div class="character-tabs-info character-inventory tl-inventory">
    <!-- WEAPONS -->
   <div class="tl-section tl-section-weapons"><span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.WEAPONS"}}</span>
     <div class="items-weapons gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.WEAPONS"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
@@ -186,10 +186,9 @@
 
   <!-- ARMOR -->
   <div class="tl-section tl-section-armor"><span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.ARMOR"}}</span>
     <div class="items-armor tl-armor gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.ARMOR"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
@@ -250,10 +249,9 @@
 
   <!-- AUGMENTS -->
   <div class="tl-section tl-section-augments"><span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.AUGMENTS"}}</span>
     <div class="items-augments gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.AUGMENTS"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Effect"}}</span>
@@ -295,10 +293,9 @@
 
   <!-- EQUIPMENT -->
   <div class="tl-section tl-section-equipment"><span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.EQUIPMENT_TOOLS"}}</span>
     <div class="items-equipment gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.EQUIPMENT_TOOLS"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
@@ -344,10 +341,9 @@
 
   <!-- STORAGE & JUNK -->
   <div class="tl-section tl-section-junk"><span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.STORAGE_JUNK"}}</span>
     <div class="items-armor tl-junk gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.STORAGE_JUNK"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
@@ -396,10 +392,9 @@
  <!-- Consumables -->
  <div class="tl-section tl-section-consumables">
     <span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.CONSUMABLES"}}</span>
     <div class="items-consumable gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.CONSUMABLES"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Count"}}</span>
@@ -453,10 +448,9 @@
   <!-- Attachments -->
   <div class="tl-section tl-section-attachments">
     <span class="pusher"></span>
-    <span class="item-title">{{localize "TWODSIX.Actor.Items.ATTACHMENTS"}}</span>
     <div class="items-consumable tl-attach gear-header">
       <span></span>
-      <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
+      <span class="item-name tl-section-title">{{localize "TWODSIX.Actor.Items.ATTACHMENTS"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>

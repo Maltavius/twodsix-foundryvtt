@@ -191,15 +191,30 @@ export function markFireModes(sheet) {
   }
 }
 
+/** A list leaves out TL and Qty when its name column would be narrower than this (in em). */
+export const NARROW_NAME_EM = 8;
+
 /**
- * A list with no items takes its name column from the list above it (in pixels as laid out), so empty lists line up
- * with it instead of sizing their columns from the headings alone. Lists with items keep their own columns.
+ * @param {HTMLElement} section
+ * @returns {number} the laid-out width of the name column in pixels, or NaN while the tab is hidden
+ */
+function nameColumnWidth(section) {
+  return Number.parseFloat(getComputedStyle(section).gridTemplateColumns.split(" ")[1]);
+}
+
+/**
+ * Lay out the lists one by one, top down:
+ * - a list whose name column would be narrower than NARROW_NAME_EM leaves out TL and Qty (class tl-narrow), each list
+ *   on its own, so a crowded list does not take columns from the others;
+ * - a list with no items takes its name column from the list above it (in pixels as laid out), so empty lists line up
+ *   with it instead of sizing their columns from the headings alone.
  * @param {HTMLElement} root - the sheet's element
  */
-export function matchEmptySections(root) {
+export function layoutSections(root) {
   const sections = root?.querySelectorAll?.(".tl-inventory .tl-section") ?? [];
   let previousName = null;
   for (const section of sections) {
+    section.classList.remove("tl-narrow");
     section.style.removeProperty("--tl-name-match");
     section.style.removeProperty("--tl-icons-match");
     const empty = !section.querySelector(".item-list .item");
@@ -207,11 +222,17 @@ export function matchEmptySections(root) {
       section.style.setProperty("--tl-name-match", previousName);
       section.style.setProperty("--tl-icons-match", "1fr");
     }
-    // The laid-out widths; a hidden tab gives no pixel widths, and is done again when it is shown
-    const name = Number.parseFloat(getComputedStyle(section).gridTemplateColumns.split(" ")[1]);
-    if (name > 0) {
-      previousName = `${name}px`;
+    let name = nameColumnWidth(section);
+    // A hidden tab gives no pixel widths; this is done again when the tab is shown
+    if (!(name > 0)) {
+      continue;
     }
+    const em = Number.parseFloat(getComputedStyle(section).fontSize) || 16;
+    if (!empty && name < NARROW_NAME_EM * em && section.querySelector(".tl-col-tl, .tl-col-qty")) {
+      section.classList.add("tl-narrow");
+      name = nameColumnWidth(section);
+    }
+    previousName = `${name}px`;
   }
 }
 
@@ -228,12 +249,12 @@ export function bindInventoryTab(sheet) {
   if (!inventory) {
     return;
   }
-  matchEmptySections(sheet.element);
+  layoutSections(sheet.element);
   if (typeof ResizeObserver === "function") {
     let frame = null;
     sheet[SECTION_OBSERVER] = new ResizeObserver(() => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => matchEmptySections(sheet.element));
+      frame = requestAnimationFrame(() => layoutSections(sheet.element));
     });
     sheet[SECTION_OBSERVER].observe(inventory);
   }

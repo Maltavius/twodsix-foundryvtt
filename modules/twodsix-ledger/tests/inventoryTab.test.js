@@ -4,7 +4,7 @@ import {
   applyReload,
   handleEquipDrop,
   inventoryActions,
-  matchEmptySections,
+  layoutSections,
   lastFireMode,
   prepareInventoryContext,
   reloadChoiceLabel
@@ -352,13 +352,16 @@ describe('handleEquipDrop', () => {
   });
 });
 
-describe('matchEmptySections', () => {
-  function section(empty, columns) {
+describe('layoutSections', () => {
+  function section(empty, name, {hasTl = true} = {}) {
     const props = {};
+    const classes = new Set();
     return {
       props,
-      columns,
-      querySelector: () => (empty ? null : {}),
+      classes,
+      name,
+      querySelector: selector => (selector === '.item-list .item' ? (empty ? null : {}) : (hasTl ? {} : null)),
+      classList: {add: name => classes.add(name), remove: name => classes.delete(name)},
       style: {
         setProperty: (key, value) => {
           props[key] = value;
@@ -370,28 +373,57 @@ describe('matchEmptySections', () => {
     };
   }
 
+  /** Name column: the matched width, or the list's own, which grows by 60px without TL and Qty. */
+  function installLayout() {
+    globalThis.getComputedStyle = element => {
+      const own = element.classes.has('tl-narrow') ? element.name + 60 : element.name;
+      const name = element.props['--tl-name-match'] ?? (Number.isNaN(own) ? 'minmax(6em,' : `${own}px`);
+      return {gridTemplateColumns: `25px ${name} 20px`, fontSize: '10px'};
+    };
+  }
+  afterEach(() => {
+    delete globalThis.getComputedStyle;
+  });
+
   test('an empty list takes the name column of the list above, and passes it on', () => {
-    const weapons = section(false, '25px 180px 20px');
-    const armour = section(true, '25px 120px 20px');
-    const augments = section(true, '25px 120px 20px');
-    const equipment = section(false, '25px 150px 20px');
-    globalThis.getComputedStyle = element => ({
-      gridTemplateColumns: element.props['--tl-name-match'] ? `25px ${element.props['--tl-name-match']} 20px` : element.columns
-    });
-    matchEmptySections({querySelectorAll: () => [weapons, armour, augments, equipment]});
+    installLayout();
+    const weapons = section(false, 180);
+    const armour = section(true, 120);
+    const augments = section(true, 120);
+    const equipment = section(false, 150);
+    layoutSections({querySelectorAll: () => [weapons, armour, augments, equipment]});
     expect(weapons.props).toEqual({});
     expect(armour.props).toEqual({'--tl-name-match': '180px', '--tl-icons-match': '1fr'});
     expect(augments.props).toEqual({'--tl-name-match': '180px', '--tl-icons-match': '1fr'});
     expect(equipment.props).toEqual({});
-    delete globalThis.getComputedStyle;
   });
 
-  test('nothing to match while the tab is hidden', () => {
-    const weapons = section(false, 'var(--tl-dice) minmax(6em, 1fr) auto');
-    const armour = section(true, 'x');
-    globalThis.getComputedStyle = element => ({gridTemplateColumns: element.columns});
-    matchEmptySections({querySelectorAll: () => [weapons, armour]});
+  test('only a list whose name column is too narrow leaves out TL and Qty', () => {
+    installLayout();
+    const weapons = section(false, 120);
+    const equipment = section(false, 70);
+    const consumables = section(false, 50, {hasTl: false});
+    layoutSections({querySelectorAll: () => [weapons, equipment, consumables]});
+    expect(weapons.classes.has('tl-narrow')).toBe(false);
+    expect(equipment.classes.has('tl-narrow')).toBe(true);
+    // Nothing to leave out in Consumables (Qty stays there)
+    expect(consumables.classes.has('tl-narrow')).toBe(false);
+  });
+
+  test('an empty list below a narrowed one gets the wider name column', () => {
+    installLayout();
+    const equipment = section(false, 70);
+    const junk = section(true, 120);
+    layoutSections({querySelectorAll: () => [equipment, junk]});
+    expect(junk.props['--tl-name-match']).toBe('130px');
+  });
+
+  test('nothing is set while the tab is hidden', () => {
+    installLayout();
+    const weapons = section(false, Number.NaN);
+    const armour = section(true, Number.NaN);
+    layoutSections({querySelectorAll: () => [weapons, armour]});
     expect(armour.props).toEqual({});
-    delete globalThis.getComputedStyle;
+    expect(weapons.classes.size).toBe(0);
   });
 });
