@@ -4,6 +4,7 @@ import {
   applyReload,
   handleEquipDrop,
   inventoryActions,
+  bindInventoryTab,
   layoutSections,
   lastFireMode,
   prepareInventoryContext,
@@ -425,5 +426,19 @@ describe('layoutSections', () => {
     layoutSections({querySelectorAll: () => [weapons, armour]});
     expect(armour.props).toEqual({});
     expect(weapons.classes.size).toBe(0);
+  });
+});
+
+describe('portrait setting', () => {
+  test('the sheet gets the class that keeps the portrait\'s aspect ratio only when the setting is on', () => {
+    const toggle = vi.fn();
+    const sheet = {element: {classList: {toggle}, querySelector: () => null}};
+    compactValue = false;
+    globalThis.game.settings.get = vi.fn((scope, key) => key === 'portraitKeepAspect');
+    bindInventoryTab(sheet);
+    expect(toggle).toHaveBeenCalledWith('twodsix-ledger-portrait-contain', true);
+    globalThis.game.settings.get = vi.fn(() => false);
+    bindInventoryTab(sheet);
+    expect(toggle).toHaveBeenLastCalledWith('twodsix-ledger-portrait-contain', false);
   });
 });

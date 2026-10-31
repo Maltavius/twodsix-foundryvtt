@@ -168,6 +168,8 @@
       "RESERVE_PARTIAL_ONE": "{count} i reserv, varav {partial} påbörjat",
       "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade",
       "DAMAGE_SHORT": "Skada"
-    }
+    },
+    "PORTRAIT_NAME": "Porträttet behåller sina proportioner",
+    "PORTRAIT_HINT": "Porträttet på rollformuläret får plats i sin ram i stället för att sträckas ut eller beskäras."
   }
 }

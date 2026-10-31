@@ -24,6 +24,8 @@ import {
 
 export const INVENTORY_SETTING = "improvedInventory";
 export const COMPACT_SETTING = "inventoryCompact";
+export const PORTRAIT_SETTING = "portraitKeepAspect";
+export const PORTRAIT_CLASS = "twodsix-ledger-portrait-contain";
 const PREFIX = "TWODSIX_LEDGER.INVENTORY";
 
 /** The last fire mode used per weapon, on this client only, until the page is reloaded. Key: "<actor id>.<item id>". */
@@ -240,9 +242,21 @@ export function layoutSections(root) {
 const SECTION_OBSERVER = Symbol("twodsixLedgerSectionObserver");
 
 /**
+ * @returns {boolean} whether the portrait keeps its aspect ratio (fits inside its frame instead of being stretched)
+ */
+export function portraitKeepsAspect() {
+  try {
+    return game.settings.get(MODULE_ID, PORTRAIT_SETTING) === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * @param {object} sheet
  */
 export function bindInventoryTab(sheet) {
+  sheet.element?.classList?.toggle(PORTRAIT_CLASS, portraitKeepsAspect());
   markFireModes(sheet);
   sheet[SECTION_OBSERVER]?.disconnect();
   const inventory = sheet.element?.querySelector?.(".tl-inventory");

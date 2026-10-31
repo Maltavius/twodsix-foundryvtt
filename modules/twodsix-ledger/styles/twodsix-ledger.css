@@ -1615,3 +1615,11 @@
 .twodsix-ledger-reload .form-footer {
   flex-direction: column;
 }
+
+/* Setting "Portrait keeps its aspect ratio": the portrait fits inside its frame */
+.twodsix-ledger-portrait-contain .character-photo img {
+  max-width: 100%;
+  max-height: 100%;
+  vertical-align: middle;
+  object-fit: contain;
+}

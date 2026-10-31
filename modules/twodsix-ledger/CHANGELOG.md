@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- New setting (per player) "Portrait keeps its aspect ratio": the portrait on the sheet fits inside its frame instead
+  of being stretched or cut, without a custom CSS rule.
 - New Inventory tab (on by default, each player can turn it off under Module Settings with "Improved Inventory tab"):
   - Carried items come first in every list and have a tinted background. A thin "Not equipped" line separates them
     from the rest.

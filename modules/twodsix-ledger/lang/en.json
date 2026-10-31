@@ -168,6 +168,8 @@
       "RESERVE_PARTIAL_ONE": "{count} in reserve, {partial} part-used",
       "RESERVE_PARTIAL_MANY": "{count} in reserve, {partial} part-used",
       "DAMAGE_SHORT": "Dmg"
-    }
+    },
+    "PORTRAIT_NAME": "Portrait keeps its aspect ratio",
+    "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut."
   }
 }
