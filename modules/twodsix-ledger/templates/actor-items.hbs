@@ -132,21 +132,23 @@
           </li>
           {{!-- The loaded magazine. The system's - and + buttons, green check and edit button read the consumable-row ids --}}
           {{#with (lookup (lookup @root.inventory.weapons item.id) "ammo") as |ammo|}}
+          {{!-- Two cells like the weapon row: everything about the magazine, and the icons in the icon column (the pen
+               under the weapon's pen, the green check under the trash) --}}
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
-            <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
-            {{#if ammo.loaded}}
-              <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
-              <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
-              <span class="combined-buttons">
-                <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
-                <button type="button" class="right-button adjust-consumable" data-action="adjustConsumable" data-value="-1" {{#if ammo.full}}disabled{{/if}}>+</button>
-              </span>
-              <span class="tl-ammo-text" data-tooltip="{{ammo.loaded.name}}">{{ammo.loaded.name}} · {{ammo.text}}</span>
-            {{else}}
-              <span class="tl-badge">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
-              <span class="tl-ammo-text">{{ammo.text}}</span>
-            {{/if}}
-            <span class="tl-ammo-actions">
+            <span class="tl-ammo-main">
+              <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
+              {{#if ammo.loaded}}
+                <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
+                <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
+                <span class="combined-buttons">
+                  <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
+                  <button type="button" class="right-button adjust-consumable" data-action="adjustConsumable" data-value="-1" {{#if ammo.full}}disabled{{/if}}>+</button>
+                </span>
+                <span class="tl-ammo-text" data-tooltip="{{ammo.loaded.name}}">{{ammo.loaded.name}} · {{ammo.text}}</span>
+              {{else}}
+                <span class="tl-badge">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
+                <span class="tl-ammo-text">{{ammo.text}}</span>
+              {{/if}}
               {{#if ammo.canReload}}
               <a class="item-control tl-reload" data-action="inventoryReload"
                 data-tooltip="{{#if ammo.loaded}}{{localize 'TWODSIX_LEDGER.INVENTORY.RELOAD'}}{{else}}{{localize 'TWODSIX_LEDGER.INVENTORY.LOAD'}}{{/if}}"
@@ -154,11 +156,11 @@
                 <i class="fa-solid fa-rotate"></i>{{#if ammo.multiple}}<i class="fa-solid fa-caret-down tl-reload-more"></i>{{/if}}
               </a>
               {{/if}}
+            </span>
+            <span class="item-controls tl-ammo-icons">
               {{#if ammo.loaded}}
-              <span class="item-controls">
-                <a class="consumable-toggle" data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}" data-action="toggleConsumable" style="color: green;" data-tooltip="{{localize 'TWODSIX.Items.Consumable.ActiveConsumable'}}"><i class="fa-solid fa-circle-check"></i></a>
-                <a class="item-control consumable-edit" data-tooltip='{{localize "TWODSIX.Actor.Items.EditItem"}}' data-action="editConsumable"><i class="fa-solid fa-pen-to-square"></i></a>
-              </span>
+              <a class="item-control consumable-edit" data-tooltip='{{localize "TWODSIX.Actor.Items.EditItem"}}' data-action="editConsumable"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a class="item-control consumable-toggle" data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}" data-action="toggleConsumable" style="color: green;" data-tooltip="{{localize 'TWODSIX.Items.Consumable.ActiveConsumable'}}"><i class="fa-solid fa-circle-check"></i></a>
               {{/if}}
             </span>
           </li>

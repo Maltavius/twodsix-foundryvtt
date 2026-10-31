@@ -30,7 +30,8 @@
     drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
     with it, as with the equip button.
   - All lists share the same column widths, so Name, TL, Qty and the icons line up from list to list; the name
-    column takes the rest. All columns show at the width the sheet opens with. When the sheet is made narrower, TL and Qty are left out and Damage is labelled
+    column takes the rest. The icons sit at the right end of each row, and on the magazine row the pen and the green
+    check line up under the weapon's pen and trash. All columns show at the width the sheet opens with. When the sheet is made narrower, TL and Qty are left out and Damage is labelled
     Dmg; Qty stays in Consumables and Attachments, where it is edited.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").

@@ -1220,7 +1220,10 @@
   --tl-wt: 4ch;
   --tl-a: 6em;
   --tl-b: 6em;
-  --tl-icons: 7em;
+  /* four icons: equip, chat, edit, delete */
+  --tl-icon: 1.3em;
+  --tl-icon-gap: 3px;
+  --tl-icons: calc(4 * var(--tl-icon) + 3 * var(--tl-icon-gap));
   /* joined columns */
   --tl-wt-a: calc(var(--tl-wt) + var(--tl-gap) + var(--tl-a));
   --tl-a-b: calc(var(--tl-a) + var(--tl-gap) + var(--tl-b));
@@ -1296,8 +1299,23 @@
   }
 }
 
-.tl-inventory .item-controls {
+/* The icons sit at the right end of every row and heading, each in a box of the same width, so they line up from row
+   to row (a fifth icon, the battery, sticks out to the left). */
+.tl-inventory .item-controls,
+.tl-inventory .gear-header > :last-child {
+  display: flex;
+  justify-content: flex-end;
+  justify-self: end;
+  align-items: center;
+  gap: var(--tl-icon-gap);
   white-space: nowrap;
+}
+
+.tl-inventory .item-controls > a,
+.tl-inventory .gear-header > :last-child > a {
+  flex: 0 0 var(--tl-icon);
+  width: var(--tl-icon);
+  text-align: center;
 }
 
 /* The name column of a weapon: the name (attacks), Auto, and the magazine gauge at the right end, which opens and
@@ -1307,12 +1325,17 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
-  padding-right: 6px;
+  overflow: hidden;
+}
+
+.tl-inventory .tl-weapon-name > .tl-chip,
+.tl-inventory .tl-weapon-name > .tl-status {
+  flex: none;
 }
 
 .tl-inventory .tl-name-text {
   flex: 0 1 auto;
-  min-width: 5em;
+  min-width: 2.5em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1426,6 +1449,21 @@
   text-align: left;
 }
 
+.tl-inventory .tl-ammo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--tl-icons);
+  column-gap: var(--tl-gap);
+  padding-right: 0;
+}
+
+.tl-inventory .tl-ammo-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
 .tl-inventory .tl-fire-modes:not(:has(.tl-fire-mode)) {
   display: none;
 }
@@ -1522,18 +1560,6 @@
   text-overflow: ellipsis;
   font-size: 0.85em;
   color: var(--tl-muted);
-}
-
-.tl-inventory .tl-ammo-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-}
-
-.tl-inventory .tl-ammo-actions .item-controls {
-  display: flex;
-  gap: 4px;
 }
 
 /* Loaded magazines left out of the Consumables list */
