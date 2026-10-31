@@ -21,9 +21,6 @@ Things we have decided to wait with. Nothing here is forgotten, and nothing here
 - **The Inventory template is a copy of the system's `actor-items.hbs` (twodsix 7.7.1).** When the system changes its
   template, compare and move the change over to `templates/actor-items.hbs`. The changes are listed at the top of the
   file.
-- **Ammunition mass.** Most magazines weigh 0. The Traveller rules of thumb could give an estimate: a magazine of 20
-  rounds is 10% of the weapon's mass (scale by size), a power pack 60% if external or 20% if internal, and a weapon
-  without a mass counts as 0.2 kg. Only if someone wants encumbrance for ammunition.
 - **A new name for the module.** It does more than the ledger now.
 
 - **The first line, `feature/finance-ledger` (the ledger built into the system).** Parked while the work goes on in this
