@@ -77,7 +77,7 @@ describe('describeWeaponAmmo', () => {
   test('the loaded magazine, how full it is and what is in reserve', () => {
     const info = describeWeaponAmmo(weapon([magazine('m1', 75, 80, 3)], 'm1', 80));
     expect(info).toMatchObject({
-      loaded: {id: 'm1', name: 'Magazine m1', quantity: 3, weight: ''}, current: 75, max: 80, percent: 94, state: 'ok', full: false,
+      loaded: {id: 'm1', name: 'Magazine m1', quantity: 3}, current: 75, max: 80, percent: 94, state: 'ok', full: false,
       reserve: 2, partial: 0, canReload: true, multiple: false
     });
   });

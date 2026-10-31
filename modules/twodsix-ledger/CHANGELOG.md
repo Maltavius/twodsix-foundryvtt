@@ -25,7 +25,7 @@
     start hidden; the new setting "Automatically expand weapons" shows them from the start. Changing the setting also
     resets weapons opened or closed by hand.
   - The magazine row uses the weapon's columns: the gauge and count under the name, the number of magazines in the
-    stack under Qty, its weight under Wt and the reserve as +2 under Range and Damage. The magazine's name and the
+    stack under Qty and the reserve as +2 under Range and Damage. The magazine's name and the
     full reserve text show on hover.
   - Reload is a plain icon like the others (with a tooltip), with a small arrow when there is more than one magazine to
     choose, in the icon column of the magazine row.

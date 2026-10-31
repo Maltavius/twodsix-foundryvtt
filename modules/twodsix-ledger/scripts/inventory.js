@@ -195,8 +195,7 @@ export function describeWeaponAmmo(weapon, unlinked = []) {
     loaded: {
       id: loaded.id,
       name: loaded.name,
-      quantity: Math.max(0, Number(loaded.system?.quantity) || 0),
-      weight: loaded.system?.weight ?? ""
+      quantity: Math.max(0, Number(loaded.system?.quantity) || 0)
     },
     current,
     max,
