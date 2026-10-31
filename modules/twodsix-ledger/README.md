@@ -28,8 +28,11 @@ https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger
 - The loaded magazine under each weapon, with a bar that turns yellow when it is low and red when it is empty, and a
   Reload that asks which magazine when there is more than one.
 - Loaded magazines are not listed a second time under Consumables.
+- Drag an item onto a carried row to carry it, or onto another row to put it in the backpack.
+- Armour shows radiation protection and secondary protection; Equipment & Tools shows weight.
 
-Each player can switch back to the system's own Inventory tab with the setting "Improved Inventory tab".
+Each player can switch back to the system's own Inventory tab with the setting "Improved Inventory tab", and choose
+"Compact weapon rows" to see only the status after each weapon's name until it is clicked.
 
 ## Settings
 

@@ -15,8 +15,16 @@
     from the same stack, or another magazine that fits).
   - Loaded magazines are left out of the Consumables list, since they are shown under their weapon. A line under the
     list says how many, and can show them there too.
-  - All the icons on a weapon row stay (equip, chat, edit, delete). The battery that creates a magazine is only shown
-    on weapons with an ammo value, and the icons no longer wrap to a second line.
+  - All the icons on a row stay (equip, chat, edit, delete). The battery that creates a magazine is only shown on
+    weapons with an ammo value, and the icons no longer wrap to a second line in any of the lists.
+  - The status of a weapon is shown after its name: the loaded magazine (green, yellow or red) or Unloaded, and Auto 3
+    for weapons with automatic fire. Burst Damage and Full Auto no longer repeat the rate of fire. A click on the status
+    shows or hides the fire modes and the magazine row. With the new setting "Compact weapon rows" they start hidden.
+  - Reload is an icon (with a tooltip), and has a small arrow when there is more than one magazine to choose.
+  - Drag an item onto a carried row of its own list and it is carried; drag it onto a row that is not carried (or the
+    "Not equipped" line) and it goes to the backpack. Its magazines go with it, as with the equip button.
+  - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the
+    protection types on hover. Equipment & Tools has a weight column.
 - A trash button next to Add empties the form (amount, description, category and a dropped item). It is only there while
   there is something to empty.
 - Drag an item (from the inventory, the sidebar or a compendium) onto the Finances tab, anywhere on it: Add

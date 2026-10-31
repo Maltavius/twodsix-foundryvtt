@@ -159,7 +159,14 @@
       "SHOW_LOADED": "Show here too",
       "HIDE_LOADED": "Hide",
       "SETTING_NAME": "Improved Inventory tab",
-      "SETTING_HINT": "Carried items first, fire mode buttons, the loaded magazine under each weapon and Reload with a choice of magazine. Turn it off to use the system's own Inventory tab."
+      "SETTING_HINT": "Carried items first, fire mode buttons, the loaded magazine under each weapon and Reload with a choice of magazine. Turn it off to use the system's own Inventory tab.",
+      "RAD_HEADER": "Rad",
+      "SECONDARY": "Secondary protection",
+      "SECONDARY_TYPES": "Secondary protection: {types}",
+      "SHOW_DETAILS": "Show fire modes and magazine",
+      "HIDE_DETAILS": "Hide fire modes and magazine",
+      "COMPACT_NAME": "Compact weapon rows",
+      "COMPACT_HINT": "Weapons show only their status after the name (magazine, Auto). Click the status to show fire modes and the magazine."
     }
   }
 }

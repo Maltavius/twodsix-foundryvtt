@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   ammoText,
   applyReload,
+  handleEquipDrop,
   inventoryActions,
   lastFireMode,
   prepareInventoryContext,
@@ -18,10 +19,12 @@ const weapon = (id, equipped, consumableData, loaded = '', ammo = 0) => ({
 });
 
 let settingValue;
+let compactValue;
 beforeEach(() => {
   settingValue = true;
+  compactValue = false;
   globalThis.game = {
-    settings: {get: vi.fn(() => settingValue)},
+    settings: {get: vi.fn((scope, key) => (key === 'inventoryCompact' ? compactValue : settingValue))},
     i18n: {localize: key => key, format: (key, data) => `${key}:${Object.values(data).join(',')}`}
   };
   globalThis.ui = {notifications: {warn: vi.fn()}};
@@ -37,12 +40,18 @@ describe('prepareInventoryContext', () => {
   function makeContext() {
     const m1 = magazine('m1', 75, 80, 3);
     const m2 = magazine('m2', 4, 6, 1, 'backpack');
+    const rifle = weapon('w2', 'equipped', [m1], 'm1', 80);
+    rifle.system.rateOfFire = '3';
     const itemTypes = {
-      weapon: [weapon('w1', 'backpack', [m2], '', 6), weapon('w2', 'equipped', [m1], 'm1', 80), weapon('w3', 'equipped', [])],
-      armor: [{id: 'a1', system: {equipped: 'ship'}}, {id: 'a2', system: {equipped: 'equipped'}}],
+      weapon: [weapon('w1', 'backpack', [m2], '', 6), rifle, weapon('w3', 'equipped', [])],
+      armor: [
+        {id: 'a1', system: {equipped: 'ship', secondaryArmor: {value: 0, protectionTypes: []}}},
+        {id: 'a2', system: {equipped: 'equipped', secondaryArmor: {value: 2, protectionTypes: ['laser', 'plasma']}}}
+      ],
       consumable: [m1, m2]
     };
-    return {itemTypes, context: {container: itemTypes, system: {hideStoredItems: {}}}};
+    const settings = {useCELAutofireRules: true, damageTypes: {laser: 'Laser', plasma: 'Plasma'}};
+    return {itemTypes, context: {container: itemTypes, system: {hideStoredItems: {}}, settings}};
   }
 
   test('does nothing when the player has turned it off', () => {
@@ -61,12 +70,38 @@ describe('prepareInventoryContext', () => {
     expect(context.inventory.groupStart).toMatchObject({w1: true, a1: true});
   });
 
-  test('describes the ammunition of weapons that use it', () => {
+  test('describes the ammunition and status of every weapon', () => {
+    const {context} = makeContext();
+    prepareInventoryContext({actor: {id: 'actor'}}, context);
+    const {weapons} = context.inventory;
+    expect(weapons.w2.ammo).toMatchObject({current: 75, max: 80, text: 'TWODSIX_LEDGER.INVENTORY.RESERVE:2'});
+    expect(weapons.w2).toMatchObject({auto: 3, hasDetails: true, open: true});
+    expect(weapons.w1.ammo).toMatchObject({state: 'unloaded', text: 'TWODSIX_LEDGER.INVENTORY.MAGAZINES_ONE:1'});
+    expect(weapons.w3).toMatchObject({ammo: null, auto: null, hasDetails: false, open: false});
+  });
+
+  test('compact rows start closed, and a weapon can be opened by hand', () => {
+    compactValue = true;
+    const sheet = {actor: {id: 'compact-actor', items: new Map()}, render: vi.fn()};
+    const {context} = makeContext();
+    prepareInventoryContext(sheet, context);
+    expect(context.inventory.weapons.w2.open).toBe(false);
+
+    sheet.actor.items.set('w2', context.container.weapon[0]);
+    inventoryActions.inventoryToggleDetails.call(sheet, {stopPropagation: vi.fn()}, makeButton('w2', {}));
+    expect(sheet.render).toHaveBeenCalled();
+    const again = makeContext().context;
+    prepareInventoryContext(sheet, again);
+    expect(again.inventory.weapons.w2.open).toBe(true);
+    expect(again.inventory.weapons.w1.open).toBe(false);
+  });
+
+  test('secondary armour protection with its types', () => {
     const {context} = makeContext();
     prepareInventoryContext({}, context);
-    expect(Object.keys(context.inventory.ammo).sort()).toEqual(['w1', 'w2']);
-    expect(context.inventory.ammo.w2).toMatchObject({current: 75, max: 80, text: 'TWODSIX_LEDGER.INVENTORY.RESERVE:2'});
-    expect(context.inventory.ammo.w1).toMatchObject({state: 'unloaded', text: 'TWODSIX_LEDGER.INVENTORY.MAGAZINES_ONE:1'});
+    expect(context.inventory.armor).toEqual({
+      a2: {secondary: 2, tooltip: 'TWODSIX_LEDGER.INVENTORY.SECONDARY_TYPES:Laser, Plasma'}
+    });
   });
 
   test('leaves loaded magazines out of the Consumables list unless the sheet shows them', () => {
@@ -206,5 +241,63 @@ describe('inventoryReload', () => {
     sheet.actor.isOwner = false;
     await inventoryActions.inventoryReload.call(sheet, {}, makeButton('w1', {}));
     expect(m1.refill).not.toHaveBeenCalled();
+  });
+});
+
+describe('handleEquipDrop', () => {
+  /** A row in a list; the list knows which item ids it holds. */
+  function makeDom(rows) {
+    const list = {querySelector: selector => (rows.some(row => selector.includes(`"${row.id}"`)) ? {} : null)};
+    return Object.fromEntries(rows.map(row => [row.id, {
+      dataset: {itemId: row.id},
+      classList: {contains: name => name === 'tl-equipped' && row.equipped},
+      closest: selector => (selector === '.item-list' ? list : null)
+    }]));
+  }
+  const dropOn = target => ({target: {closest: () => target}});
+
+  function makeActor(items) {
+    return {items: new Map(items.map(item => [item.id, item])), updateEmbeddedDocuments: vi.fn(async () => {})};
+  }
+
+  test('dropped on a carried row: carried, with its magazines', async () => {
+    const m1 = magazine('m1', 1, 6, 1, 'backpack');
+    const gun = weapon('w1', 'backpack', [m1]);
+    gun.system.consumables = ['m1'];
+    const actor = makeActor([gun, m1]);
+    const rows = makeDom([{id: 'w1', equipped: false}, {id: 'w2', equipped: true}]);
+    expect(await handleEquipDrop({actor}, dropOn(rows.w2), {id: 'w1'})).toBe(true);
+    expect(actor.updateEmbeddedDocuments).toHaveBeenCalledWith('Item', [
+      {_id: 'w1', 'system.equipped': 'equipped'},
+      {_id: 'm1', 'system.equipped': 'equipped'}
+    ]);
+  });
+
+  test('dropped on a row that is not carried: to the backpack', async () => {
+    const gun = weapon('w1', 'equipped', []);
+    const actor = makeActor([gun]);
+    const rows = makeDom([{id: 'w1', equipped: true}, {id: 'w3', equipped: false}]);
+    expect(await handleEquipDrop({actor}, dropOn(rows.w3), {id: 'w1'})).toBe(true);
+    expect(actor.updateEmbeddedDocuments).toHaveBeenCalledWith('Item', [{_id: 'w1', 'system.equipped': 'backpack'}]);
+  });
+
+  test('nothing when it already is there, on itself, in another list, or with the tab off', async () => {
+    const gun = weapon('w1', 'equipped', []);
+    const actor = makeActor([gun]);
+    const rows = makeDom([{id: 'w1', equipped: true}, {id: 'w2', equipped: true}]);
+    expect(await handleEquipDrop({actor}, dropOn(rows.w2), {id: 'w1'})).toBe(false);
+    expect(await handleEquipDrop({actor}, dropOn(rows.w1), {id: 'w1'})).toBe(false);
+    const armour = makeDom([{id: 'a1', equipped: false}]);
+    expect(await handleEquipDrop({actor}, dropOn(armour.a1), {id: 'w1'})).toBe(false);
+    settingValue = false;
+    const others = makeDom([{id: 'w1', equipped: true}, {id: 'w3', equipped: false}]);
+    expect(await handleEquipDrop({actor}, dropOn(others.w3), {id: 'w1'})).toBe(false);
+    expect(actor.updateEmbeddedDocuments).not.toHaveBeenCalled();
+  });
+
+  test('items from elsewhere are left to the system', async () => {
+    const actor = makeActor([]);
+    const rows = makeDom([{id: 'w2', equipped: true}]);
+    expect(await handleEquipDrop({actor}, dropOn(rows.w2), {id: 'other'})).toBe(false);
   });
 });

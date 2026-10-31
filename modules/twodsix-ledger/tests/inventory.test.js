@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import {
   ammoState,
+  autoRate,
+  equipStateForDrop,
+  fireRules,
+  hasFireModes,
   describeWeaponAmmo,
   fireModeKey,
   firstNotEquippedId,
@@ -116,5 +120,42 @@ describe('fireModeKey', () => {
   test('attack type and rate of fire, with the system defaults', () => {
     expect(fireModeKey('auto-full', '3')).toBe('auto-full:3');
     expect(fireModeKey('', undefined)).toBe('single:1');
+  });
+});
+
+describe('fire modes and Auto', () => {
+  const gun = (rateOfFire, extra = {}) => ({system: {rateOfFire, ...extra}});
+
+  test('fireRules reads the sheet settings', () => {
+    expect(fireRules({useCELAutofireRules: true, ShowDoubleTap: true})).toMatchObject({cel: true, showDoubleTap: true, ce: false});
+    expect(fireRules()).toMatchObject({ce: false, cel: false, ct: false, cu: false, rider: false});
+  });
+
+  test('hasFireModes follows the system template for each rule set', () => {
+    expect(hasFireModes(gun('1-3'), fireRules({useCEAutofireRules: true}))).toBe(true);
+    expect(hasFireModes(gun('1'), fireRules({useCEAutofireRules: true}))).toBe(false);
+    expect(hasFireModes(gun('3'), fireRules({useCELAutofireRules: true}))).toBe(true);
+    expect(hasFireModes(gun('1', {doubleTap: true}), fireRules({useCELAutofireRules: true, ShowDoubleTap: true}))).toBe(true);
+    expect(hasFireModes(gun('1/4'), fireRules({useCTAutofireRules: true}))).toBe(true);
+    expect(hasFireModes(gun('4'), fireRules({useCUAutofireRules: true}))).toBe(true);
+    expect(hasFireModes(gun('1', {isSingleAction: true}), fireRules({useRIDERFireRules: true}))).toBe(true);
+    expect(hasFireModes(gun('3'), fireRules({}))).toBe(false);
+  });
+
+  test('autoRate for CEL and CU', () => {
+    expect(autoRate(gun('3'), fireRules({useCELAutofireRules: true}))).toBe(3);
+    expect(autoRate(gun('3', {doubleTap: true}), fireRules({useCELAutofireRules: true, ShowDoubleTap: true}))).toBeNull();
+    expect(autoRate(gun('4'), fireRules({useCUAutofireRules: true}))).toBe(4);
+    expect(autoRate(gun('1'), fireRules({useCELAutofireRules: true}))).toBeNull();
+    expect(autoRate(gun('1-3'), fireRules({useCEAutofireRules: true}))).toBeNull();
+  });
+});
+
+describe('equipStateForDrop', () => {
+  test('carried rows carry, other rows put it in the backpack, otherwise nothing', () => {
+    expect(equipStateForDrop({itemEquipped: false, targetEquipped: true})).toBe('equipped');
+    expect(equipStateForDrop({itemEquipped: true, targetEquipped: false})).toBe('backpack');
+    expect(equipStateForDrop({itemEquipped: true, targetEquipped: true})).toBeNull();
+    expect(equipStateForDrop({itemEquipped: false, targetEquipped: false})).toBeNull();
   });
 });

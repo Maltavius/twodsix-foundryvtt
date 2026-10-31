@@ -16,8 +16,8 @@ Things we have decided to wait with. Nothing here is forgotten, and nothing here
 
 ## Open for later
 
-- **Compact mode for the Inventory tab.** A per-player choice between the weapon details on their own rows (now) and one
-  compact row with fire modes and ammunition. Wait until the new Inventory tab has been used for a while.
+- **Equipped items as cards (like the Finances cards).** Tried as a sketch and set aside: without icons for the weapon
+  stats the cards end up as text. Colour coding per item type belongs with it.
 - **The Inventory template is a copy of the system's `actor-items.hbs` (twodsix 7.7.1).** When the system changes its
   template, compare and move the change over to `templates/actor-items.hbs`. The changes are listed at the top of the
   file.

@@ -1205,13 +1205,93 @@
   --tl-muted: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-/* Room for all the icons on one line (the system's last column is 16%) */
+/* Room for all the icons on one line in every list (the system's last columns are 12-16%) */
 .tl-inventory .items-weapons {
   grid-template-columns: 5% 30% 6% 6% 10% 11% 11% 21%;
 }
 
-.tl-inventory .tl-controls {
+.tl-inventory .items-armor.tl-armor {
+  grid-template-columns: 5% 31% 7% 7% 8% 12% 9% 21%;
+}
+
+.tl-inventory .items-armor.tl-junk {
+  grid-template-columns: 5% 37% 8% 8% 8% 13% 21%;
+}
+
+.tl-inventory .items-augments {
+  grid-template-columns: 5% 28% 6% 7% 22% 11% 21%;
+}
+
+.tl-inventory .items-equipment {
+  grid-template-columns: 5% 27% 6% 7% 7% 27% 21%;
+}
+
+.tl-inventory .items-consumable {
+  grid-template-columns: 5% 35% 14% 10% 15% 21%;
+}
+
+.tl-inventory .item-controls {
   white-space: nowrap;
+}
+
+/* Status after the weapon's name: the loaded magazine and Auto. A click opens or closes the rows under the weapon. */
+.tl-inventory .tl-weapon-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+}
+
+.tl-inventory .tl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.tl-inventory .tl-status-caret {
+  font-size: 0.7em;
+  color: var(--tl-muted);
+}
+
+.tl-inventory .tl-chip {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  line-height: 1.5;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-inventory .tl-chip-ok {
+  color: var(--tl-ok);
+  background: color-mix(in srgb, var(--tl-ok-base) 14%, transparent);
+}
+
+.tl-inventory .tl-chip-low {
+  color: var(--tl-low);
+  background: color-mix(in srgb, var(--tl-low-base) 18%, transparent);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-chip-empty,
+.tl-inventory .tl-chip-unloaded {
+  color: var(--tl-empty);
+  background: color-mix(in srgb, var(--tl-empty-base) 15%, transparent);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-chip-auto {
+  color: var(--tl-equipped);
+  background: color-mix(in srgb, var(--tl-equipped) 14%, transparent);
+}
+
+/* Secondary armour protection, (+X) with the protection types on hover */
+.tl-inventory .tl-secondary {
+  font-size: 0.85em;
+  color: var(--tl-muted);
+  border-bottom: 1px dotted var(--tl-line);
+  cursor: help;
 }
 
 /* Carried items */

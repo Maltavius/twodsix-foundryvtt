@@ -6,20 +6,30 @@
 
 import { MODULE_ID } from "./store.js";
 import {
+  EQUIPPED,
   INVENTORY_LISTS,
+  autoRate,
   describeWeaponAmmo,
+  equipStateForDrop,
   fireModeKey,
+  fireRules,
   firstNotEquippedId,
+  hasFireModes,
+  isEquipped,
   loadedConsumableIds,
   reloadChoices,
   sortEquippedFirst
 } from "./inventory.js";
 
 export const INVENTORY_SETTING = "improvedInventory";
+export const COMPACT_SETTING = "inventoryCompact";
 const PREFIX = "TWODSIX_LEDGER.INVENTORY";
 
 /** The last fire mode used per weapon, on this client only, until the page is reloaded. Key: "<actor id>.<item id>". */
 const lastFireModes = new Map();
+
+/** Weapons the player opened or closed by hand, on this client until the page is reloaded. Key as above. */
+const openedWeapons = new Map();
 
 /** Whether this sheet shows the loaded magazines in the Consumables list too (per open sheet). */
 const SHOW_LOADED = Symbol("twodsixLedgerShowLoaded");
@@ -32,6 +42,17 @@ export function inventoryEnabled() {
     return game.settings.get(MODULE_ID, INVENTORY_SETTING) !== false;
   } catch {
     return true;
+  }
+}
+
+/**
+ * @returns {boolean} whether the weapon rows start closed (only the status after the name shows)
+ */
+export function inventoryCompact() {
+  try {
+    return game.settings.get(MODULE_ID, COMPACT_SETTING) === true;
+  } catch {
+    return false;
   }
 }
 
@@ -100,18 +121,42 @@ export function prepareInventoryContext(sheet, context) {
   markGroup(consumables.filter(item => !item.system?.isAttachment && (showLoaded || !loadedIds.has(item.id))), hide.consumable);
   markGroup(consumables.filter(item => item.system?.isAttachment), hide.attachment);
 
-  const ammo = {};
+  const rules = fireRules(context.settings);
+  const compact = inventoryCompact();
+  const weapons = {};
   for (const weapon of container.weapon ?? []) {
     const info = describeWeaponAmmo(weapon);
-    if (info) {
-      ammo[weapon.id] = {...info, text: ammoText(info)};
+    const ammo = info ? {...info, text: ammoText(info)} : null;
+    const hasDetails = Boolean(ammo) || hasFireModes(weapon, rules);
+    const open = hasDetails && (openedWeapons.get(`${sheet.actor?.id}.${weapon.id}`) ?? !compact);
+    weapons[weapon.id] = {
+      ammo,
+      auto: autoRate(weapon, rules),
+      hasDetails,
+      open,
+      toggleTooltip: t(open ? "HIDE_DETAILS" : "SHOW_DETAILS")
+    };
+  }
+
+  const armor = {};
+  const damageTypes = context.settings?.damageTypes ?? {};
+  for (const item of container.armor ?? []) {
+    const secondary = Number(item.system?.secondaryArmor?.value) || 0;
+    if (secondary) {
+      const types = (item.system.secondaryArmor.protectionTypes ?? [])
+        .map(type => game.i18n.localize(damageTypes[type] ?? type));
+      armor[item.id] = {
+        secondary,
+        tooltip: types.length ? t("SECONDARY_TYPES", {types: types.join(", ")}) : t("SECONDARY")
+      };
     }
   }
 
   context.container = container;
   context.inventory = {
     groupStart,
-    ammo,
+    weapons,
+    armor,
     loadedHidden: showLoaded ? {} : Object.fromEntries(loadedInList.map(item => [item.id, true])),
     loadedCount: loadedInList.length,
     loadedNote: t(loadedInList.length === 1 ? "LOADED_HIDDEN_ONE" : "LOADED_HIDDEN_MANY", {count: loadedInList.length}),
@@ -291,6 +336,24 @@ export const inventoryActions = {
   },
 
   /**
+   * Open or close the rows under a weapon (fire modes and the loaded magazine).
+   * @this {object} the sheet
+   * @param {Event} event
+   * @param {HTMLElement} target
+   */
+  inventoryToggleDetails(event, target) {
+    event?.stopPropagation?.();
+    const item = rowItem(this, target);
+    if (!item) {
+      return;
+    }
+    const key = `${this.actor.id}.${item.id}`;
+    const open = openedWeapons.get(key) ?? !inventoryCompact();
+    openedWeapons.set(key, !open);
+    this.render();
+  },
+
+  /**
    * Show or hide the loaded magazines in the Consumables list.
    * @this {object} the sheet
    */
@@ -299,3 +362,52 @@ export const inventoryActions = {
     this.render();
   }
 };
+
+/**
+ * Carry an item, or put it in the backpack, together with its magazines (as the system's equip button does).
+ * @param {object} actor
+ * @param {object} item
+ * @param {string} state
+ * @returns {Promise<void>}
+ */
+export async function setEquipped(actor, item, state) {
+  const updates = [{_id: item.id, "system.equipped": state}];
+  for (const id of item.system?.consumables ?? []) {
+    if (actor.items.get(id)) {
+      updates.push({_id: id, "system.equipped": state});
+    }
+  }
+  await actor.updateEmbeddedDocuments("Item", updates);
+}
+
+/**
+ * An item of the actor dropped on a row of its own list: carried rows carry it, other rows put it in the backpack.
+ * @param {object} sheet
+ * @param {DragEvent} event
+ * @param {object} dropped - the dropped item
+ * @returns {Promise<boolean>} whether the item was moved
+ */
+export async function handleEquipDrop(sheet, event, dropped) {
+  if (!inventoryEnabled()) {
+    return false;
+  }
+  const item = sheet.actor?.items.get(dropped?.id ?? dropped?._id);
+  const target = event?.target?.closest?.(".tl-inventory .item[data-item-id], .tl-inventory .tl-group-divider");
+  if (!item || !target || target.dataset?.itemId === item.id) {
+    return false;
+  }
+  // Only within the item's own list (a weapon dropped among armour does nothing)
+  const list = target.closest(".item-list");
+  if (!list?.querySelector(`.item[data-item-id="${item.id}"]`)) {
+    return false;
+  }
+  const state = equipStateForDrop({
+    itemEquipped: isEquipped(item),
+    targetEquipped: target.classList.contains("tl-equipped")
+  });
+  if (!state) {
+    return false;
+  }
+  await setEquipped(sheet.actor, item, state === EQUIPPED ? EQUIPPED : "backpack");
+  return true;
+}

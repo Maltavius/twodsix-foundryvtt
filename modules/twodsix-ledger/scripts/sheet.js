@@ -10,7 +10,7 @@
 
 import { MODULE_ID } from "./store.js";
 import { bindFinanceTab, financeActions, prepareFinanceContext } from "./financeTab.js";
-import { bindInventoryTab, inventoryActions, prepareInventoryContext } from "./inventoryTab.js";
+import { bindInventoryTab, handleEquipDrop, inventoryActions, prepareInventoryContext } from "./inventoryTab.js";
 
 export const SYSTEM_PARTIAL = "systems/twodsix/templates/actors/parts/actor/actor-finances.hbs";
 export const OWN_PARTIAL = `modules/${MODULE_ID}/templates/actor-finances.hbs`;
@@ -117,6 +117,17 @@ export function createLedgerSheet(SystemSheet) {
     async _renderHTML(context, options) {
       await ensureSheetPartials();
       return super._renderHTML(context, options);
+    }
+
+    /**
+     * An item of the character dropped on its own Inventory list: the system sorts it as before, and the module carries
+     * it or puts it in the backpack depending on where it lands.
+     * @override
+     */
+    async processDroppedItem(event, item) {
+      const result = await super.processDroppedItem(event, item);
+      const moved = await handleEquipDrop(this, event, item);
+      return result || moved;
     }
 
     /** @override */

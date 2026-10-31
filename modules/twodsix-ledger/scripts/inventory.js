@@ -191,3 +191,84 @@ export function loadedConsumableIds(weapons) {
 export function fireModeKey(attackType, rof) {
   return `${attackType || "single"}:${Number.parseInt(rof, 10) || 1}`;
 }
+
+/**
+ * The autofire rules the world uses, from the sheet's settings (the same flags the system's template reads).
+ * @param {object} [settings] - context.settings
+ * @returns {{ce: boolean, cel: boolean, ct: boolean, cu: boolean, rider: boolean, showDoubleTap: boolean}}
+ */
+export function fireRules(settings = {}) {
+  return {
+    ce: Boolean(settings.useCEAutofireRules),
+    cel: Boolean(settings.useCELAutofireRules),
+    ct: Boolean(settings.useCTAutofireRules),
+    cu: Boolean(settings.useCUAutofireRules),
+    rider: Boolean(settings.useRIDERFireRules),
+    showDoubleTap: Boolean(settings.ShowDoubleTap)
+  };
+}
+
+/**
+ * @param {object} weapon
+ * @returns {Array<string>} the rate of fire split like the system's helpers do ("1-3" → ["1", "3"])
+ */
+function rateParts(weapon) {
+  return String(weapon?.system?.rateOfFire ?? "").split(/[-/]/);
+}
+
+/**
+ * Whether the weapon gets fire mode buttons, the same tests as the system's template.
+ * @param {object} weapon
+ * @param {object} rules - from fireRules
+ * @returns {boolean}
+ */
+export function hasFireModes(weapon, rules) {
+  const system = weapon?.system ?? {};
+  const rof = Number.parseInt(system.rateOfFire, 10);
+  if (rules.ce || rules.ct) {
+    return rateParts(weapon).length > 1;
+  }
+  if (rules.cel) {
+    return rof > 1 || Boolean(system.doubleTap && rules.showDoubleTap);
+  }
+  if (rules.cu) {
+    return rof > 1;
+  }
+  if (rules.rider) {
+    return rof > 1 || Boolean(system.isSingleAction);
+  }
+  return false;
+}
+
+/**
+ * The "Auto N" status after the weapon's name, for the rules where the system shows one rate of fire (CEL and CU).
+ * @param {object} weapon
+ * @param {object} rules - from fireRules
+ * @returns {number|null}
+ */
+export function autoRate(weapon, rules) {
+  const rof = Number.parseInt(weapon?.system?.rateOfFire, 10);
+  if (!(rof > 1)) {
+    return null;
+  }
+  if (rules.cel) {
+    return weapon.system.doubleTap && rules.showDoubleTap ? null : rof;
+  }
+  return rules.cu ? rof : null;
+}
+
+/**
+ * What dropping an item of the actor on a row of its own list does to where it is carried: on a carried row it becomes
+ * carried, on another row (or the "Not equipped" line) it goes to the backpack. Nothing changes when it is already there.
+ * @param {{itemEquipped: boolean, targetEquipped: boolean}} drop
+ * @returns {"equipped"|"backpack"|null}
+ */
+export function equipStateForDrop({itemEquipped, targetEquipped}) {
+  if (targetEquipped && !itemEquipped) {
+    return EQUIPPED;
+  }
+  if (!targetEquipped && itemEquipped) {
+    return "backpack";
+  }
+  return null;
+}

@@ -7,7 +7,7 @@
  */
 
 import { MODULE_ID } from "./store.js";
-import { INVENTORY_SETTING } from "./inventoryTab.js";
+import { COMPACT_SETTING, INVENTORY_SETTING } from "./inventoryTab.js";
 import {
   BUILTIN_CATEGORIES,
   LEDGER_ACCOUNTS,
@@ -230,6 +230,15 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true,
+    onChange: refreshSheets
+  });
+  game.settings.register(MODULE_ID, COMPACT_SETTING, {
+    name: `${PREFIX}.INVENTORY.COMPACT_NAME`,
+    hint: `${PREFIX}.INVENTORY.COMPACT_HINT`,
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
     onChange: refreshSheets
   });
   game.settings.registerMenu(MODULE_ID, "configure", {

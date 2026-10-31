@@ -121,6 +121,9 @@ describe('createLedgerSheet', () => {
         return 'html';
       }
       async _onRender() {}
+      async processDroppedItem() {
+        return 'sorted';
+      }
     };
   }
 
@@ -134,6 +137,15 @@ describe('createLedgerSheet', () => {
     expect(Object.keys(Ledger.DEFAULT_OPTIONS.actions)).toEqual(expect.arrayContaining(['financeAdd', 'financeMove', 'financeUndo',
       'inventoryFireMode', 'inventoryReload', 'inventoryToggleLoaded']));
     expect('financeAdd' in Base.DEFAULT_OPTIONS.actions).toBe(false);
+  });
+
+  test('a dropped item is still handled by the system first', async () => {
+    globalThis.game = {settings: {get: () => true}};
+    const Ledger = createLedgerSheet(makeBase());
+    const sheet = new Ledger();
+    sheet.actor = {items: new Map()};
+    expect(await sheet.processDroppedItem({target: {closest: () => null}}, {id: 'x'})).toBe('sorted');
+    delete globalThis.game;
   });
 
   test('installs the partial before rendering', async () => {

@@ -159,7 +159,14 @@
       "SHOW_LOADED": "Visa här också",
       "HIDE_LOADED": "Dölj",
       "SETTING_NAME": "Förbättrad Inventory-flik",
-      "SETTING_HINT": "Burna föremål först, knappar för eldlägen, det laddade magasinet under varje vapen och Ladda om med val av magasin. Stäng av för att använda systemets egen Inventory-flik."
+      "SETTING_HINT": "Burna föremål först, knappar för eldlägen, det laddade magasinet under varje vapen och Ladda om med val av magasin. Stäng av för att använda systemets egen Inventory-flik.",
+      "RAD_HEADER": "Strål.",
+      "SECONDARY": "Sekundärt skydd",
+      "SECONDARY_TYPES": "Sekundärt skydd: {types}",
+      "SHOW_DETAILS": "Visa eldlägen och magasin",
+      "HIDE_DETAILS": "Dölj eldlägen och magasin",
+      "COMPACT_NAME": "Kompakta vapenrader",
+      "COMPACT_HINT": "Vapen visar bara sin status efter namnet (magasin, Auto). Klicka på statusen för att visa eldlägen och magasin."
     }
   }
 }
