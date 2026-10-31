@@ -33,8 +33,9 @@
     with the list above it. A list whose name column gets too narrow leaves out TL and Qty and labels Damage Dmg; the
     other lists keep theirs. Qty stays in Consumables and Attachments, where it is edited.
   - The list's name stands in the black heading row where "Name" was, instead of in a tab above it: one row less per
-    list. The icons sit at the right end of each row; on the magazine row Reload sits under the
-    equip icon, the pen under the weapon's pen and the green check under the trash.
+    list.
+  - The icons sit at the right end of each row; on the magazine row Reload sits under the equip icon, the pen under
+    the weapon's pen and the green check under the trash.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the
