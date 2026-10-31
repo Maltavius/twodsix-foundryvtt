@@ -192,10 +192,51 @@ export function markFireModes(sheet) {
 }
 
 /**
+ * A list with no items takes its name column from the list above it (in pixels as laid out), so empty lists line up
+ * with it instead of sizing their columns from the headings alone. Lists with items keep their own columns.
+ * @param {HTMLElement} root - the sheet's element
+ */
+export function matchEmptySections(root) {
+  const sections = root?.querySelectorAll?.(".tl-inventory .tl-section") ?? [];
+  let previousName = null;
+  for (const section of sections) {
+    section.style.removeProperty("--tl-name-match");
+    section.style.removeProperty("--tl-icons-match");
+    const empty = !section.querySelector(".item-list .item");
+    if (empty && previousName) {
+      section.style.setProperty("--tl-name-match", previousName);
+      section.style.setProperty("--tl-icons-match", "1fr");
+    }
+    // The laid-out widths; a hidden tab gives no pixel widths, and is done again when it is shown
+    const name = Number.parseFloat(getComputedStyle(section).gridTemplateColumns.split(" ")[1]);
+    if (name > 0) {
+      previousName = `${name}px`;
+    }
+  }
+}
+
+/** The observer that lines up empty lists again when the tab is shown or the sheet is resized (one per sheet). */
+const SECTION_OBSERVER = Symbol("twodsixLedgerSectionObserver");
+
+/**
  * @param {object} sheet
  */
 export function bindInventoryTab(sheet) {
   markFireModes(sheet);
+  sheet[SECTION_OBSERVER]?.disconnect();
+  const inventory = sheet.element?.querySelector?.(".tl-inventory");
+  if (!inventory) {
+    return;
+  }
+  matchEmptySections(sheet.element);
+  if (typeof ResizeObserver === "function") {
+    let frame = null;
+    sheet[SECTION_OBSERVER] = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => matchEmptySections(sheet.element));
+    });
+    sheet[SECTION_OBSERVER].observe(inventory);
+  }
 }
 
 /**

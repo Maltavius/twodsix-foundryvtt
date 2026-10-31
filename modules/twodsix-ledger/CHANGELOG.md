@@ -22,16 +22,16 @@
     and an arrow shows or hides the fire modes and the magazine row with its bar; only the name itself attacks. With the new setting "Compact
     weapon rows" they start hidden.
   - Reload is a plain icon like the others (with a tooltip), with a small arrow when there is more than one magazine to
-    choose.
+    choose, in the icon column of the magazine row.
   - Reserve counts every magazine that is not loaded, part-used ones too ("2 in reserve, 1 part-used"). The system's
     Reload puts a part-used magazine aside as a new item that the weapon does not know about; the module links it to
     the weapon, and finds such magazines that were put aside earlier by name and size, so they can be loaded again.
   - Drag an item onto a carried row of its own list, or onto the list heading or column headings, and it is carried;
     drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
     with it, as with the equip button.
-  - All lists share the same column widths, so Name, TL, Qty and the icons line up from list to list; the name
-    column takes the rest. The icons sit at the right end of each row, and on the magazine row the pen and the green
-    check line up under the weapon's pen and trash. All columns show at the width the sheet opens with. When the sheet is made narrower, TL and Qty are left out and Damage is labelled
+  - Each list sizes its columns to its own content, and the name column takes the rest. A list with no items lines up
+    with the list above it. The icons sit at the right end of each row; on the magazine row Reload sits under the
+    equip icon, the pen under the weapon's pen and the green check under the trash. All columns show at the width the sheet opens with. When the sheet is made narrower, TL and Qty are left out and Damage is labelled
     Dmg; Qty stays in Consumables and Attachments, where it is edited.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").

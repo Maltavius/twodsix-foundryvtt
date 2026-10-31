@@ -1205,61 +1205,81 @@
   --tl-muted: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-/* Every row is its own grid, so all lists share one set of fixed column widths and the name column takes the rest.
-   That keeps Name, TL, Qty and the icons lined up from list to list, empty or not. Two list columns (A and B: range
-   and damage, armour and radiation, ...) have the same width everywhere; a list with one wide column (a description)
-   joins them. When the sheet is made narrower than it opens, TL and Qty are left out (Qty stays in Consumables and
-   Attachments, where it is edited). */
+/* Each list is one grid: the heading row, the item rows and the rows under a weapon share its columns (subgrid), so
+   every column is as wide as the widest value in that list and the name column takes the rest. A list with no items
+   gets its name column from the list above (set by the sheet's script), so empty lists line up with it. When the sheet
+   is made narrower than it opens, TL and Qty are left out (Qty stays in Consumables and Attachments, where it is
+   edited). */
 .tl-inventory {
   container-type: inline-size;
-  --tl-gap: 6px;
+  --tl-gap: 10px;
   --tl-dice: 1.8em;
-  --tl-name: minmax(7em, 1fr);
-  --tl-tl: 3ch;
-  --tl-qty: 3.5ch;
-  --tl-wt: 4ch;
-  --tl-a: 6.5ch;
-  --tl-b: 8ch;
-  /* four icons: equip, chat, edit, delete */
   --tl-icon: 1.3em;
   --tl-icon-gap: 3px;
-  --tl-icons: calc(4 * var(--tl-icon) + 3 * var(--tl-icon-gap));
-  /* joined columns */
-  --tl-wt-a: calc(var(--tl-wt) + var(--tl-gap) + var(--tl-a));
-  --tl-a-b: calc(var(--tl-a) + var(--tl-gap) + var(--tl-b));
-  --tl-tl-qty-wt: calc(var(--tl-tl) + var(--tl-qty) + var(--tl-wt) + 2 * var(--tl-gap));
 }
 
-.tl-inventory .items-weapons,
-.tl-inventory .items-armor.tl-armor,
-.tl-inventory .items-armor.tl-junk,
-.tl-inventory .items-augments,
-.tl-inventory .items-equipment,
-.tl-inventory .items-consumable {
+.tl-inventory .tl-section {
+  display: grid;
+  column-gap: var(--tl-gap);
+  --tl-name-col: var(--tl-name-match, minmax(6em, 1fr));
+  --tl-icons-col: var(--tl-icons-match, auto);
+}
+
+.tl-inventory .tl-section > *,
+.tl-inventory .tl-section .item-list > *,
+.tl-inventory .tl-section .item > *,
+.tl-inventory .tl-section .item > ol > * {
+  grid-column: 1 / -1;
+}
+
+.tl-inventory .tl-section > .gear-header,
+.tl-inventory .tl-section > .item-list,
+.tl-inventory .tl-section .item-list > .item,
+.tl-inventory .tl-section .item > ol,
+.tl-inventory .tl-section .item > ol > li.flexrow,
+.tl-inventory .tl-section .item > ol > li.flexrow > [class*="items-"],
+.tl-inventory .tl-section li.tl-ammo {
+  display: grid;
+  grid-template-columns: subgrid;
   column-gap: var(--tl-gap);
 }
 
+.tl-inventory .tl-section .item > ol > li.flexrow > [class*="items-"] {
+  grid-column: 1 / -1;
+}
+
 /* dice, name, TL, Qty, Wt, Range | Armour, Damage | Rad, icons */
-.tl-inventory .items-weapons,
-.tl-inventory .items-armor.tl-armor {
-  grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-tl) var(--tl-qty) var(--tl-wt) var(--tl-a) var(--tl-b)
-    var(--tl-icons);
+.tl-inventory .tl-section-weapons,
+.tl-inventory .tl-section-armor {
+  grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto auto auto auto var(--tl-icons-col);
 }
 
-/* dice, name, TL, Qty, Wt, description (or nothing), icons */
-.tl-inventory .items-equipment,
-.tl-inventory .items-armor.tl-junk {
-  grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-tl) var(--tl-qty) var(--tl-wt) var(--tl-a-b) var(--tl-icons);
+/* dice, name, TL, Qty, Effect, Location, icons; dice, name, TL, Qty, Wt, description (or nothing), icons */
+.tl-inventory .tl-section-augments,
+.tl-inventory .tl-section-equipment,
+.tl-inventory .tl-section-junk {
+  grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto auto auto var(--tl-icons-col);
 }
 
-/* dice, name, TL, Qty, Effect, Location, icons */
-.tl-inventory .items-augments {
-  grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-tl) var(--tl-qty) var(--tl-wt-a) var(--tl-b) var(--tl-icons);
+/* dice, name, Type, Qty, Count, icons; Attachments: Subtype, Qty, TL */
+.tl-inventory .tl-section-consumables,
+.tl-inventory .tl-section-attachments {
+  grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto auto var(--tl-icons-col);
 }
 
-/* dice, name, Type, Qty, Count, icons (Attachments: Subtype, Qty, TL) */
-.tl-inventory .items-consumable {
-  grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-tl-qty-wt) var(--tl-a) var(--tl-b) var(--tl-icons);
+/* A description gets room to wrap instead of pushing the name aside */
+.tl-inventory .tl-section-equipment .items-equipment > :nth-child(6),
+.tl-inventory .tl-section-augments .items-augments > :nth-child(5) {
+  max-width: 18em;
+}
+
+/* The magazine row: everything about the magazine across the columns, its icons in the icon column */
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-main {
+  grid-column: 1 / -2;
+}
+
+.tl-inventory .tl-section li.tl-ammo > .tl-ammo-icons {
+  grid-column: -2 / -1;
 }
 
 @container (max-width: 510px) {
@@ -1273,29 +1293,20 @@
     display: inline;
   }
 
-  .tl-inventory .items-weapons,
-  .tl-inventory .items-armor.tl-armor {
-    grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-wt) var(--tl-a) var(--tl-b) var(--tl-icons);
+  .tl-inventory .tl-section-weapons,
+  .tl-inventory .tl-section-armor {
+    grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto auto var(--tl-icons-col);
   }
 
-  .tl-inventory .items-equipment,
-  .tl-inventory .items-armor.tl-junk {
-    grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-wt) var(--tl-a-b) var(--tl-icons);
+  .tl-inventory .tl-section-augments,
+  .tl-inventory .tl-section-equipment,
+  .tl-inventory .tl-section-junk {
+    grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto var(--tl-icons-col);
   }
 
-  .tl-inventory .items-augments {
-    grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-wt-a) var(--tl-b) var(--tl-icons);
-  }
-
-  /* Qty stays: Type and Qty share Wt and A, Count keeps B */
-  .tl-inventory .items-consumable {
-    grid-template-columns: var(--tl-dice) var(--tl-name) calc(var(--tl-wt-a) - 5ch - var(--tl-gap)) 5ch var(--tl-b)
-      var(--tl-icons);
-  }
-
-  /* Attachments: Subtype, Qty */
-  .tl-inventory .items-consumable.tl-attach {
-    grid-template-columns: var(--tl-dice) var(--tl-name) var(--tl-wt-a) var(--tl-b) var(--tl-icons);
+  /* Qty stays in Consumables; Attachments lose TL */
+  .tl-inventory .tl-section-attachments {
+    grid-template-columns: var(--tl-dice) var(--tl-name-col) auto auto var(--tl-icons-col);
   }
 }
 
@@ -1312,6 +1323,7 @@
 }
 
 .tl-inventory .item-controls > a,
+.tl-inventory .item-controls > .tl-icon-gap,
 .tl-inventory .gear-header > :last-child > a {
   flex: 0 0 var(--tl-icon);
   width: var(--tl-icon);
@@ -1450,9 +1462,6 @@
 }
 
 .tl-inventory .tl-ammo {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--tl-icons);
-  column-gap: var(--tl-gap);
   padding-right: 0;
 }
 
@@ -1498,9 +1507,15 @@
   cursor: pointer;
 }
 
+.tl-inventory .tl-reload {
+  position: relative;
+}
+
 .tl-inventory .tl-reload-more {
-  margin-left: 1px;
-  font-size: 0.7em;
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  font-size: 0.6em;
 }
 
 .tl-inventory .tl-fire-mode.is-active {

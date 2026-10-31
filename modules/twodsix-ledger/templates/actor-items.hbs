@@ -9,7 +9,7 @@
 {{!-- Sheet Body --}}
 <div class="character-tabs-info character-inventory tl-inventory">
    <!-- WEAPONS -->
-  <div><span class="pusher"></span>
+  <div class="tl-section tl-section-weapons"><span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.WEAPONS"}}</span>
     <div class="items-weapons gear-header">
       <span></span>
@@ -132,8 +132,7 @@
           </li>
           {{!-- The loaded magazine. The system's - and + buttons, green check and edit button read the consumable-row ids --}}
           {{#with (lookup (lookup @root.inventory.weapons item.id) "ammo") as |ammo|}}
-          {{!-- Two cells like the weapon row: everything about the magazine, and the icons in the icon column (the pen
-               under the weapon's pen, the green check under the trash) --}}
+          {{!-- Two cells like the weapon row: everything about the magazine, and the icons in the icon column --}}
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
             <span class="tl-ammo-main">
               <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
@@ -149,18 +148,22 @@
                 <span class="tl-badge">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
                 <span class="tl-ammo-text">{{ammo.text}}</span>
               {{/if}}
-              {{#if ammo.canReload}}
-              <a class="item-control tl-reload" data-action="inventoryReload"
-                data-tooltip="{{#if ammo.loaded}}{{localize 'TWODSIX_LEDGER.INVENTORY.RELOAD'}}{{else}}{{localize 'TWODSIX_LEDGER.INVENTORY.LOAD'}}{{/if}}"
-                aria-label="{{#if ammo.loaded}}{{localize 'TWODSIX_LEDGER.INVENTORY.RELOAD'}}{{else}}{{localize 'TWODSIX_LEDGER.INVENTORY.LOAD'}}{{/if}}">
-                <i class="fa-solid fa-rotate"></i>{{#if ammo.multiple}}<i class="fa-solid fa-caret-down tl-reload-more"></i>{{/if}}
-              </a>
-              {{/if}}
             </span>
             <span class="item-controls tl-ammo-icons">
+              {{!-- Under the weapon's icons: Reload under equip, a gap under chat, pen under pen, check under trash --}}
+                {{#if ammo.canReload}}
+                <a class="item-control tl-reload" data-action="inventoryReload"
+                  data-tooltip="{{#if ammo.loaded}}{{localize 'TWODSIX_LEDGER.INVENTORY.RELOAD'}}{{else}}{{localize 'TWODSIX_LEDGER.INVENTORY.LOAD'}}{{/if}}"
+                  aria-label="{{#if ammo.loaded}}{{localize 'TWODSIX_LEDGER.INVENTORY.RELOAD'}}{{else}}{{localize 'TWODSIX_LEDGER.INVENTORY.LOAD'}}{{/if}}">
+                  <i class="fa-solid fa-rotate"></i>{{#if ammo.multiple}}<i class="fa-solid fa-caret-down tl-reload-more"></i>{{/if}}
+                </a>
+                {{/if}}
+              <span class="tl-icon-gap" aria-hidden="true"></span>
               {{#if ammo.loaded}}
               <a class="item-control consumable-edit" data-tooltip='{{localize "TWODSIX.Actor.Items.EditItem"}}' data-action="editConsumable"><i class="fa-solid fa-pen-to-square"></i></a>
               <a class="item-control consumable-toggle" data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}" data-action="toggleConsumable" style="color: green;" data-tooltip="{{localize 'TWODSIX.Items.Consumable.ActiveConsumable'}}"><i class="fa-solid fa-circle-check"></i></a>
+              {{else}}
+              <span class="tl-icon-gap" aria-hidden="true"></span><span class="tl-icon-gap" aria-hidden="true"></span>
               {{/if}}
             </span>
           </li>
@@ -182,7 +185,7 @@
   </div>
 
   <!-- ARMOR -->
-  <div><span class="pusher"></span>
+  <div class="tl-section tl-section-armor"><span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.ARMOR"}}</span>
     <div class="items-armor tl-armor gear-header">
       <span></span>
@@ -246,7 +249,7 @@
   </div>
 
   <!-- AUGMENTS -->
-  <div><span class="pusher"></span>
+  <div class="tl-section tl-section-augments"><span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.AUGMENTS"}}</span>
     <div class="items-augments gear-header">
       <span></span>
@@ -291,7 +294,7 @@
   </div>
 
   <!-- EQUIPMENT -->
-  <div><span class="pusher"></span>
+  <div class="tl-section tl-section-equipment"><span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.EQUIPMENT_TOOLS"}}</span>
     <div class="items-equipment gear-header">
       <span></span>
@@ -340,7 +343,7 @@
   </div>
 
   <!-- STORAGE & JUNK -->
-  <div><span class="pusher"></span>
+  <div class="tl-section tl-section-junk"><span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.STORAGE_JUNK"}}</span>
     <div class="items-armor tl-junk gear-header">
       <span></span>
@@ -391,7 +394,7 @@
   </div>
 
  <!-- Consumables -->
- <div>
+ <div class="tl-section tl-section-consumables">
     <span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.CONSUMABLES"}}</span>
     <div class="items-consumable gear-header">
@@ -448,7 +451,7 @@
  </div>
 
   <!-- Attachments -->
-  <div>
+  <div class="tl-section tl-section-attachments">
     <span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.ATTACHMENTS"}}</span>
     <div class="items-consumable tl-attach gear-header">

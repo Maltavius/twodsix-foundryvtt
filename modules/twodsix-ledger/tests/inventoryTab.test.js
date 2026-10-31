@@ -4,6 +4,7 @@ import {
   applyReload,
   handleEquipDrop,
   inventoryActions,
+  matchEmptySections,
   lastFireMode,
   prepareInventoryContext,
   reloadChoiceLabel
@@ -348,5 +349,49 @@ describe('handleEquipDrop', () => {
     const actor = makeActor([]);
     const rows = makeDom([{id: 'w2', equipped: true}]);
     expect(await handleEquipDrop({actor}, dropOn(rows.w2), {id: 'other'})).toBe(false);
+  });
+});
+
+describe('matchEmptySections', () => {
+  function section(empty, columns) {
+    const props = {};
+    return {
+      props,
+      columns,
+      querySelector: () => (empty ? null : {}),
+      style: {
+        setProperty: (key, value) => {
+          props[key] = value;
+        },
+        removeProperty: key => {
+          delete props[key];
+        }
+      }
+    };
+  }
+
+  test('an empty list takes the name column of the list above, and passes it on', () => {
+    const weapons = section(false, '25px 180px 20px');
+    const armour = section(true, '25px 120px 20px');
+    const augments = section(true, '25px 120px 20px');
+    const equipment = section(false, '25px 150px 20px');
+    globalThis.getComputedStyle = element => ({
+      gridTemplateColumns: element.props['--tl-name-match'] ? `25px ${element.props['--tl-name-match']} 20px` : element.columns
+    });
+    matchEmptySections({querySelectorAll: () => [weapons, armour, augments, equipment]});
+    expect(weapons.props).toEqual({});
+    expect(armour.props).toEqual({'--tl-name-match': '180px', '--tl-icons-match': '1fr'});
+    expect(augments.props).toEqual({'--tl-name-match': '180px', '--tl-icons-match': '1fr'});
+    expect(equipment.props).toEqual({});
+    delete globalThis.getComputedStyle;
+  });
+
+  test('nothing to match while the tab is hidden', () => {
+    const weapons = section(false, 'var(--tl-dice) minmax(6em, 1fr) auto');
+    const armour = section(true, 'x');
+    globalThis.getComputedStyle = element => ({gridTemplateColumns: element.columns});
+    matchEmptySections({querySelectorAll: () => [weapons, armour]});
+    expect(armour.props).toEqual({});
+    delete globalThis.getComputedStyle;
   });
 });
