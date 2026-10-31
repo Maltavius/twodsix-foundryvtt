@@ -29,7 +29,8 @@
     drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
     with it, as with the equip button.
   - Columns are only as wide as they need to be; name, range, damage and description get the rest. When the sheet is
-    narrow, TL and Qty are left out in every list and Damage is labelled Dmg.
+    narrow, TL and Qty are left out and Damage is labelled Dmg. Qty stays in Consumables and Attachments,
+    where it is edited.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the

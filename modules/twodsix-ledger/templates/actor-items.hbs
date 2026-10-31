@@ -2,7 +2,8 @@
      the tl-equipped class and a "Not equipped" line before the rest; weapons have Auto after the name and a magazine pill (count and arrow) that open the rows with fire mode buttons and the loaded magazine, instead of the Consumables list;
      loaded magazines are left out of the Consumables list; armour has a radiation column and secondary protection as
      (+X); Equipment & Tools has a weight column; Storage & Junk and armour have their own column classes; TL and Qty
-     have column classes so they can be left out on a narrow sheet; Damage has a short label; a magazine's weapon is
+     have column classes so they can be left out on a narrow sheet (Qty stays in Consumables and Attachments, where it
+     is edited); Damage has a short label; a magazine's weapon is
      shown in brackets only when its name does not already contain it. Compare
      with the system's file when the system changes it. --}}
 {{!-- Sheet Body --}}
@@ -395,7 +396,7 @@
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
-      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Count"}}</span>
       <span class="item-name centre">
         <a class="item-control item-create" data-tooltip='{{localize "TWODSIX.Actor.Items.CreateItem"}}' data-type="consumable" data-subtype="consumable" data-action="itemCreate"><i class="fa-solid fa-plus"></i></a>
@@ -423,7 +424,7 @@
                       </span>
                       <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#if (lookup @root.inventory.parentSuffix item.id)}} ({{lookup @root.inventory.parentSuffix item.id}}){{/if}}</span>
                       <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
-                      <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
+                      <input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
                       <span class="item-name centre">{{item.system.currentCount}}/{{item.system.max}}</span>
                       {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
                     </span>
@@ -452,7 +453,7 @@
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
-      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre">
         <a class="item-control item-create" data-tooltip='{{localize "TWODSIX.Actor.Items.CreateItem"}}' data-type="consumable" data-subtype="attachment" data-action="itemCreate"><i class="fa-solid fa-plus"></i></a>
@@ -478,7 +479,7 @@
                 </span>
                 <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#if (lookup @root.inventory.parentSuffix item.id)}} ({{lookup @root.inventory.parentSuffix item.id}}){{/if}}</span>
                 <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
-                <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
+                <input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
                 <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
                 {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
               </span>

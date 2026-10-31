@@ -1207,7 +1207,7 @@
 
 /* Every row is its own grid, so the small columns have fixed widths (wide enough for their content) to stay lined up;
    the name, range, damage, effect and description columns share the rest. When the sheet is narrow, TL and Qty are
-   left out in every list. */
+   left out (Qty stays in Consumables and Attachments, where it is edited). */
 .tl-inventory {
   container-type: inline-size;
   --tl-dice: 1.8em;
@@ -1289,11 +1289,11 @@
   }
 
   .tl-inventory .items-consumable {
-    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 7em 6ch var(--tl-icons);
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 6em 5ch 6ch var(--tl-icons);
   }
 
   .tl-inventory .items-consumable.tl-attach {
-    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 7em var(--tl-icons);
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 6em 5ch var(--tl-icons);
   }
 }
 
