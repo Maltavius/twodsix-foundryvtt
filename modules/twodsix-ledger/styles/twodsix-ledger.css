@@ -1205,53 +1205,168 @@
   --tl-muted: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-/* Room for all the icons on one line in every list (the system's last columns are 12-16%) */
+/* Every row is its own grid, so the small columns have fixed widths (wide enough for their content) to stay lined up;
+   the name, range, damage, effect and description columns share the rest. When the sheet is narrow, TL and Qty are
+   left out in every list. */
+.tl-inventory {
+  container-type: inline-size;
+  --tl-dice: 1.8em;
+  --tl-tl: 3ch;
+  --tl-qty: 3.5ch;
+  --tl-wt: 4ch;
+  --tl-icons: 6.2em;
+  --tl-weapon-icons: 7.6em;
+}
+
 .tl-inventory .items-weapons {
-  grid-template-columns: 5% 30% 6% 6% 10% 11% 11% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(4.5em, 1fr)
+    minmax(4.5em, 1fr) var(--tl-weapon-icons);
+  column-gap: 6px;
 }
 
 .tl-inventory .items-armor.tl-armor {
-  grid-template-columns: 5% 31% 7% 7% 8% 12% 9% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(5em, 1fr) 5ch
+    var(--tl-icons);
+  column-gap: 6px;
 }
 
 .tl-inventory .items-armor.tl-junk {
-  grid-template-columns: 5% 37% 8% 8% 8% 13% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) 0 var(--tl-icons);
+  column-gap: 6px;
 }
 
 .tl-inventory .items-augments {
-  grid-template-columns: 5% 28% 6% 7% 22% 11% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 2fr) var(--tl-tl) var(--tl-qty) minmax(6em, 2fr) minmax(4em, 1fr)
+    var(--tl-icons);
+  column-gap: 6px;
 }
 
 .tl-inventory .items-equipment {
-  grid-template-columns: 5% 27% 6% 7% 7% 27% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 2fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(8em, 2fr)
+    var(--tl-icons);
+  column-gap: 6px;
 }
 
 .tl-inventory .items-consumable {
-  grid-template-columns: 5% 35% 14% 10% 15% 21%;
+  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) 7em 5ch 6ch var(--tl-icons);
+  column-gap: 6px;
+}
+
+.tl-inventory .items-consumable.tl-attach {
+  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) 7em 5ch var(--tl-tl) var(--tl-icons);
+}
+
+@container (max-width: 620px) {
+  .tl-inventory .tl-col-tl,
+  .tl-inventory .tl-col-qty {
+    display: none;
+  }
+
+  .tl-inventory .items-weapons {
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) var(--tl-wt) minmax(4em, 1fr) minmax(4em, 1fr)
+      var(--tl-weapon-icons);
+  }
+
+  .tl-inventory .items-armor.tl-armor {
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) var(--tl-wt) minmax(4.5em, 1fr) 5ch var(--tl-icons);
+  }
+
+  .tl-inventory .items-armor.tl-junk {
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) var(--tl-wt) 0 var(--tl-icons);
+  }
+
+  .tl-inventory .items-augments {
+    grid-template-columns: var(--tl-dice) minmax(7em, 2fr) minmax(5em, 2fr) minmax(3.5em, 1fr) var(--tl-icons);
+  }
+
+  .tl-inventory .items-equipment {
+    grid-template-columns: var(--tl-dice) minmax(7em, 2fr) var(--tl-wt) minmax(6em, 2fr) var(--tl-icons);
+  }
+
+  .tl-inventory .items-consumable {
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 7em 6ch var(--tl-icons);
+  }
+
+  .tl-inventory .items-consumable.tl-attach {
+    grid-template-columns: var(--tl-dice) minmax(7em, 3fr) 7em var(--tl-icons);
+  }
 }
 
 .tl-inventory .item-controls {
   white-space: nowrap;
 }
 
-/* Status after the weapon's name: the loaded magazine and Auto. A click opens or closes the rows under the weapon. */
+/* The name column of a weapon: the name (attacks), Auto, and the magazine gauge at the right end, which opens and
+   closes the rows under the weapon. */
 .tl-inventory .tl-weapon-name {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 2px 6px;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 6px;
+}
+
+.tl-inventory .tl-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .tl-inventory .tl-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--tl-line);
+  border-radius: 4px;
+  font-size: 0.8em;
+  white-space: nowrap;
   cursor: pointer;
 }
 
+.tl-inventory .tl-status:hover,
+.tl-inventory .tl-status.is-open {
+  border-color: var(--tl-equipped);
+}
+
+.tl-inventory .tl-mini-bar {
+  display: inline-block;
+  width: 32px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--tl-line);
+  overflow: hidden;
+}
+
+.tl-inventory .tl-mini-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--tl-ok);
+}
+
+.tl-inventory .tl-status-low .tl-mini-bar > span {
+  background: var(--tl-low);
+}
+
+.tl-inventory .tl-status-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-inventory .tl-status-low .tl-status-count {
+  color: var(--tl-low);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-status-empty .tl-status-count {
+  color: var(--tl-empty);
+  font-weight: bold;
+}
+
 .tl-inventory .tl-status-caret {
-  font-size: 0.7em;
-  color: var(--tl-muted);
+  font-size: 0.85em;
 }
 
 .tl-inventory .tl-chip {
@@ -1263,18 +1378,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tl-inventory .tl-chip-ok {
-  color: var(--tl-ok);
-  background: color-mix(in srgb, var(--tl-ok-base) 14%, transparent);
-}
-
-.tl-inventory .tl-chip-low {
-  color: var(--tl-low);
-  background: color-mix(in srgb, var(--tl-low-base) 18%, transparent);
-  font-weight: bold;
-}
-
-.tl-inventory .tl-chip-empty,
 .tl-inventory .tl-chip-unloaded {
   color: var(--tl-empty);
   background: color-mix(in srgb, var(--tl-empty-base) 15%, transparent);
@@ -1355,25 +1458,6 @@
   background: color-mix(in srgb, var(--tl-equipped) 22%, transparent);
   border-color: var(--tl-equipped);
   font-weight: bold;
-}
-
-.tl-inventory .tl-ammo-bar {
-  display: inline-block;
-  width: 70px;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--tl-line);
-  overflow: hidden;
-}
-
-.tl-inventory .tl-ammo-bar > span {
-  display: block;
-  height: 100%;
-  background: var(--tl-ok);
-}
-
-.tl-inventory .tl-ammo-low .tl-ammo-bar > span {
-  background: var(--tl-low);
 }
 
 .tl-inventory .tl-ammo-low .tl-ammo-count {

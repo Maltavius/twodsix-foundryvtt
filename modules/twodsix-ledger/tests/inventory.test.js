@@ -10,8 +10,10 @@ import {
   firstNotEquippedId,
   isShown,
   loadedConsumableIds,
+  matchingUnlinked,
   reloadChoices,
-  sortEquippedFirst
+  sortEquippedFirst,
+  unlinkedConsumables
 } from '../scripts/inventory.js';
 
 const item = (id, equipped) => ({id, system: {equipped}});
@@ -75,7 +77,7 @@ describe('describeWeaponAmmo', () => {
     const info = describeWeaponAmmo(weapon([magazine('m1', 75, 80, 3)], 'm1', 80));
     expect(info).toMatchObject({
       loaded: {id: 'm1', name: 'Magazine m1'}, current: 75, max: 80, percent: 94, state: 'ok', full: false,
-      reserve: 2, others: 0, canReload: true, multiple: false
+      reserve: 2, partial: 0, canReload: true, multiple: false
     });
   });
 
@@ -157,5 +159,40 @@ describe('equipStateForDrop', () => {
     expect(equipStateForDrop({itemEquipped: true, targetEquipped: false})).toBe('backpack');
     expect(equipStateForDrop({itemEquipped: true, targetEquipped: true})).toBeNull();
     expect(equipStateForDrop({itemEquipped: false, targetEquipped: false})).toBeNull();
+  });
+});
+
+describe('part-used magazines the system put aside', () => {
+  const aside = (id, current, extra = {}) => ({
+    id, name: 'Magazine m1', type: 'consumable', system: {currentCount: current, max: 6, quantity: 1, subtype: 'magazine', ...extra}
+  });
+  const loadedStack = () => magazine('m1', 5, 6, 1, {subtype: 'magazine'});
+
+  test('match by name, subtype and size', () => {
+    const linked = [loadedStack()];
+    expect(matchingUnlinked(linked, [aside('p1', 1), aside('p2', 1, {max: 30}), aside('p3', 1, {subtype: 'cell'})])
+      .map(item => item.id)).toEqual(['p1']);
+  });
+
+  test('count in the reserve and can be loaded (and linked)', () => {
+    const gun = weapon([loadedStack()], 'm1', 6);
+    const info = describeWeaponAmmo(gun, [aside('p1', 1)]);
+    expect(info).toMatchObject({reserve: 1, partial: 1, magazines: 2, canReload: true});
+    expect(reloadChoices(gun, [aside('p1', 1)])).toEqual([
+      {kind: 'select', id: 'p1', name: 'Magazine m1', current: 1, max: 6, quantity: 1, link: true}
+    ]);
+  });
+
+  test('a full one put aside counts as reserve but not as part-used', () => {
+    expect(describeWeaponAmmo(weapon([loadedStack()], 'm1', 6), [aside('p1', 6)])).toMatchObject({reserve: 1, partial: 0});
+  });
+
+  test('unlinkedConsumables leaves out what any item links to', () => {
+    const items = [
+      {id: 'w', type: 'weapon', system: {consumables: ['m1']}},
+      {id: 'm1', type: 'consumable', system: {}},
+      {id: 'p1', type: 'consumable', system: {}}
+    ];
+    expect(unlinkedConsumables(items).map(item => item.id)).toEqual(['p1']);
   });
 });

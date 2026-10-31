@@ -12,8 +12,8 @@
     <div class="items-weapons gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Range"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Damage"}}</span>
@@ -37,26 +37,29 @@
           <li class="flexrow">
             <span class="items-weapons">
               <span class="mini-dice perform-attack" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="performAttack"><i class="fa-solid fa-dice" alt="d6" ></i></span>
-              <span class="item-name perform-attack tl-weapon-name" data-label="{{item.name}}" data-action="performAttack">
-                <span class="tl-name-text">{{item.name}}</span>
+              {{!-- Name (click to attack), Auto after it, and at the right end of the column the magazine gauge, which opens
+                   and closes the rows under the weapon. Only the name itself attacks. --}}
+              <span class="item-name tl-weapon-name">
+                <span class="perform-attack tl-name-text" data-label="{{item.name}}" data-action="performAttack">{{item.name}}</span>
                 {{#with (lookup @root.inventory.weapons item.id) as |w|}}
+                {{#if w.auto}}<span class="tl-chip tl-chip-auto">{{localize "TWODSIX.Rolls.Auto"}} {{w.auto}}</span>{{/if}}
                 {{#if w.hasDetails}}
-                <a class="tl-status" data-action="inventoryToggleDetails" data-tooltip="{{w.toggleTooltip}}">
+                <a class="tl-status tl-status-{{#if w.ammo}}{{w.ammo.state}}{{else}}none{{/if}}{{#if w.open}} is-open{{/if}}" data-action="inventoryToggleDetails" data-tooltip="{{w.toggleTooltip}}">
                   {{#if w.ammo}}
                     {{#if w.ammo.loaded}}
-                    <span class="tl-chip tl-chip-{{w.ammo.state}}">{{w.ammo.current}}/{{w.ammo.max}}</span>
+                    <span class="tl-mini-bar" aria-hidden="true"><span style="width: {{w.ammo.percent}}%"></span></span>
+                    <span class="tl-status-count">{{w.ammo.current}}/{{w.ammo.max}}</span>
                     {{else}}
                     <span class="tl-chip tl-chip-unloaded">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
                     {{/if}}
                   {{/if}}
-                  {{#if w.auto}}<span class="tl-chip tl-chip-auto">{{localize "TWODSIX.Rolls.Auto"}} {{w.auto}}</span>{{/if}}
                   <i class="fa-solid {{#if w.open}}fa-chevron-up{{else}}fa-chevron-down{{/if}} tl-status-caret"></i>
                 </a>
                 {{/if}}
                 {{/with}}
               </span>
-              <span class="item-name centre">{{item.system.techLevel}}</span>
-              <span class="item-name centre">{{item.system.quantity}}</span>
+              <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
+              <span class="item-name centre tl-col-qty">{{item.system.quantity}}</span>
               <span class="item-name centre">{{item.system.weight}}</span>
               {{#if ../settings.ShowRangeBandAndHideRange}}
               <span class="item-name centre" data-tooltip='{{localize (concat "TWODSIX.Chat.Roll.WeaponRangeTypes." item.system.rangeBand)}}'>{{localize (lookup ../settings.rangeTypes item.system.rangeBand)}}</span>
@@ -98,7 +101,7 @@
                 {{#iff item.system.doubleTap "&&" ../settings.ShowDoubleTap}}
                   <button type="button" class="tl-fire-mode" data-action="inventoryFireMode" data-attack-type="double-tap" data-rof="2" data-tooltip="{{twodsix_invertSkillRollShiftClick}}">{{localize "TWODSIX.Rolls.DoubleTap"}}</button>
                 {{else}}
-                  <button type="button" class="tl-fire-mode" data-action="inventoryFireMode" data-attack-type="auto-burst" data-rof="{{item.system.rateOfFire}}" data-tooltip="{{twodsix_invertSkillRollShiftClick}}">{{localize "TWODSIX.Rolls.BurstDamage"}}</button>
+                  <button type="button" class="tl-fire-mode" data-action="inventoryFireMode" data-attack-type="auto-burst" data-rof="{{item.system.rateOfFire}}" data-tooltip="{{twodsix_invertSkillRollShiftClick}}">{{localize "TWODSIX.Rolls.Burst"}}</button>
                   <button type="button" class="tl-fire-mode" data-action="inventoryFireMode" data-attack-type="auto-full" data-rof="{{item.system.rateOfFire}}" data-tooltip="{{twodsix_invertSkillRollShiftClick}}">{{localize "TWODSIX.Rolls.FullAuto"}}</button>
                 {{/iff}}
               {{/if}}
@@ -131,7 +134,6 @@
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
             <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
             {{#if ammo.loaded}}
-              <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
               <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
               <span class="combined-buttons">
                 <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
@@ -181,8 +183,8 @@
     <div class="items-armor tl-armor gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Armor"}}</span>
       <span class="item-name centre" data-tooltip='{{localize "TWODSIX.Items.Armor.RadProt"}}'>{{localize "TWODSIX_LEDGER.INVENTORY.RAD_HEADER"}}</span>
@@ -216,8 +218,8 @@
                   {{/iff}}
                 {{/if}}
               </span>
-              <span class="item-name centre">{{item.system.techLevel}}</span>
-              <span class="item-name centre">{{item.system.quantity}}</span>
+              <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
+              <span class="item-name centre tl-col-qty">{{item.system.quantity}}</span>
               <span class="item-name centre">{{item.system.weight}}</span>
               {{#if ../settings.useCTData}}
                 <span class="item-name centre">{{localize (concat 'TWODSIX.Chat.Roll.ArmorTypes.' item.system.armorType)}}</span>
@@ -245,8 +247,8 @@
     <div class="items-augments gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Effect"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Location"}}</span>
       <span class="item-name centre">
@@ -269,8 +271,8 @@
             <span class="items-augments">
               <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}"data-label="{{item.name}}" data-action="skillTalentRoll"><i class="fa-solid fa-dice" alt="d6" ></i></span>
               <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}</span>
-              <span class="item-name centre">{{item.system.techLevel}}</span>
-              <span class="item-name centre">{{item.system.quantity}}</span>
+              <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
+              <span class="item-name centre tl-col-qty">{{item.system.quantity}}</span>
               <span class="item-name centre">{{item.system.bonus}}</span>
               <span class="item-name centre">{{item.system.auglocation}}</span>
               {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
@@ -290,8 +292,8 @@
     <div class="items-equipment gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.ShortDescr"}}</span>
       <span class="item-name centre">
@@ -314,8 +316,8 @@
                 <span class="items-equipment">
                   <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="skillTalentRoll"><i class="fa-solid fa-dice" alt="d6" ></i></span>
                   <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}</span>
-                  <span class="item-name centre">{{item.system.techLevel}}</span>
-                  <span class="item-name centre">{{item.system.quantity}}</span>
+                  <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
+                  <span class="item-name centre tl-col-qty">{{item.system.quantity}}</span>
                   <span class="item-name centre">{{item.system.weight}}</span>
                   {{#iff item.type "===" "computer"}}
                     <span class="item-name centre">{{localize "TWODSIX.Items.Computer.ProcessingPower"}}: {{twodsix_getProcessingPower item}}/{{item.system.processingPower}}</span>
@@ -339,8 +341,8 @@
     <div class="items-armor tl-junk gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
       <span></span>
       <span class="item-name centre">
@@ -363,8 +365,8 @@
                 <span class="items-armor tl-junk">
                   <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="skillTalentRoll"><i class="fa-solid fa-dice" alt="d6" ></i></span>
                   <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}</span>
-                  <span class="item-name centre">{{item.system.techLevel}}</span>
-                  <span class="item-name centre">{{item.system.quantity}}</span>
+                  <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
+                  <span class="item-name centre tl-col-qty">{{item.system.quantity}}</span>
                   <span class="item-name centre">{{item.system.weight}}</span>
                   <span></span>
                   <span class="item-controls centre">
@@ -392,7 +394,7 @@
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Count"}}</span>
       <span class="item-name centre">
         <a class="item-control item-create" data-tooltip='{{localize "TWODSIX.Actor.Items.CreateItem"}}' data-type="consumable" data-subtype="consumable" data-action="itemCreate"><i class="fa-solid fa-plus"></i></a>
@@ -420,7 +422,7 @@
                       </span>
                       <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#iff item.system.parentName "!==" ""}} ({{item.system.parentName}}){{/iff}}</span>
                       <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
-                      <input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
+                      <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
                       <span class="item-name centre">{{item.system.currentCount}}/{{item.system.max}}</span>
                       {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
                     </span>
@@ -445,12 +447,12 @@
   <div>
     <span class="pusher"></span>
     <span class="item-title">{{localize "TWODSIX.Actor.Items.ATTACHMENTS"}}</span>
-    <div class="items-consumable gear-header">
+    <div class="items-consumable tl-attach gear-header">
       <span></span>
       <span class="item-name">{{localize "TWODSIX.Actor.Items.Name"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Subtype"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.TL"}}</span>
+      <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
+      <span class="item-name centre tl-col-tl">{{localize "TWODSIX.Actor.Items.TL"}}</span>
       <span class="item-name centre">
         <a class="item-control item-create" data-tooltip='{{localize "TWODSIX.Actor.Items.CreateItem"}}' data-type="consumable" data-subtype="attachment" data-action="itemCreate"><i class="fa-solid fa-plus"></i></a>
         <a class="item-control item-viewToggle" data-item-type="attachment" data-action="toggleView">
@@ -469,14 +471,14 @@
       <div class="item gear draggable{{#iff item.system.equipped "===" "equipped"}} tl-equipped{{/iff}}" data-item-id="{{item.id}}">
         <ol class="ol-no-indent">
           <li class="flexrow" >
-              <span class="items-consumable">
+              <span class="items-consumable tl-attach">
                 <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="skillTalentRoll">
                   <i class="fa-solid fa-dice" alt="d6" ></i>
                 </span>
                 <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#iff item.system.parentName "!==" ""}} ({{item.system.parentName}}){{/iff}}</span>
                 <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
-                <input class= "item-value-edit" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
-                <span class="item-name centre">{{item.system.techLevel}}</span>
+                <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
+                <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>
                 {{> "systems/twodsix/templates/actors/parts/actor/actor-core-buttons.hbs" item= item settings= ../settings}}
               </span>
           </li>

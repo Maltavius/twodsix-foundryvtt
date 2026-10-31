@@ -146,8 +146,6 @@
       "MAGAZINES_ONE": "{count} magasin finns",
       "MAGAZINES_MANY": "{count} magasin finns",
       "RESERVE": "{count} i reserv",
-      "OTHERS_ONE": "{count} annat magasin",
-      "OTHERS_MANY": "{count} andra magasin",
       "RELOAD": "Ladda om",
       "LOAD": "Ladda",
       "RELOAD_NONE": "Det finns inget annat magasin att ladda.",
@@ -166,7 +164,9 @@
       "SHOW_DETAILS": "Visa eldlägen och magasin",
       "HIDE_DETAILS": "Dölj eldlägen och magasin",
       "COMPACT_NAME": "Kompakta vapenrader",
-      "COMPACT_HINT": "Vapen visar bara sin status efter namnet (magasin, Auto). Klicka på statusen för att visa eldlägen och magasin."
+      "COMPACT_HINT": "Vapen visar bara sin status efter namnet (magasin, Auto). Klicka på statusen för att visa eldlägen och magasin.",
+      "RESERVE_PARTIAL_ONE": "{count} i reserv, varav {partial} påbörjat",
+      "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade"
     }
   }
 }

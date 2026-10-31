@@ -17,12 +17,19 @@
     list says how many, and can show them there too.
   - All the icons on a row stay (equip, chat, edit, delete). The battery that creates a magazine is only shown on
     weapons with an ammo value, and the icons no longer wrap to a second line in any of the lists.
-  - The status of a weapon is shown after its name: the loaded magazine (green, yellow or red) or Unloaded, and Auto 3
-    for weapons with automatic fire. Burst Damage and Full Auto no longer repeat the rate of fire. A click on the status
-    shows or hides the fire modes and the magazine row. With the new setting "Compact weapon rows" they start hidden.
+  - Auto 3 is shown after the name of weapons with automatic fire, and the buttons say Burst and Full Auto without the
+    rate of fire. At the right end of the name column a small magazine gauge (bar and 75/80, or Unloaded) with an arrow
+    shows or hides the fire modes and the magazine row; only the name itself attacks. With the new setting "Compact
+    weapon rows" they start hidden.
   - Reload is an icon (with a tooltip), and has a small arrow when there is more than one magazine to choose.
-  - Drag an item onto a carried row of its own list and it is carried; drag it onto a row that is not carried (or the
-    "Not equipped" line) and it goes to the backpack. Its magazines go with it, as with the equip button.
+  - Reserve counts every magazine that is not loaded, part-used ones too ("2 in reserve, 1 part-used"). The system's
+    Reload puts a part-used magazine aside as a new item that the weapon does not know about; the module links it to
+    the weapon, and finds such magazines that were put aside earlier by name and size, so they can be loaded again.
+  - Drag an item onto a carried row of its own list, or onto the list heading or column headings, and it is carried;
+    drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
+    with it, as with the equip button.
+  - Columns are only as wide as they need to be; name, range, damage and description get the rest. When the sheet is
+    narrow, TL and Qty are left out in every list.
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the
     protection types on hover. Equipment & Tools has a weight column.
 - A trash button next to Add empties the form (amount, description, category and a dropped item). It is only there while

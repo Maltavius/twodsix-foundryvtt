@@ -146,8 +146,6 @@
       "MAGAZINES_ONE": "{count} magazine available",
       "MAGAZINES_MANY": "{count} magazines available",
       "RESERVE": "{count} in reserve",
-      "OTHERS_ONE": "{count} other magazine",
-      "OTHERS_MANY": "{count} other magazines",
       "RELOAD": "Reload",
       "LOAD": "Load",
       "RELOAD_NONE": "No other magazine to load.",
@@ -166,7 +164,9 @@
       "SHOW_DETAILS": "Show fire modes and magazine",
       "HIDE_DETAILS": "Hide fire modes and magazine",
       "COMPACT_NAME": "Compact weapon rows",
-      "COMPACT_HINT": "Weapons show only their status after the name (magazine, Auto). Click the status to show fire modes and the magazine."
+      "COMPACT_HINT": "Weapons show only their status after the name (magazine, Auto). Click the status to show fire modes and the magazine.",
+      "RESERVE_PARTIAL_ONE": "{count} in reserve, {partial} part-used",
+      "RESERVE_PARTIAL_MANY": "{count} in reserve, {partial} part-used"
     }
   }
 }

@@ -123,7 +123,9 @@ describe('prepareInventoryContext', () => {
 
 describe('texts', () => {
   test('ammoText names reserve and other magazines', () => {
-    expect(ammoText({loaded: {}, reserve: 1, others: 2})).toBe('TWODSIX_LEDGER.INVENTORY.RESERVE:1 · TWODSIX_LEDGER.INVENTORY.OTHERS_MANY:2');
+    expect(ammoText({loaded: {}, reserve: 2, partial: 0})).toBe('TWODSIX_LEDGER.INVENTORY.RESERVE:2');
+    expect(ammoText({loaded: {}, reserve: 2, partial: 1})).toBe('TWODSIX_LEDGER.INVENTORY.RESERVE_PARTIAL_ONE:2,1');
+    expect(ammoText({loaded: {}, reserve: 3, partial: 2})).toBe('TWODSIX_LEDGER.INVENTORY.RESERVE_PARTIAL_MANY:3,2');
     expect(ammoText({loaded: null, magazines: 0})).toBe('TWODSIX_LEDGER.INVENTORY.NO_MAGAZINE');
     expect(ammoText({loaded: null, magazines: 3})).toBe('TWODSIX_LEDGER.INVENTORY.MAGAZINES_MANY:3');
   });
@@ -139,14 +141,37 @@ describe('applyReload', () => {
   test('refill uses the system\'s Reload', async () => {
     const m1 = magazine('m1', 1, 6, 2);
     const gun = weapon('w', 'equipped', [m1], 'm1');
+    gun.addConsumable = vi.fn(async () => {});
     await applyReload({items: new Map([['m1', m1]])}, gun, {kind: 'refill', id: 'm1'});
     expect(m1.refill).toHaveBeenCalled();
     expect(gun.update).not.toHaveBeenCalled();
   });
 
+  test('the part-used magazine the system puts aside is linked to the weapon', async () => {
+    const m1 = magazine('m1', 1, 6, 2);
+    const gun = weapon('w', 'equipped', [m1], 'm1');
+    gun.addConsumable = vi.fn(async () => {});
+    const items = new Map([['m1', m1]]);
+    m1.refill.mockImplementation(async () => {
+      items.set('p1', {id: 'p1', type: 'consumable'});
+    });
+    await applyReload({items}, gun, {kind: 'refill', id: 'm1'});
+    expect(gun.addConsumable).toHaveBeenCalledWith('p1');
+  });
+
+  test('a magazine that is not linked yet is linked when it is loaded', async () => {
+    const p1 = magazine('p1', 1, 6, 1);
+    const gun = weapon('w', 'equipped', []);
+    gun.addConsumable = vi.fn(async () => {});
+    await applyReload({items: new Map([['p1', p1]])}, gun, {kind: 'select', id: 'p1', link: true});
+    expect(gun.addConsumable).toHaveBeenCalledWith('p1');
+    expect(gun.update).toHaveBeenCalledWith({'system.useConsumableForAttack': 'p1'});
+  });
+
   test('select loads the other magazine, and refills it when it is an empty stack', async () => {
     const m2 = magazine('m2', 0, 6, 2);
     const gun = weapon('w', 'equipped', [m2]);
+    gun.addConsumable = vi.fn(async () => {});
     await applyReload({items: new Map([['m2', m2]])}, gun, {kind: 'select', id: 'm2'});
     expect(gun.update).toHaveBeenCalledWith({'system.useConsumableForAttack': 'm2'});
     expect(m2.refill).toHaveBeenCalled();
@@ -293,6 +318,21 @@ describe('handleEquipDrop', () => {
     const others = makeDom([{id: 'w1', equipped: true}, {id: 'w3', equipped: false}]);
     expect(await handleEquipDrop({actor}, dropOn(others.w3), {id: 'w1'})).toBe(false);
     expect(actor.updateEmbeddedDocuments).not.toHaveBeenCalled();
+  });
+
+  test('dropped on the list heading or column headings: carried', async () => {
+    const gun = weapon('w1', 'backpack', []);
+    const actor = makeActor([gun]);
+    const list = {querySelector: selector => (selector.includes('"w1"') ? {} : null)};
+    const heading = name => ({
+      dataset: {},
+      classList: {contains: cls => cls === name},
+      parentElement: {querySelector: selector => (selector === ':scope > .item-list' ? list : null)},
+      closest: () => null
+    });
+    expect(await handleEquipDrop({actor}, dropOn(heading('gear-header')), {id: 'w1'})).toBe(true);
+    expect(await handleEquipDrop({actor}, dropOn(heading('item-title')), {id: 'w1'})).toBe(true);
+    expect(actor.updateEmbeddedDocuments).toHaveBeenCalledWith('Item', [{_id: 'w1', 'system.equipped': 'equipped'}]);
   });
 
   test('items from elsewhere are left to the system', async () => {

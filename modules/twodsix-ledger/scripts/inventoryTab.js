@@ -18,7 +18,8 @@ import {
   isEquipped,
   loadedConsumableIds,
   reloadChoices,
-  sortEquippedFirst
+  sortEquippedFirst,
+  unlinkedConsumables
 } from "./inventory.js";
 
 export const INVENTORY_SETTING = "improvedInventory";
@@ -77,11 +78,10 @@ export function ammoText(ammo) {
     }
     return t(ammo.magazines === 1 ? "MAGAZINES_ONE" : "MAGAZINES_MANY", {count: ammo.magazines});
   }
-  const parts = [t("RESERVE", {count: ammo.reserve})];
-  if (ammo.others > 0) {
-    parts.push(t(ammo.others === 1 ? "OTHERS_ONE" : "OTHERS_MANY", {count: ammo.others}));
+  if (ammo.partial > 0) {
+    return t(ammo.partial === 1 ? "RESERVE_PARTIAL_ONE" : "RESERVE_PARTIAL_MANY", {count: ammo.reserve, partial: ammo.partial});
   }
-  return parts.join(" · ");
+  return t("RESERVE", {count: ammo.reserve});
 }
 
 /**
@@ -123,9 +123,10 @@ export function prepareInventoryContext(sheet, context) {
 
   const rules = fireRules(context.settings);
   const compact = inventoryCompact();
+  const unlinked = unlinkedConsumables(sheet.actor?.items?.values?.() ?? []);
   const weapons = {};
   for (const weapon of container.weapon ?? []) {
-    const info = describeWeaponAmmo(weapon);
+    const info = describeWeaponAmmo(weapon, unlinked);
     const ammo = info ? {...info, text: ammoText(info)} : null;
     const hasDetails = Boolean(ammo) || hasFireModes(weapon, rules);
     const open = hasDetails && (openedWeapons.get(`${sheet.actor?.id}.${weapon.id}`) ?? !compact);
@@ -270,13 +271,33 @@ export async function applyReload(actor, weapon, choice) {
     return;
   }
   if (choice.kind === "select") {
+    if (choice.link) {
+      await weapon.addConsumable(magazine.id);
+    }
     await weapon.update({"system.useConsumableForAttack": magazine.id});
     if (!(Number(magazine.system.currentCount) > 0) && Number(magazine.system.quantity) > 1) {
-      await refillMagazine(magazine);
+      await refillWithLink(actor, weapon, magazine);
     }
     return;
   }
+  await refillWithLink(actor, weapon, magazine);
+}
+
+/**
+ * Refill, and link the part-used magazine the system puts aside to the weapon, so it is still counted and can be loaded.
+ * @param {object} actor
+ * @param {object} weapon
+ * @param {object} magazine
+ * @returns {Promise<void>}
+ */
+async function refillWithLink(actor, weapon, magazine) {
+  const before = new Set(actor.items.keys());
   await refillMagazine(magazine);
+  for (const item of actor.items.values()) {
+    if (!before.has(item.id) && item.type === "consumable") {
+      await weapon.addConsumable(item.id);
+    }
+  }
 }
 
 /**
@@ -324,7 +345,7 @@ export const inventoryActions = {
     if (!weapon) {
       return;
     }
-    const choices = reloadChoices(weapon);
+    const choices = reloadChoices(weapon, unlinkedConsumables(this.actor.items.values()));
     if (!choices.length) {
       ui.notifications.warn(t("RELOAD_NONE"));
       return;
@@ -392,18 +413,22 @@ export async function handleEquipDrop(sheet, event, dropped) {
     return false;
   }
   const item = sheet.actor?.items.get(dropped?.id ?? dropped?._id);
-  const target = event?.target?.closest?.(".tl-inventory .item[data-item-id], .tl-inventory .tl-group-divider");
+  const target = event?.target?.closest?.(
+    ".tl-inventory .item[data-item-id], .tl-inventory .tl-group-divider, .tl-inventory .gear-header, .tl-inventory .item-title"
+  );
   if (!item || !target || target.dataset?.itemId === item.id) {
     return false;
   }
+  // The list heading and the column headings count as the top of the list, where the carried items are
+  const isHeading = target.classList.contains("gear-header") || target.classList.contains("item-title");
+  const list = isHeading ? target.parentElement?.querySelector(":scope > .item-list") : target.closest(".item-list");
   // Only within the item's own list (a weapon dropped among armour does nothing)
-  const list = target.closest(".item-list");
   if (!list?.querySelector(`.item[data-item-id="${item.id}"]`)) {
     return false;
   }
   const state = equipStateForDrop({
     itemEquipped: isEquipped(item),
-    targetEquipped: target.classList.contains("tl-equipped")
+    targetEquipped: isHeading || target.classList.contains("tl-equipped")
   });
   if (!state) {
     return false;

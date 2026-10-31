@@ -96,27 +96,45 @@ function counts(consumable) {
 }
 
 /**
+ * Magazines that are not linked to any item but match one of the weapon's own: same name, same subtype and the same
+ * size. The system's Reload puts a part-used magazine aside as a new item without linking it to the weapon, so this is
+ * how such a magazine is found again.
+ * @param {Array<object>} linked - the weapon's own magazines
+ * @param {Array<object>} unlinked - consumables of the actor that no item links to
+ * @returns {Array<object>}
+ */
+export function matchingUnlinked(linked, unlinked) {
+  const keys = new Set(linked.map(item => `${item.name}|${item.system?.subtype}|${Number(item.system?.max) || 0}`));
+  return (Array.isArray(unlinked) ? unlinked : []).filter(item => item && !item.system?.isAttachment
+    && keys.has(`${item.name}|${item.system?.subtype}|${Number(item.system?.max) || 0}`));
+}
+
+/**
  * The magazines that fit a weapon, and the loaded one.
  * @param {object} weapon
- * @returns {{magazines: Array<object>, loaded: object|null}}
+ * @param {Array<object>} [unlinked] - consumables of the actor that no item links to
+ * @returns {{magazines: Array<object>, loaded: object|null, extra: Array<object>}}
  */
-function weaponMagazines(weapon) {
+function weaponMagazines(weapon, unlinked = []) {
   const magazines = (weapon?.system?.consumableData ?? []).filter(item => item && !item.system?.isAttachment);
   const loadedId = weapon?.system?.useConsumableForAttack;
   const loaded = loadedId ? magazines.find(item => item.id === loadedId) ?? null : null;
-  return {magazines, loaded};
+  return {magazines, loaded, extra: matchingUnlinked(magazines, unlinked)};
 }
 
 /**
  * What a reload can do for a weapon:
- * - `refill`: take a full magazine from the loaded stack (the system's Reload, which keeps a part-used magazine as its
- *   own item);
- * - `select`: load another magazine that fits and has something in it, or more of them.
+ * - `refill`: take a full magazine from the loaded stack (the system's Reload, which puts the part-used one aside as
+ *   its own item);
+ * - `select`: load another magazine that fits and has something in it, or more of them. `link` is set for a magazine
+ *   that is not linked to the weapon yet.
  * @param {object} weapon
- * @returns {Array<{kind: "refill"|"select", id: string, name: string, current: number, max: number, quantity: number}>}
+ * @param {Array<object>} [unlinked] - consumables of the actor that no item links to
+ * @returns {Array<{kind: "refill"|"select", id: string, name: string, current: number, max: number, quantity: number,
+ *   link?: boolean}>}
  */
-export function reloadChoices(weapon) {
-  const {magazines, loaded} = weaponMagazines(weapon);
+export function reloadChoices(weapon, unlinked = []) {
+  const {magazines, loaded, extra} = weaponMagazines(weapon, unlinked);
   const choices = [];
   if (loaded) {
     const {current, max, quantity} = counts(loaded);
@@ -124,34 +142,54 @@ export function reloadChoices(weapon) {
       choices.push({kind: "refill", id: loaded.id, name: loaded.name, current: max, max, quantity: quantity - 1});
     }
   }
-  for (const magazine of magazines) {
+  for (const magazine of [...magazines, ...extra]) {
     if (magazine === loaded) {
       continue;
     }
     const {current, max, quantity} = counts(magazine);
     if (current > 0 || quantity > 1) {
-      choices.push({kind: "select", id: magazine.id, name: magazine.name, current, max, quantity});
+      const choice = {kind: "select", id: magazine.id, name: magazine.name, current, max, quantity};
+      choices.push(extra.includes(magazine) ? {...choice, link: true} : choice);
     }
   }
   return choices;
 }
 
 /**
- * The ammunition line under a weapon, or null for weapons that use no ammunition (no magazines and no ammo value).
+ * The ammunition of a weapon, or null for weapons that use no ammunition (no magazines and no ammo value).
+ * `reserve` counts every magazine that is not loaded and has something in it (the rest of the loaded stack, other
+ * stacks and part-used ones); `partial` is how many of them are not full.
  * @param {object} weapon
+ * @param {Array<object>} [unlinked] - consumables of the actor that no item links to
  * @returns {object|null}
  */
-export function describeWeaponAmmo(weapon) {
-  const {magazines, loaded} = weaponMagazines(weapon);
+export function describeWeaponAmmo(weapon, unlinked = []) {
+  const {magazines, loaded, extra} = weaponMagazines(weapon, unlinked);
   if (!magazines.length && !(Number(weapon?.system?.ammo) > 0)) {
     return null;
   }
-  const choices = reloadChoices(weapon);
-  const common = {magazines: magazines.length, choices, canReload: choices.length > 0, multiple: choices.length > 1};
+  const choices = reloadChoices(weapon, unlinked);
+  let reserve = 0;
+  let partial = 0;
+  for (const magazine of [...magazines, ...extra]) {
+    const {current, max, quantity} = counts(magazine);
+    if (magazine === loaded) {
+      reserve += Math.max(0, quantity - 1);
+    } else if (current > 0) {
+      reserve += Math.max(1, quantity);
+      partial += current < max ? 1 : 0;
+    } else if (quantity > 1) {
+      reserve += quantity - 1;
+    }
+  }
+  const common = {
+    magazines: magazines.length + extra.length, choices, canReload: choices.length > 0, multiple: choices.length > 1,
+    reserve, partial
+  };
   if (!loaded) {
     return {...common, loaded: null, state: "unloaded"};
   }
-  const {current, max, quantity} = counts(loaded);
+  const {current, max} = counts(loaded);
   return {
     ...common,
     loaded: {id: loaded.id, name: loaded.name},
@@ -159,10 +197,19 @@ export function describeWeaponAmmo(weapon) {
     max,
     percent: max > 0 ? Math.min(100, Math.round(current / max * 100)) : 0,
     state: ammoState(current, max),
-    full: max > 0 && current >= max,
-    reserve: Math.max(0, quantity - 1),
-    others: magazines.length - 1
+    full: max > 0 && current >= max
   };
+}
+
+/**
+ * The consumables of an actor that no item links to.
+ * @param {Iterable<object>} items - all the actor's items
+ * @returns {Array<object>}
+ */
+export function unlinkedConsumables(items) {
+  const all = Array.from(items ?? []);
+  const linked = new Set(all.flatMap(item => item.system?.consumables ?? []));
+  return all.filter(item => item.type === "consumable" && !linked.has(item.id));
 }
 
 /**
