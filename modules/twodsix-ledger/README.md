@@ -1,6 +1,6 @@
 # Twodsix Ledger
 
-A ledger for the Finances tab of the Twodsix traveller sheet.
+A ledger for the Finances tab of the Twodsix traveller sheet, and a clearer Inventory tab.
 
 ## Install
 
@@ -19,6 +19,17 @@ https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger
 - Add transactions, or move money between accounts, and undo the last entry. Payments that the account cannot cover are
   refused.
 - The in-game date comes from Simple Calendar if you have it.
+
+## Inventory
+
+- Carried items come first in every list, with a tinted background.
+- Fire mode buttons under weapons that can fire in more than one way. Each click is one attack; the last one used is
+  marked.
+- The loaded magazine under each weapon, with a bar that turns yellow when it is low and red when it is empty, and a
+  Reload that asks which magazine when there is more than one.
+- Loaded magazines are not listed a second time under Consumables.
+
+Each player can switch back to the system's own Inventory tab with the setting "Improved Inventory tab".
 
 ## Settings
 

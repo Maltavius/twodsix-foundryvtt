@@ -7,6 +7,7 @@
  */
 
 import { MODULE_ID } from "./store.js";
+import { INVENTORY_SETTING } from "./inventoryTab.js";
 import {
   BUILTIN_CATEGORIES,
   LEDGER_ACCOUNTS,
@@ -220,6 +221,15 @@ export function registerSettings() {
     type: String,
     default: "auto",
     choices: Object.fromEntries(Object.keys(NUMBER_FORMATS).map(key => [key, `${PREFIX}.NUMBER_FORMATS.${key}`])),
+    onChange: refreshSheets
+  });
+  game.settings.register(MODULE_ID, INVENTORY_SETTING, {
+    name: `${PREFIX}.INVENTORY.SETTING_NAME`,
+    hint: `${PREFIX}.INVENTORY.SETTING_HINT`,
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
     onChange: refreshSheets
   });
   game.settings.registerMenu(MODULE_ID, "configure", {

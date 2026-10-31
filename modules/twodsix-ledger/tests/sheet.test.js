@@ -1,16 +1,24 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
+  ORIGINAL_ITEMS_PARTIAL,
   ORIGINAL_PARTIAL,
+  OWN_ITEMS_PARTIAL,
   OWN_PARTIAL,
+  SYSTEM_ITEMS_PARTIAL,
   SYSTEM_PARTIAL,
   createLedgerSheet,
-  ensureFinancePartial,
+  ensureSheetPartials,
   findSystemTravellerSheet
 } from '../scripts/sheet.js';
 
 /** A tiny stand-in for Handlebars: partials by name, and a compile that returns a function. */
 function installHandlebars({systemPartial = () => 'system tab', preload = true} = {}) {
-  const partials = preload ? {[SYSTEM_PARTIAL]: systemPartial, [OWN_PARTIAL]: () => 'ledger tab'} : {};
+  const partials = preload ? {
+    [SYSTEM_PARTIAL]: systemPartial,
+    [OWN_PARTIAL]: () => 'ledger tab',
+    [SYSTEM_ITEMS_PARTIAL]: () => 'system inventory',
+    [OWN_ITEMS_PARTIAL]: () => 'module inventory'
+  } : {};
   globalThis.Handlebars = {
     partials,
     compile: vi.fn(source => Object.assign(() => 'wrapper', {source})),
@@ -37,10 +45,10 @@ afterEach(() => {
   delete globalThis.CONFIG;
 });
 
-describe('ensureFinancePartial', () => {
+describe('ensureSheetPartials', () => {
   test('puts a wrapper under the system path and keeps the system tab as the fallback', async () => {
     const original = globalThis.Handlebars.partials[SYSTEM_PARTIAL];
-    await ensureFinancePartial();
+    await ensureSheetPartials();
     const hb = globalThis.Handlebars;
     expect(hb.partials[ORIGINAL_PARTIAL]).toBe(original);
     expect(hb.partials[SYSTEM_PARTIAL]).not.toBe(original);
@@ -51,25 +59,36 @@ describe('ensureFinancePartial', () => {
   });
 
   test('does the work once, and again only if the system registers its partial again', async () => {
-    await ensureFinancePartial();
+    await ensureSheetPartials();
     const hb = globalThis.Handlebars;
     const calls = hb.registerPartial.mock.calls.length;
-    await ensureFinancePartial();
+    await ensureSheetPartials();
     expect(hb.registerPartial.mock.calls.length).toBe(calls);
 
     const reRegistered = () => 'system tab again';
     hb.partials[SYSTEM_PARTIAL] = reRegistered;
-    await ensureFinancePartial();
+    await ensureSheetPartials();
     expect(hb.partials[ORIGINAL_PARTIAL]).toBe(reRegistered);
     expect(hb.partials[SYSTEM_PARTIAL].source).toContain('{{#if finance}}');
   });
 
   test('loads the templates itself if they are not registered yet', async () => {
     installHandlebars({preload: false});
-    await ensureFinancePartial();
+    await ensureSheetPartials();
     const loaded = globalThis.foundry.applications.handlebars.getTemplate.mock.calls.map(call => call[0]);
-    expect(loaded).toEqual(expect.arrayContaining([SYSTEM_PARTIAL, OWN_PARTIAL]));
+    expect(loaded).toEqual(expect.arrayContaining([SYSTEM_PARTIAL, OWN_PARTIAL, SYSTEM_ITEMS_PARTIAL, OWN_ITEMS_PARTIAL]));
     expect(globalThis.Handlebars.partials[SYSTEM_PARTIAL].source).toContain('{{#if finance}}');
+  });
+
+  test('puts a wrapper under the Inventory path too, with the system tab as the fallback', async () => {
+    const original = globalThis.Handlebars.partials[SYSTEM_ITEMS_PARTIAL];
+    await ensureSheetPartials();
+    const hb = globalThis.Handlebars;
+    expect(hb.partials[ORIGINAL_ITEMS_PARTIAL]).toBe(original);
+    const source = hb.partials[SYSTEM_ITEMS_PARTIAL].source;
+    expect(source).toContain('{{#if inventory}}');
+    expect(source).toContain(OWN_ITEMS_PARTIAL);
+    expect(source).toContain(ORIGINAL_ITEMS_PARTIAL);
   });
 });
 
@@ -112,7 +131,8 @@ describe('createLedgerSheet', () => {
     expect(Ledger.PARTS.main.template).toBe(Base.PARTS.main.template);
     expect(Ledger.PARTS.main.scrollable).toEqual(['.skills', '.fl-scroll']);
     expect(Base.PARTS.main.scrollable).toEqual(['.skills']);
-    expect(Object.keys(Ledger.DEFAULT_OPTIONS.actions)).toEqual(expect.arrayContaining(['financeAdd', 'financeMove', 'financeUndo']));
+    expect(Object.keys(Ledger.DEFAULT_OPTIONS.actions)).toEqual(expect.arrayContaining(['financeAdd', 'financeMove', 'financeUndo',
+      'inventoryFireMode', 'inventoryReload', 'inventoryToggleLoaded']));
     expect('financeAdd' in Base.DEFAULT_OPTIONS.actions).toBe(false);
   });
 

@@ -1186,3 +1186,178 @@
 .finance-ledger .fl-clear[hidden] {
   display: none;
 }
+
+/* ============================================================================
+   Inventory tab (the module's copy of the system's template, root class .tl-inventory). Carried items first with a
+   tinted background, fire mode buttons and the loaded magazine under each weapon. Colours are mixed with the text colour
+   (currentColor) like the Finances tab, so the rules work for every sheet theme.
+   ============================================================================ */
+
+.tl-inventory {
+  --tl-equipped: #2b6cb0;
+  --tl-ok-base: var(--s2d6-crit-success, #2f7822);
+  --tl-low-base: #b7791f;
+  --tl-empty-base: var(--s2d6-crit-fail, #aa0200);
+  --tl-ok: color-mix(in srgb, var(--tl-ok-base) 70%, currentColor);
+  --tl-low: color-mix(in srgb, var(--tl-low-base) 80%, currentColor);
+  --tl-empty: color-mix(in srgb, var(--tl-empty-base) 70%, currentColor);
+  --tl-line: color-mix(in srgb, currentColor 30%, transparent);
+  --tl-muted: color-mix(in srgb, currentColor 70%, transparent);
+}
+
+/* Room for all the icons on one line (the system's last column is 16%) */
+.tl-inventory .items-weapons {
+  grid-template-columns: 5% 30% 6% 6% 10% 11% 11% 21%;
+}
+
+.tl-inventory .tl-controls {
+  white-space: nowrap;
+}
+
+/* Carried items */
+.tl-inventory .item.tl-equipped {
+  background: color-mix(in srgb, var(--tl-equipped) 12%, transparent);
+  box-shadow: inset 3px 0 0 var(--tl-equipped);
+}
+
+.tl-inventory .tl-group-divider {
+  padding: 2px 6px 2px 12px;
+  font-size: 0.8em;
+  color: var(--tl-muted);
+  border-top: 1px solid var(--tl-line);
+}
+
+/* The rows under a weapon */
+.tl-inventory .tl-fire-modes,
+.tl-inventory .tl-ammo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 2px 6px 4px 5%;
+  list-style: none;
+  text-align: left;
+}
+
+.tl-inventory .tl-fire-modes:not(:has(.tl-fire-mode)) {
+  display: none;
+}
+
+.tl-inventory .tl-row-label {
+  min-width: 6em;
+  font-size: 0.8em;
+  color: var(--tl-muted);
+}
+
+.tl-inventory .tl-fire-mode,
+.tl-inventory .tl-reload {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 1px 8px;
+  line-height: 1.5;
+  font-size: 0.85em;
+  border: 1px solid var(--tl-line);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tl-inventory .tl-fire-mode:hover,
+.tl-inventory .tl-reload:hover {
+  border-color: var(--tl-equipped);
+}
+
+.tl-inventory .tl-fire-mode.is-active {
+  background: color-mix(in srgb, var(--tl-equipped) 22%, transparent);
+  border-color: var(--tl-equipped);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-ammo-bar {
+  display: inline-block;
+  width: 70px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--tl-line);
+  overflow: hidden;
+}
+
+.tl-inventory .tl-ammo-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--tl-ok);
+}
+
+.tl-inventory .tl-ammo-low .tl-ammo-bar > span {
+  background: var(--tl-low);
+}
+
+.tl-inventory .tl-ammo-low .tl-ammo-count {
+  color: var(--tl-low);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-ammo-empty .tl-ammo-count {
+  color: var(--tl-empty);
+  font-weight: bold;
+}
+
+.tl-inventory .tl-ammo-count {
+  min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-inventory .tl-badge {
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--tl-empty);
+  background: color-mix(in srgb, var(--tl-empty-base) 15%, transparent);
+}
+
+.tl-inventory .tl-ammo-text {
+  flex: 1 1 8em;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.85em;
+  color: var(--tl-muted);
+}
+
+.tl-inventory .tl-ammo-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tl-inventory .tl-ammo-actions .item-controls {
+  display: flex;
+  gap: 4px;
+}
+
+/* Loaded magazines left out of the Consumables list */
+.tl-inventory .tl-loaded-note {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 6px;
+  font-size: 0.8em;
+  color: var(--tl-muted);
+}
+
+.tl-inventory .tl-loaded-note a {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Reload: one magazine per line */
+.twodsix-ledger-reload .form-footer {
+  flex-direction: column;
+}

@@ -136,6 +136,30 @@
     "ADD_INCOME_ITEM": "Lägg till inkomst & föremål",
     "ADD_WITH_ITEM": "Lägg till transaktion & föremål",
     "ADD_ITEM_HINT": "Lägger även till {name} i inventoryt. Töm beskrivningen för att lämna föremålet utanför.",
-    "CLEAR_FORM": "Töm formuläret"
+    "CLEAR_FORM": "Töm formuläret",
+    "INVENTORY": {
+      "FIRE_MODE": "Eldläge",
+      "LOADED": "Laddat",
+      "UNLOADED": "Oladdat",
+      "NOT_EQUIPPED": "Inte burna",
+      "NO_MAGAZINE": "Inget magasin",
+      "MAGAZINES_ONE": "{count} magasin finns",
+      "MAGAZINES_MANY": "{count} magasin finns",
+      "RESERVE": "{count} i reserv",
+      "OTHERS_ONE": "{count} annat magasin",
+      "OTHERS_MANY": "{count} andra magasin",
+      "RELOAD": "Ladda om",
+      "LOAD": "Ladda",
+      "RELOAD_NONE": "Det finns inget annat magasin att ladda.",
+      "RELOAD_TITLE": "Ladda om {weapon}",
+      "RELOAD_PROMPT": "Vilket magasin laddar du?",
+      "CHOICE_REFILL": "Ett fullt ur samma stapel ({count} kvar)",
+      "LOADED_HIDDEN_ONE": "{count} laddat magasin visas under sitt vapen.",
+      "LOADED_HIDDEN_MANY": "{count} laddade magasin visas under sina vapen.",
+      "SHOW_LOADED": "Visa här också",
+      "HIDE_LOADED": "Dölj",
+      "SETTING_NAME": "Förbättrad Inventory-flik",
+      "SETTING_HINT": "Burna föremål först, knappar för eldlägen, det laddade magasinet under varje vapen och Ladda om med val av magasin. Stäng av för att använda systemets egen Inventory-flik."
+    }
   }
 }

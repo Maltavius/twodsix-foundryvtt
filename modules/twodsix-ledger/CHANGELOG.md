@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- New Inventory tab (on by default, each player can turn it off under Module Settings with "Improved Inventory tab"):
+  - Carried items come first in every list and have a tinted background. A thin "Not equipped" line separates them
+    from the rest.
+  - Weapons with more than one way to fire get a row of fire mode buttons (Single, Burst, Full Auto and so on, after
+    the autofire rules of the world). Every click is one attack in that mode; nothing is stored on the weapon. The last
+    mode used is marked until the page is reloaded.
+  - The loaded magazine is shown directly under the weapon: a bar that turns yellow at a quarter or less and red when
+    empty, the count with - and +, the reserve, and the green check and edit button as before. A weapon whose magazine
+    is not chosen is marked Unloaded.
+  - Reload loads straight away when there is one way to do it, and asks which magazine when there are more (a full one
+    from the same stack, or another magazine that fits).
+  - Loaded magazines are left out of the Consumables list, since they are shown under their weapon. A line under the
+    list says how many, and can show them there too.
+  - All the icons on a weapon row stay (equip, chat, edit, delete). The battery that creates a magazine is only shown
+    on weapons with an ammo value, and the icons no longer wrap to a second line.
 - A trash button next to Add empties the form (amount, description, category and a dropped item). It is only there while
   there is something to empty.
 - Drag an item (from the inventory, the sidebar or a compendium) onto the Finances tab, anywhere on it: Add

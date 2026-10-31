@@ -136,6 +136,30 @@
     "ADD_INCOME_ITEM": "Add Income & Item",
     "ADD_WITH_ITEM": "Add Transaction & Item",
     "ADD_ITEM_HINT": "Adds {name} to the inventory as well. Empty the description to leave the item out.",
-    "CLEAR_FORM": "Empty the form"
+    "CLEAR_FORM": "Empty the form",
+    "INVENTORY": {
+      "FIRE_MODE": "Fire mode",
+      "LOADED": "Loaded",
+      "UNLOADED": "Unloaded",
+      "NOT_EQUIPPED": "Not equipped",
+      "NO_MAGAZINE": "No magazine",
+      "MAGAZINES_ONE": "{count} magazine available",
+      "MAGAZINES_MANY": "{count} magazines available",
+      "RESERVE": "{count} in reserve",
+      "OTHERS_ONE": "{count} other magazine",
+      "OTHERS_MANY": "{count} other magazines",
+      "RELOAD": "Reload",
+      "LOAD": "Load",
+      "RELOAD_NONE": "No other magazine to load.",
+      "RELOAD_TITLE": "Reload {weapon}",
+      "RELOAD_PROMPT": "Which magazine do you load?",
+      "CHOICE_REFILL": "A full one from the same stack ({count} left)",
+      "LOADED_HIDDEN_ONE": "{count} loaded magazine is shown under its weapon.",
+      "LOADED_HIDDEN_MANY": "{count} loaded magazines are shown under their weapons.",
+      "SHOW_LOADED": "Show here too",
+      "HIDE_LOADED": "Hide",
+      "SETTING_NAME": "Improved Inventory tab",
+      "SETTING_HINT": "Carried items first, fire mode buttons, the loaded magazine under each weapon and Reload with a choice of magazine. Turn it off to use the system's own Inventory tab."
+    }
   }
 }
