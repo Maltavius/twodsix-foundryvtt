@@ -153,8 +153,18 @@ export function prepareInventoryContext(sheet, context) {
     }
   }
 
+  // The system writes the weapon's name after a linked magazine; leave it out when the name already says it
+  const parentSuffix = {};
+  for (const item of consumables) {
+    const parent = item.system?.parentName;
+    if (parent && !String(item.name ?? "").includes(parent)) {
+      parentSuffix[item.id] = parent;
+    }
+  }
+
   context.container = container;
   context.inventory = {
+    parentSuffix,
     groupStart,
     weapons,
     armor,

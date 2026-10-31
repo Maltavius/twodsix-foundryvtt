@@ -96,6 +96,15 @@ describe('prepareInventoryContext', () => {
     expect(again.inventory.weapons.w1.open).toBe(false);
   });
 
+  test('the weapon in brackets after a magazine only when its name does not say it', () => {
+    const {context} = makeContext();
+    context.container.consumable[0].system.parentName = 'Gun w2';
+    context.container.consumable[0].name = 'Magazine: Gun w2';
+    context.container.consumable[1].system.parentName = 'Gun w1';
+    prepareInventoryContext({}, context);
+    expect(context.inventory.parentSuffix).toEqual({m2: 'Gun w1'});
+  });
+
   test('secondary armour protection with its types', () => {
     const {context} = makeContext();
     prepareInventoryContext({}, context);

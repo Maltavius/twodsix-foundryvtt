@@ -1258,8 +1258,13 @@
 
 @container (max-width: 620px) {
   .tl-inventory .tl-col-tl,
-  .tl-inventory .tl-col-qty {
+  .tl-inventory .tl-col-qty,
+  .tl-inventory .tl-label-long {
     display: none;
+  }
+
+  .tl-inventory .tl-label-short {
+    display: inline;
   }
 
   .tl-inventory .items-weapons {
@@ -1307,7 +1312,8 @@
 }
 
 .tl-inventory .tl-name-text {
-  min-width: 0;
+  flex: 0 1 auto;
+  min-width: 5em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1319,50 +1325,49 @@
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  padding: 1px 6px;
-  border: 1px solid var(--tl-line);
-  border-radius: 4px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 1em;
   font-size: 0.8em;
+  line-height: 1.6;
   white-space: nowrap;
   cursor: pointer;
 }
 
+/* A weapon with fire modes but no magazine: the pill is only the arrow */
+.tl-inventory .tl-status-none {
+  border-color: var(--tl-line);
+}
+
 .tl-inventory .tl-status:hover,
 .tl-inventory .tl-status.is-open {
-  border-color: var(--tl-equipped);
-}
-
-.tl-inventory .tl-mini-bar {
-  display: inline-block;
-  width: 32px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--tl-line);
-  overflow: hidden;
-}
-
-.tl-inventory .tl-mini-bar > span {
-  display: block;
-  height: 100%;
-  background: var(--tl-ok);
-}
-
-.tl-inventory .tl-status-low .tl-mini-bar > span {
-  background: var(--tl-low);
+  border-color: currentColor;
 }
 
 .tl-inventory .tl-status-count {
   font-variant-numeric: tabular-nums;
 }
 
-.tl-inventory .tl-status-low .tl-status-count {
+.tl-inventory .tl-status-ok {
+  color: var(--tl-ok);
+  background: color-mix(in srgb, var(--tl-ok-base) 12%, transparent);
+}
+
+.tl-inventory .tl-status-low {
   color: var(--tl-low);
+  background: color-mix(in srgb, var(--tl-low-base) 16%, transparent);
   font-weight: bold;
 }
 
-.tl-inventory .tl-status-empty .tl-status-count {
+.tl-inventory .tl-status-empty,
+.tl-inventory .tl-status-unloaded {
   color: var(--tl-empty);
+  background: color-mix(in srgb, var(--tl-empty-base) 14%, transparent);
   font-weight: bold;
+}
+
+.tl-inventory .tl-label-short {
+  display: none;
 }
 
 .tl-inventory .tl-status-caret {
@@ -1468,6 +1473,25 @@
 .tl-inventory .tl-ammo-empty .tl-ammo-count {
   color: var(--tl-empty);
   font-weight: bold;
+}
+
+.tl-inventory .tl-ammo-bar {
+  display: inline-block;
+  width: 70px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--tl-line);
+  overflow: hidden;
+}
+
+.tl-inventory .tl-ammo-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--tl-ok);
+}
+
+.tl-inventory .tl-ammo-low .tl-ammo-bar > span {
+  background: var(--tl-low);
 }
 
 .tl-inventory .tl-ammo-count {

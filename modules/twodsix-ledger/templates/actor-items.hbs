@@ -1,8 +1,9 @@
 {{!-- Twodsix Ledger: the module's copy of the system's actor-items.hbs (twodsix 7.7.1). Changed: carried items get
-     the tl-equipped class and a "Not equipped" line before the rest; weapons have status chips after the name (loaded
-     magazine, Auto) that open the rows with fire mode buttons and the loaded magazine, instead of the Consumables list;
+     the tl-equipped class and a "Not equipped" line before the rest; weapons have Auto after the name and a magazine pill (count and arrow) that open the rows with fire mode buttons and the loaded magazine, instead of the Consumables list;
      loaded magazines are left out of the Consumables list; armour has a radiation column and secondary protection as
-     (+X); Equipment & Tools has a weight column; Storage & Junk and armour have their own column classes. Compare
+     (+X); Equipment & Tools has a weight column; Storage & Junk and armour have their own column classes; TL and Qty
+     have column classes so they can be left out on a narrow sheet; Damage has a short label; a magazine's weapon is
+     shown in brackets only when its name does not already contain it. Compare
      with the system's file when the system changes it. --}}
 {{!-- Sheet Body --}}
 <div class="character-tabs-info character-inventory tl-inventory">
@@ -16,7 +17,7 @@
       <span class="item-name centre tl-col-qty">{{localize "TWODSIX.Actor.Items.Qty"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Weight"}}</span>
       <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Range"}}</span>
-      <span class="item-name centre">{{localize "TWODSIX.Actor.Items.Damage"}}</span>
+      <span class="item-name centre"><span class="tl-label-long">{{localize "TWODSIX.Actor.Items.Damage"}}</span><span class="tl-label-short">{{localize "TWODSIX_LEDGER.INVENTORY.DAMAGE_SHORT"}}</span></span>
       <span class="item-name centre">
         <a class="item-control item-create" data-tooltip='{{localize "TWODSIX.Actor.Items.CreateItem"}}' data-type="weapon" data-action="itemCreate"><i class="fa-solid fa-plus"></i></a>
         <a class="item-control item-viewToggle" data-item-type="weapon" data-action="toggleView">
@@ -47,10 +48,9 @@
                 <a class="tl-status tl-status-{{#if w.ammo}}{{w.ammo.state}}{{else}}none{{/if}}{{#if w.open}} is-open{{/if}}" data-action="inventoryToggleDetails" data-tooltip="{{w.toggleTooltip}}">
                   {{#if w.ammo}}
                     {{#if w.ammo.loaded}}
-                    <span class="tl-mini-bar" aria-hidden="true"><span style="width: {{w.ammo.percent}}%"></span></span>
                     <span class="tl-status-count">{{w.ammo.current}}/{{w.ammo.max}}</span>
                     {{else}}
-                    <span class="tl-chip tl-chip-unloaded">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
+                    <span class="tl-status-count">{{localize "TWODSIX_LEDGER.INVENTORY.UNLOADED"}}</span>
                     {{/if}}
                   {{/if}}
                   <i class="fa-solid {{#if w.open}}fa-chevron-up{{else}}fa-chevron-down{{/if}} tl-status-caret"></i>
@@ -134,6 +134,7 @@
           <li class="tl-ammo tl-ammo-{{ammo.state}}{{#if ammo.loaded}} consumable-row{{/if}}"{{#if ammo.loaded}} data-consumable-id="{{ammo.loaded.id}}" data-parent-id="{{item.id}}"{{/if}}>
             <span class="tl-row-label">{{localize "TWODSIX_LEDGER.INVENTORY.LOADED"}}</span>
             {{#if ammo.loaded}}
+              <span class="tl-ammo-bar" aria-hidden="true"><span style="width: {{ammo.percent}}%"></span></span>
               <span class="tl-ammo-count">{{ammo.current}}/{{ammo.max}}</span>
               <span class="combined-buttons">
                 <button type="button" class="left-button adjust-consumable" data-action="adjustConsumable" data-value="1" {{#iff ammo.current "<=" 0}}disabled{{/iff}}>-</button>
@@ -420,7 +421,7 @@
                       <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="skillTalentRoll">
                         <i class="fa-solid fa-dice" alt="d6" ></i>
                       </span>
-                      <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#iff item.system.parentName "!==" ""}} ({{item.system.parentName}}){{/iff}}</span>
+                      <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#if (lookup @root.inventory.parentSuffix item.id)}} ({{lookup @root.inventory.parentSuffix item.id}}){{/if}}</span>
                       <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
                       <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
                       <span class="item-name centre">{{item.system.currentCount}}/{{item.system.max}}</span>
@@ -475,7 +476,7 @@
                 <span class="mini-dice rollable" data-tooltip="{{twodsix_invertSkillRollShiftClick}}" data-label="{{item.name}}" data-action="skillTalentRoll">
                   <i class="fa-solid fa-dice" alt="d6" ></i>
                 </span>
-                <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#iff item.system.parentName "!==" ""}} ({{item.system.parentName}}){{/iff}}</span>
+                <span class="item-name rollable" data-action="skillTalentRoll">{{item.name}}{{#if (lookup @root.inventory.parentSuffix item.id)}} ({{lookup @root.inventory.parentSuffix item.id}}){{/if}}</span>
                 <span class="item-name centre">{{twodsix_localizeConsumable item.system.subtype}}</span>
                 <input class= "item-value-edit tl-col-qty" type="number" min="0" step="1" value="{{item.system.quantity}}" data-action="selectItem"/>
                 <span class="item-name centre tl-col-tl">{{item.system.techLevel}}</span>

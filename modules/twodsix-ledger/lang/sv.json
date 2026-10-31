@@ -166,7 +166,8 @@
       "COMPACT_NAME": "Kompakta vapenrader",
       "COMPACT_HINT": "Vapen visar bara sin status efter namnet (magasin, Auto). Klicka på statusen för att visa eldlägen och magasin.",
       "RESERVE_PARTIAL_ONE": "{count} i reserv, varav {partial} påbörjat",
-      "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade"
+      "RESERVE_PARTIAL_MANY": "{count} i reserv, varav {partial} påbörjade",
+      "DAMAGE_SHORT": "Skada"
     }
   }
 }

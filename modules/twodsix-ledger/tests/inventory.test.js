@@ -196,3 +196,13 @@ describe('part-used magazines the system put aside', () => {
     expect(unlinkedConsumables(items).map(item => item.id)).toEqual(['p1']);
   });
 });
+
+describe('after a reload of a 5/6 magazine with one more in the stack', () => {
+  test('the full one is loaded and the 5/6 one is in reserve, and can be loaded again', () => {
+    const loaded = magazine('m1', 6, 6, 1);
+    const putAside = magazine('p1', 5, 6, 1);
+    const gun = weapon([loaded, putAside], 'm1', 6);
+    expect(describeWeaponAmmo(gun)).toMatchObject({current: 6, reserve: 1, partial: 1});
+    expect(reloadChoices(gun).map(choice => [choice.kind, choice.id])).toEqual([['select', 'p1']]);
+  });
+});
