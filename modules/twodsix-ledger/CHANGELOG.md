@@ -21,15 +21,16 @@
     rate of fire. At the right end of the name column a pill with the magazine count (green, yellow or red, or Unloaded)
     and an arrow shows or hides the fire modes and the magazine row with its bar; only the name itself attacks. With the new setting "Compact
     weapon rows" they start hidden.
-  - Reload is an icon (with a tooltip), and has a small arrow when there is more than one magazine to choose.
+  - Reload is a plain icon like the others (with a tooltip), with a small arrow when there is more than one magazine to
+    choose.
   - Reserve counts every magazine that is not loaded, part-used ones too ("2 in reserve, 1 part-used"). The system's
     Reload puts a part-used magazine aside as a new item that the weapon does not know about; the module links it to
     the weapon, and finds such magazines that were put aside earlier by name and size, so they can be loaded again.
   - Drag an item onto a carried row of its own list, or onto the list heading or column headings, and it is carried;
     drag it onto a row that is not carried (or the "Not equipped" line) and it goes to the backpack. Its magazines go
     with it, as with the equip button.
-  - Columns are only as wide as they need to be; name, range, damage and description get the rest. When the sheet is
-    narrow, TL and Qty are left out and Damage is labelled Dmg. Qty stays in Consumables and Attachments,
+  - Columns are only as wide as they need to be; name, range, damage and description get the rest. All columns show at the
+    width the sheet opens with; when the sheet is made narrower, TL and Qty are left out and Damage is labelled Dmg. Qty stays in Consumables and Attachments,
     where it is edited.
   - A magazine in the Consumables list shows its weapon in brackets only when its name does not already contain it
     (no more "Magazine: Snub Pistol (Snub Pistol)").

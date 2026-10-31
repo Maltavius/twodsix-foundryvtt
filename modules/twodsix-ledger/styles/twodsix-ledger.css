@@ -1219,44 +1219,44 @@
 }
 
 .tl-inventory .items-weapons {
-  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(4.5em, 1fr)
+  grid-template-columns: var(--tl-dice) minmax(8em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(4.5em, 1fr)
     minmax(4.5em, 1fr) var(--tl-weapon-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-armor.tl-armor {
-  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(5em, 1fr) 5ch
+  grid-template-columns: var(--tl-dice) minmax(8em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(5em, 1fr) 5ch
     var(--tl-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-armor.tl-junk {
-  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) 0 var(--tl-icons);
+  grid-template-columns: var(--tl-dice) minmax(8em, 3fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) 0 var(--tl-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-augments {
-  grid-template-columns: var(--tl-dice) minmax(9em, 2fr) var(--tl-tl) var(--tl-qty) minmax(6em, 2fr) minmax(4em, 1fr)
+  grid-template-columns: var(--tl-dice) minmax(8em, 2fr) var(--tl-tl) var(--tl-qty) minmax(6em, 2fr) minmax(4em, 1fr)
     var(--tl-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-equipment {
-  grid-template-columns: var(--tl-dice) minmax(9em, 2fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(8em, 2fr)
+  grid-template-columns: var(--tl-dice) minmax(8em, 2fr) var(--tl-tl) var(--tl-qty) var(--tl-wt) minmax(8em, 2fr)
     var(--tl-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-consumable {
-  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) 7em 5ch 6ch var(--tl-icons);
+  grid-template-columns: var(--tl-dice) minmax(8em, 3fr) 7em 5ch 6ch var(--tl-icons);
   column-gap: 6px;
 }
 
 .tl-inventory .items-consumable.tl-attach {
-  grid-template-columns: var(--tl-dice) minmax(9em, 3fr) 7em 5ch var(--tl-tl) var(--tl-icons);
+  grid-template-columns: var(--tl-dice) minmax(8em, 3fr) 7em 5ch var(--tl-tl) var(--tl-icons);
 }
 
-@container (max-width: 620px) {
+@container (max-width: 500px) {
   .tl-inventory .tl-col-tl,
   .tl-inventory .tl-col-qty,
   .tl-inventory .tl-label-long {
@@ -1437,8 +1437,7 @@
   color: var(--tl-muted);
 }
 
-.tl-inventory .tl-fire-mode,
-.tl-inventory .tl-reload {
+.tl-inventory .tl-fire-mode {
   flex: 0 0 auto;
   width: auto;
   height: auto;
@@ -1454,9 +1453,17 @@
   cursor: pointer;
 }
 
-.tl-inventory .tl-fire-mode:hover,
-.tl-inventory .tl-reload:hover {
+.tl-inventory .tl-fire-mode:hover {
   border-color: var(--tl-equipped);
+}
+
+.tl-inventory .tl-reload {
+  cursor: pointer;
+}
+
+.tl-inventory .tl-reload-more {
+  margin-left: 1px;
+  font-size: 0.7em;
 }
 
 .tl-inventory .tl-fire-mode.is-active {
