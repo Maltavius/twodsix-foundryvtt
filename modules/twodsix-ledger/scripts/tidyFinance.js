@@ -22,8 +22,12 @@ function findTidyUps() {
   return found;
 }
 
-/** Looks like a settings window to Foundry, which calls `new Menu().render(true)`, but is only a confirm dialog. */
-export class TidyFinanceMenu {
+/**
+ * Foundry only accepts an ApplicationV2 (or FormApplication) as a settings menu and calls `new Menu().render(true)` on it.
+ * This one never draws a window of its own: render shows a confirm dialog instead.
+ */
+export class TidyFinanceMenu extends foundry.applications.api.ApplicationV2 {
+  /** @override */
   async render() {
     const found = findTidyUps();
     if (!found.length) {
