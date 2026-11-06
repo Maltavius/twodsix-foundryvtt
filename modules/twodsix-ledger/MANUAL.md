@@ -1,6 +1,6 @@
 # Twodsix Ledger: manual
 
-**Applies to version: 0.4.4**
+**Applies to version: 0.5.0**
 
 > This manual is kept up to date with every release. The release workflow refuses to publish a version whose number is
 > not on the line above, so update the text first and the number last. See `dev/RELEASING.md` for the checklist.

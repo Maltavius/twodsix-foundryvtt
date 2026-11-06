@@ -81,6 +81,13 @@ jobs:
             echo "### ${version}"
             echo "${changes}"
           } > ../../release-notes.md
-          gh release create "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json \
-            --title "Twodsix Ledger ${GITHUB_REF_NAME#ledger-v}" \
-            --notes-file ../../release-notes.md
+          title="Twodsix Ledger ${version}"
+          if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
+            # The release was made by hand in GitHub (which creates the tag too): add the files and the text to it
+            gh release upload "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json --clobber
+            gh release edit "${GITHUB_REF_NAME}" --title "${title}" --notes-file ../../release-notes.md
+          else
+            gh release create "${GITHUB_REF_NAME}" ../../twodsix-ledger.zip module.json \
+              --title "${title}" \
+              --notes-file ../../release-notes.md
+          fi

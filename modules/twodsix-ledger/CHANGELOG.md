@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 - New setting (per player) "Portrait keeps its aspect ratio": the portrait on the sheet fits inside its frame instead
   of being stretched or cut, without a custom CSS rule.

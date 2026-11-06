@@ -18,6 +18,10 @@ Do these in order. The release workflow checks the marked steps and stops if one
    git push origin ledger-v<version>
    ```
 
+   Without a computer: in GitHub, **Releases → Draft a new release**, choose **Create new tag** `ledger-v<version>` on the
+   branch `experiment/ledger-module`, and publish (the text can be empty). The workflow then adds the zip, `module.json`
+   and the text to that release.
+
 8. Watch **Actions** for a green run, and look at the release: `twodsix-ledger.zip` and `module.json` are attached, and
    the text has the manifest URL, the manual link and **What changed**.
 9. In Foundry, **Check for Update** and try the module.
