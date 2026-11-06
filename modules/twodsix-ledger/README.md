@@ -15,11 +15,14 @@ See the [manual](MANUAL.md) for how to use and set up everything, and the [chang
 
 ## What it does
 
+- A history of every transaction, with in-game dates, categories, filters, search and undo. Accounts (Cash and Digital by
+  default, up to four) and Move money between them. A payment that the account cannot cover is refused.
 - Four cards (Pension, Living costs, Ship payments, Debt) open lists of items that you pay by hand. Every payment becomes
-  an entry in the history, with the in-game month when the world has a calendar.
+  an entry in the history, with the in-game month when the world has a calendar. Empty cards take half the room.
 - Debt is a list of loans. You can take a loan, pay it back (the monthly amount or another amount) and undo it.
-- Add transactions, or move money between accounts, and undo the last entry. Payments that the account cannot cover are
-  refused.
+- Drag an item onto the Finances tab to buy it: its name and price fill in Add transaction, and the item is added to the
+  inventory when you press Add.
+- A notes button in the totals bar opens and closes Financial Notes.
 - The in-game date comes from Simple Calendar if you have it.
 
 ## Inventory
@@ -60,4 +63,4 @@ This module was written with the help of Claude, an AI model from Anthropic, and
 
 ## Status
 
-Experimental, built on Twodsix 7.7.0.
+Experimental. Needs Twodsix 7.7.0 or later, verified with 7.7.1.
