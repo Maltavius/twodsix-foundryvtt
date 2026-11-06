@@ -5,10 +5,11 @@
 #   ledger-switch.sh github   tar bort länken och ställer tillbaka den installerade versionen från GitHub
 #   ledger-switch.sh status   visar vilket läge du är i
 #
-# Ändra de två sökvägarna nedan om de inte stämmer, eller sätt dem som miljövariabler när du kör scriptet.
+# Den lokala kopian är den modulmapp som scriptet ligger i (dev/ ligger direkt under modulen), så det fungerar i vilken
+# utcheckning du än kör det från. Foundrys modulmapp kan ändras med FOUNDRY_MODULES, och LOCAL_MODULE kan sättas för hand.
 
 FOUNDRY_MODULES="${FOUNDRY_MODULES:-$HOME/.local/share/FoundryVTT/Data/modules}"
-LOCAL_MODULE="${LOCAL_MODULE:-$HOME/Projects/feature-finance-twodsix/modules/twodsix-ledger}"
+LOCAL_MODULE="${LOCAL_MODULE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 set -euo pipefail
 
