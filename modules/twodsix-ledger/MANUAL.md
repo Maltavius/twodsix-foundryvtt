@@ -308,6 +308,14 @@ These are per player, under the same settings page:
 | **Automatically expand weapons** (off) | Show the fire modes and the loaded magazine under every weapon from the start. When it is off, press the magazine pill after a weapon's name to show them. Changing the setting also resets weapons you have opened or closed by hand. |
 | **Portrait keeps its aspect ratio** (off) | The portrait on the character sheet fits inside its frame instead of being stretched or cut, without a custom CSS rule. |
 
+### 6.7 Tidy finance texts (GM)
+
+Under Module Settings, **Tidy finance texts** looks through all characters for finance texts (Cash, Debt, and so on) that
+have been filled with extra groups of digits, for example `15,404 419 494`. It shows a list of what it would change, and
+rewrites only the text after you press the button. The amounts are never changed. If nothing is wrong, it says so.
+
+The module also keeps the texts clean from now on, so you only need this once for characters that were already damaged.
+
 ## 7. Data, permissions and compatibility
 
 **Where the data is stored.** Everything the ledger needs is saved on the character as flags (`flags.twodsix-ledger`): the transactions,
@@ -344,6 +352,10 @@ It is still used. The settings window names the character. Move the balance or r
 
 **A number is read wrong, for example 1 234 becomes 1.**
 The number format does not match how you type. Choose the format you use under **Number format**.
+
+**Cash (or another finance text) on the system's own sheet shows a long row of numbers, such as `15,404 419 494`.**
+Twodsix misreads numbers written with a space as thousands separator and adds a group at every change. The amounts are
+right. Run **Tidy finance texts** under Module Settings once; the module then keeps the texts clean.
 
 **The date shown is the real date and not the in-game date.**
 No in-game date was recorded, for example because Simple Calendar was not active when the entry was made. A real-world

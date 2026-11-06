@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import {
   financeTextToNumber,
+  financeUnits,
+  formatFinanceText,
+  getCleanFinanceTexts,
+  getFinanceTextTidyUps,
   getFinanceValueFixes,
   getUnitMultiplier,
   isDeltaFinanceText,
@@ -197,5 +201,62 @@ describe('isDeltaFinanceText', () => {
     expect(financeTextToNumber('+200', simpleParse)).toBe(200);
     expect(financeTextToNumber('-200', simpleParse)).toBe(-200);
     expect(financeTextToNumber('\u22121 500', simpleParse)).toBe(-1500);
+  });
+});
+
+describe('finance text that the system can read back', () => {
+  test('a language with a comma or dot as separator keeps its grouping', () => {
+    expect(formatFinanceText(27150, '', 'en')).toBe('27,150');
+    expect(formatFinanceText(27150, '', 'de')).toBe('27.150');
+  });
+
+  test('a language with a space as separator gets no grouping, so the system cannot misread it', () => {
+    expect(formatFinanceText(27150, '', 'sv')).toBe('27150');
+    expect(formatFinanceText(-50, '', 'sv')).toBe('-50');
+    expect(formatFinanceText(1500.5, '', 'sv')).toBe('1500,5');
+    expect(formatFinanceText(1234567, '', 'fr')).toBe('1234567');
+  });
+
+  test('units are kept and the number is shown in them', () => {
+    expect(formatFinanceText(1500000, 'M', 'sv')).toBe('1,5 M');
+    expect(financeUnits('1,5 M')).toBe('M');
+    expect(financeUnits('27,150 165 240')).toBe('');
+    expect(financeUnits('27 150')).toBe('');
+  });
+
+  test('a change of the number replaces the text the system wrote with a clean one', () => {
+    const damaged = '28 500 000';
+    const update = {system: {financeValues: {cash: 28485}, finances: {cash: damaged}}};
+    expect(getCleanFinanceTexts(update, {cash: '28 500'}, {cash: 28500}, 'sv')).toEqual({cash: '28485'});
+  });
+
+  test('an update that does not change the numbers or the text is left alone', () => {
+    expect(getCleanFinanceTexts({system: {financeValues: {cash: 5}}}, {cash: '5'}, {cash: 5}, 'sv')).toEqual({});
+    expect(getCleanFinanceTexts({flags: {}}, {cash: '5'}, {cash: 5}, 'sv')).toEqual({});
+  });
+
+  test('typed text that has no number is not touched', () => {
+    expect(getCleanFinanceTexts({system: {finances: {cash: 'lots'}}}, {cash: '5'}, {cash: 5}, 'sv')).toEqual({});
+  });
+
+  test('damaged texts are found, healthy ones are not, and the number is never changed', () => {
+    const finances = {cash: '15,404 419 494 504', pension: '0', debt: '1,200', livingCosts: '5000'};
+    const values = {cash: 15404, pension: 0, debt: 1200, livingCosts: 5000};
+    const found = getFinanceTextTidyUps(finances, values, 'en', text => parseFloat(text.replace(/,/g, '')));
+    expect(found).toEqual({cash: {from: '15,404 419 494 504', to: '15,404'}});
+  });
+
+  test('a text that would be read as another number is left for a person to look at', () => {
+    expect(getFinanceTextTidyUps({cash: '1 500'}, {cash: 999}, 'en', text => parseFloat(text.replace(/,/g, '')))).toEqual({cash: {from: '1 500', to: '999'}});
+    expect(getFinanceTextTidyUps({cash: '1 500'}, {cash: 999}, 'en', text => (text === '1 500' ? 999 : 1))).toEqual({});
+  });
+
+  test('over many changes in a Swedish world the text stays one number (the bug this guards against)', () => {
+    const readUnits = text => /^(?<pre>.*?)(?<num>[0-9,.]+)(?<sp>\s*)(?<units>.*?)$/.exec(text).groups.units;
+    let text = formatFinanceText(27000, '', 'sv');
+    for (const value of [28500, 28485, 28480, 30480, 30470]) {
+      text = formatFinanceText(value, readUnits(text), 'sv');
+    }
+    expect(text).toBe('30470');
   });
 });

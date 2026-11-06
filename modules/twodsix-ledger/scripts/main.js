@@ -5,7 +5,7 @@
 import { MODULE_ID, recordLedgerAdjustments } from "./store.js";
 import { createLedgerSheet, findSystemTravellerSheet } from "./sheet.js";
 import { applyConfig, registerSettings } from "./settings.js";
-import { getFinanceValueFixes, parseLocaleNumber } from "./financeText.js";
+import { getCleanFinanceTexts, getFinanceValueFixes, parseLocaleNumber } from "./financeText.js";
 
 /**
  * Register the ledger sheet as the default traveller sheet. Foundry fills in its sheet registry (which is where the
@@ -36,7 +36,24 @@ Hooks.once("ready", () => {
 /** Balance changes made outside the ledger (typing in a field, a macro, another module) get an adjustment entry. */
 Hooks.on("preUpdateActor", (actor, data, options) => {
   recordLedgerAdjustments(actor, data, options);
+  keepFinanceTextClean(actor, data);
 });
+
+/**
+ * The system rewrites a finance text whenever its number changes, and with a space as thousands separator (Swedish,
+ * French, ...) it misreads its own text and adds a group of digits to the end every time. This writes a clean text
+ * after the system has made its change. See formatFinanceText.
+ */
+function keepFinanceTextClean(actor, data) {
+  if (actor.type !== "traveller") {
+    return;
+  }
+  const source = actor.system._source;
+  const texts = getCleanFinanceTexts(data, source.finances, source.financeValues, game.i18n.lang);
+  if (!foundry.utils.isEmpty(texts)) {
+    foundry.utils.setProperty(data, "system.finances", {...data.system?.finances, ...texts});
+  }
+}
 
 /** Characters from chargen or imports can have finance text without the matching numbers. */
 Hooks.on("preCreateActor", actor => {

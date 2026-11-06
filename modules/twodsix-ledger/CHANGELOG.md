@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: finance texts (Cash, Debt, ...) no longer fill up with extra groups of digits such as `15,404 419 494 504`.
+  The cause is in twodsix: when a number changes it rewrites the text, but it does not understand a space as thousands
+  separator (Swedish, French, Russian, ...). It reads `27 150` as 27 with the units `150`, and adds one more group at
+  every change. Worse, a text like that that is edited by hand is read as the small number (a player's Cash became 14).
+  The module now writes the text itself after every change of a finance number, in a form that twodsix reads
+  correctly: a language with a comma or dot as separator is unchanged (`27,150`), other languages get no separator
+  (`27150`). The amounts were never wrong, only the text.
+- New in Module Settings: **Tidy finance texts**. It lists the characters whose texts are damaged, and rewrites only
+  the text after you confirm. The amounts are never changed.
+
 ## 0.5.0
 
 - New setting (per player) "Portrait keeps its aspect ratio": the portrait on the sheet fits inside its frame instead

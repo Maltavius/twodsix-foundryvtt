@@ -7,6 +7,7 @@
  */
 
 import { MODULE_ID } from "./store.js";
+import { TidyFinanceMenu } from "./tidyFinance.js";
 import { EXPAND_SETTING, INVENTORY_SETTING, PORTRAIT_SETTING, forgetOpenedWeapons } from "./inventoryTab.js";
 import {
   BUILTIN_CATEGORIES,
@@ -260,6 +261,14 @@ export function registerSettings() {
     hint: `${PREFIX}.CONFIG_HINT`,
     icon: "fa-solid fa-sliders",
     type: LedgerConfigApp,
+    restricted: true
+  });
+  game.settings.registerMenu(MODULE_ID, "tidyFinance", {
+    name: `${PREFIX}.TIDY_NAME`,
+    label: `${PREFIX}.TIDY_LABEL`,
+    hint: `${PREFIX}.TIDY_HINT`,
+    icon: "fa-solid fa-broom",
+    type: TidyFinanceMenu,
     restricted: true
   });
 }
