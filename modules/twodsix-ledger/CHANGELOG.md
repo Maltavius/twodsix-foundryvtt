@@ -47,6 +47,8 @@
     stack, for one magazine, and the rest are full. Qty of a magazine or power cell says so on hover.
   - Armour has a radiation protection column, and secondary protection as (+X) after the armour value, with the
     protection types on hover. Equipment & Tools has a weight column.
+- A manual, `MANUAL.md`: what the module does, how to use each function and how to set it up. It is checked at every
+  release.
 - A trash button next to Add empties the form (amount, description, category and a dropped item). It is only there while
   there is something to empty.
 - Drag an item (from the inventory, the sidebar or a compendium) onto the Finances tab, anywhere on it: Add

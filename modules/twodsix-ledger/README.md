@@ -11,6 +11,8 @@ in your world.
 https://raw.githubusercontent.com/Maltavius/twodsix-foundryvtt/experiment/ledger-module/modules/twodsix-ledger/module.json
 ```
 
+See the [manual](MANUAL.md) for how to use and set up everything, and the [changelog](CHANGELOG.md) for what has changed.
+
 ## What it does
 
 - Four cards (Pension, Living costs, Ship payments, Debt) open lists of items that you pay by hand. Every payment becomes
