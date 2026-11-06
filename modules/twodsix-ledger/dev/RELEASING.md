@@ -5,7 +5,7 @@ Do these in order. The release workflow checks the marked steps and stops if one
 1. **Test** with the module in a real Foundry (`dev/ledger-switch.sh local`), including what changed since the last release.
 2. **`npx vitest run`** and **`npx eslint modules/twodsix-ledger`** must be clean.
 3. **CHANGELOG.md**: rename `## Unreleased` to `## <version>`, and make sure every change is in it. *(checked)*
-4. **MANUAL.md**: go through it against what changed. New or changed functions, settings, buttons and rules must be in the
+4. **MANUAL.md**: go through it against what changed. New or changed functions (ledger **and** Inventory tab), settings, buttons and rules must be in the
    text, and anything that no longer works must be removed. Then set the line `**Applies to version: <version>**`. *(checked)*
 5. **module.json**: set `version` and the `download` URL (`.../releases/download/ledger-v<version>/twodsix-ledger.zip`).
    *(checked)*

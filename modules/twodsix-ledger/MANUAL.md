@@ -11,9 +11,10 @@
 2. [Installing and updating](#2-installing-and-updating)
 3. [The Finances tab at a glance](#3-the-finances-tab-at-a-glance)
 4. [Using the ledger](#4-using-the-ledger)
-5. [Configuring the module](#5-configuring-the-module)
-6. [Data, permissions and compatibility](#6-data-permissions-and-compatibility)
-7. [Troubleshooting](#7-troubleshooting)
+5. [The Inventory tab](#5-the-inventory-tab)
+6. [Configuring the module](#6-configuring-the-module)
+7. [Data, permissions and compatibility](#7-data-permissions-and-compatibility)
+8. [Troubleshooting](#8-troubleshooting)
 
 ---
 
@@ -21,10 +22,10 @@
 
 Twodsix Ledger replaces the Finances tab of the Twodsix traveller sheet with a ledger. It keeps a **history** of
 everything that happens to a character's money, so you can see where the credits went, and it keeps track of the things a
-traveller pays regularly: rent, ship payments, a pension, loans.
+traveller pays regularly: rent, ship payments, a pension, loans. It also gives the sheet a clearer **Inventory tab**.
 
 Everything else on the sheet is the system's own. The module is a normal sheet that builds on the Twodsix traveller sheet,
-and it takes over only the Finances tab.
+and it takes over only the Finances tab and the Inventory tab (the Inventory tab can be switched off).
 
 What you get:
 
@@ -34,7 +35,10 @@ What you get:
 - **Debt** as a list of loans that you can take, add and pay back.
 - **Drag an item** onto the tab to buy it: its name and price fill in the form, and the item can be added to the inventory in
   the same step.
-- Settings for the **accounts and categories** (GM) and for **how numbers are written** (each player).
+- A clearer **Inventory tab**: carried items first, fire mode buttons, the loaded magazine under each weapon and Reload
+  with a choice of magazine.
+- Settings for the **accounts and categories** (GM), and for **how numbers are written**, the **Inventory tab** and the
+  **portrait** (each player).
 - English and Swedish.
 
 ## 2. Installing and updating
@@ -79,7 +83,7 @@ The tab adapts to the width of the sheet: the cards switch to fewer columns when
 - Amounts are in credits (Cr), rounded to whole credits.
 - Use **−** (minus) for costs and **+** (or nothing) for income. `-200` is a cost of 200, `500` is income of 500.
 - You can write `k` for thousands, `M` for millions and `G` for billions: `1.5k` is 1,500 (with a number format that uses a comma as the decimal mark, write `1,5k`).
-- How numbers are written (1,234 or 1 234 and so on) is a personal setting, see [5.2](#52-number-format-every-player).
+- How numbers are written (1,234 or 1 234 and so on) is a personal setting, see [6.2](#62-number-format-every-player).
 
 ### 4.2 Account balances
 
@@ -187,11 +191,61 @@ interest, add it as a recurring item.
 Press the yellow notes button in the totals bar to open or close **Financial Notes**. It is the same notes field the
 system has always had, so existing notes are still there.
 
-## 5. Configuring the module
+## 5. The Inventory tab
+
+The module also replaces the sheet's **Inventory** tab with a clearer one. It is on by default. Every player can switch it
+off and get the system's own tab back, see [6.6](#66-settings-for-the-inventory-tab-and-the-portrait-every-player).
+
+**Carried items first.** In every list the carried items come first and have a tinted background. A thin *Not equipped*
+line separates them from the rest.
+
+**Carrying and dropping.** Drag an item onto a carried row of its own list, or onto the list heading or the column
+headings, and it is carried. Drag it onto a row that is not carried, or onto the *Not equipped* line, and it goes to the
+backpack. Its magazines go with it, as with the equip button.
+
+**Weapons.**
+
+- A weapon with more than one way to fire gets a row of **fire mode buttons** (Single, Burst, Full Auto and so on, after
+  the autofire rules of the world). Every click is **one attack** in that mode; nothing is stored on the weapon. The last
+  mode used is marked until the page is reloaded.
+- **Auto 3** is shown after the name of weapons with automatic fire, and the buttons say Burst and Full Auto without the
+  rate of fire.
+- At the right end of the name column a **pill** shows the magazine count (green, yellow or red, or *Unloaded*) with an
+  arrow. Press it to show or hide the fire modes and the magazine row. Only the name itself attacks. Weapons start hidden,
+  unless the setting *Automatically expand weapons* is on.
+
+**The magazine.** The loaded magazine is shown directly under the weapon, in the weapon's own columns:
+
+- a **bar** that turns yellow at a quarter or less and red when empty, and the **count** with **−** and **+**;
+- under Qty, the **reserve** as *+2*: the magazines there are besides the loaded one (hover for the magazine's name and
+  the full reserve text). The reserve counts every magazine that is not loaded, part-used ones too;
+- the green check and the edit button as before. A weapon whose magazine is not chosen is marked **Unloaded**.
+
+**Reload.** Reload is a plain icon like the others. It loads straight away when there is only one way to do it. When there
+are more, it asks which magazine to load: a full one from the same stack, or another magazine that fits (the icon gets a
+small arrow then). The system's Reload puts a part-used magazine aside as a new item that the weapon does not know about;
+the module links it back to the weapon, and also finds such magazines that were put aside earlier (by name and size), so
+they can be loaded again.
+
+**Consumables.** Loaded magazines are left out of the Consumables list, since they are shown under their weapon. A line
+under the list says how many, and can show them there too. The **Count** column shows what a stack holds, for example
+*5/6 + 1 full* for Qty 2: the system keeps one count per stack, for one magazine, and the rest are full. A magazine shows
+its weapon in brackets only when the name does not already contain it.
+
+**Armour and equipment.** Armour has a radiation protection column (*Rad*), and secondary protection as *(+X)* after the
+armour value, with the protection types on hover. Equipment & Tools has a weight column.
+
+**Layout.** The name of each list stands in the black heading row. Each list sizes its columns to its own content, and
+the name column takes the rest. When the name column gets too narrow, that list leaves out TL and Qty and labels Damage
+*Dmg*; the other lists keep theirs. Qty stays in Consumables and Attachments, where it is edited. All icons on a row stay
+(equip, chat, edit, delete) at the right end of the row, and they do not wrap to a second line. The battery icon that
+creates a magazine is only shown on weapons with an ammo value.
+
+## 6. Configuring the module
 
 Open **Game Settings → Configure Settings → Twodsix Ledger**.
 
-### 5.1 Accounts and categories (GM)
+### 6.1 Accounts and categories (GM)
 
 Press **Set up accounts and categories**. The settings apply to every character in the world.
 
@@ -212,7 +266,7 @@ Press **Set up accounts and categories**. The settings apply to every character 
 **Back to standard** puts everything back as it was. Press **Save** to apply your changes. Changes in the window do not take
 effect until you save.
 
-### 5.2 Number format (every player)
+### 6.2 Number format (every player)
 
 Under the same settings page, **Number format** decides how amounts are written and read. It is **per player**: every
 player picks their own.
@@ -229,24 +283,34 @@ The choice also decides the **decimal mark** and how what you type is understood
 `1 234` is one thousand two hundred thirty-four. This is what makes it possible to use an English interface with, for
 example, Swedish number formatting.
 
-### 5.3 Simple Calendar (optional)
+### 6.3 Simple Calendar (optional)
 
 If **Simple Calendar** is installed, the ledger shows the current in-game date next to Total funds and stamps every entry
 with it. Without it, entries get the real-world date. Nothing needs to be set up.
 
-### 5.4 Language
+### 6.4 Language
 
 The module is available in English and Swedish and follows the language chosen in Foundry.
 
-### 5.5 Going back to the system's sheet
+### 6.5 Going back to the system's sheet
 
 The module registers a sheet called **Traveller Sheet (with ledger)** as the default for travellers. If you prefer the
 system's own sheet for a character, change it in the sheet's configuration (the ⋮ menu → **Configure Sheet**). The ledger
 data is kept.
 
-## 6. Data, permissions and compatibility
+### 6.6 Settings for the Inventory tab and the portrait (every player)
 
-**Where the data is stored.** Everything is saved on the character as flags (`flags.twodsix-ledger`): the transactions,
+These are per player, under the same settings page:
+
+| Setting | What it does |
+| --- | --- |
+| **Improved Inventory tab** (on) | The Inventory tab described above. Turn it off to use the system's own Inventory tab. |
+| **Automatically expand weapons** (off) | Show the fire modes and the loaded magazine under every weapon from the start. When it is off, press the magazine pill after a weapon's name to show them. Changing the setting also resets weapons you have opened or closed by hand. |
+| **Portrait keeps its aspect ratio** (off) | The portrait on the character sheet fits inside its frame instead of being stretched or cut, without a custom CSS rule. |
+
+## 7. Data, permissions and compatibility
+
+**Where the data is stored.** Everything the ledger needs is saved on the character as flags (`flags.twodsix-ledger`): the transactions,
 the digital balance and any extra accounts, the recurring items and the loans. **Cash** is the system's own number
 (`system.financeValues.cash`), so other tools that read the character's cash see the same value.
 
@@ -257,13 +321,16 @@ something is changed.
 **Permissions.** Players who own a character can use everything on its Finances tab. Others see the ledger but cannot
 change it. Account and category setup is for the GM.
 
+**Inventory tab.** It is built on a copy of the system's inventory template (twodsix 7.7.1). Using a fire mode button
+is one attack and stores nothing on the weapon.
+
 **Compatibility.** Foundry v14, Twodsix 7.7.0 or later (verified with 7.7.1). The sheet's own Debt number is kept equal to
 the sum of the loans, so the rest of the sheet keeps showing the right debt.
 
 **Uninstalling.** Disable the module to go back to the system's tab. The ledger data stays on the characters in case
 you enable the module again.
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 **The Finances tab looks like the system's, not the ledger.**
 Check that the module is enabled under **Manage Modules**, and that the character uses the sheet **Traveller Sheet (with
