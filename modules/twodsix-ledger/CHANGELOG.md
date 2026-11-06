@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.1
 
 - Fixed: finance texts (Cash, Debt, ...) no longer fill up with extra groups of digits such as `15,404 419 494 504`.
   The cause is in twodsix: when a number changes it rewrites the text, but it does not understand a space as thousands
@@ -9,6 +9,9 @@
   The module now writes the text itself after every change of a finance number, in a form that twodsix reads
   correctly: a language with a comma or dot as separator is unchanged (`27,150`), other languages get no separator
   (`27150`). The amounts were never wrong, only the text.
+- Writing an amount with a space in it (`10 500`) in the system's own finance fields, which are shown when a character
+  does not use the ledger sheet, is read by twodsix as 10. This cannot be fixed from the module; write `10500`.
+  The ledger sheet is not affected, its fields read spaces correctly.
 - New in Module Settings: **Tidy finance texts**. It lists the characters whose texts are damaged, and rewrites only
   the text after you confirm. The amounts are never changed.
 

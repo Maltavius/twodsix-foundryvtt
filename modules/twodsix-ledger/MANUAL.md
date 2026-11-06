@@ -1,6 +1,6 @@
 # Twodsix Ledger: manual
 
-**Applies to version: 0.5.0**
+**Applies to version: 0.5.1**
 
 > This manual is kept up to date with every release. The release workflow refuses to publish a version whose number is
 > not on the line above, so update the text first and the number last. See `dev/RELEASING.md` for the checklist.
@@ -356,6 +356,10 @@ The number format does not match how you type. Choose the format you use under *
 **Cash (or another finance text) on the system's own sheet shows a long row of numbers, such as `15,404 419 494`.**
 Twodsix misreads numbers written with a space as thousands separator and adds a group at every change. The amounts are
 right. Run **Tidy finance texts** under Module Settings once; the module then keeps the texts clean.
+
+**A number typed as `10 500` on the system's own Finances tab becomes 10.**
+Twodsix reads a space as the end of the number when it is written in a field of its own sheet (shown for a character that
+does not use the ledger sheet, or when the module is off). Write `10500` there. The ledger's own fields read spaces correctly.
 
 **The date shown is the real date and not the in-game date.**
 No in-game date was recorded, for example because Simple Calendar was not active when the entry was made. A real-world
