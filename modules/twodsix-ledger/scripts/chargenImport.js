@@ -98,22 +98,24 @@ function escapeHtml(text) {
  * @param {object} text
  * @param {string} text.prefix - for example "Character generation"
  * @param {string} text.opening - for example "opening balance"
- * @param {number} [createdAt] - when the character was generated (ms), used as the time of the history entries
+ * @param {number} [createdAt] - when the character was generated (ms); not used for the history, which gets no date
  * @param {Function} makeId - returns a fresh unique id
  * @returns {{transactions: Array<object>|null, loans: Array<object>|null, recurring: Array<object>|null,
  *   notes: string|null, counts: object}} what to save; null means "leave as it is"
  */
 export function planChargenImport(entries, state, text, createdAt, makeId) {
-  const time = Number.isFinite(createdAt) ? createdAt : Date.now();
+  // The entries get no date at all (timestamp 0 shows as an empty date): the real date of character generation is not an
+  // in-game date, and an in-game date would have to be guessed. The order of the history is the order of the list.
+  const time = 0;
 
   // History: income and expenses of the cash account, oldest of all. The cash balance itself is not touched.
   const money = entries.filter(entry => entry.kind === "income" || entry.kind === "expense");
-  const imported = money.map((entry, index) => createTransaction({
+  const imported = money.map(entry => createTransaction({
     amount: entry.kind === "income" ? entry.amount : -entry.amount,
     account: "cash",
     category: entry.kind === "income" ? "income" : (EXPENSE_CATEGORY[entry.source] ?? "other"),
     description: `${text.prefix}: ${entry.label}`
-  }, makeId(), time + index));
+  }, makeId(), time));
   let transactions = null;
   if (imported.length) {
     // If the history and the balance do not add up (cash changed before the ledger ran), one entry makes up the difference
@@ -121,7 +123,7 @@ export function planChargenImport(entries, state, text, createdAt, makeId) {
     const {opening} = computeRunningBalances(combined, state.balances);
     const zero = Object.fromEntries(LEDGER_ACCOUNTS.map(account => [account, 0]));
     const balancing = buildAdjustmentEntries(zero, opening, makeId, {description: `${text.prefix}: ${text.opening}`})
-      .map((entry, index) => ({...entry, timestamp: time - 1 - index}));
+      .map(entry => ({...entry, timestamp: time}));
     transactions = [...balancing, ...combined];
   }
 

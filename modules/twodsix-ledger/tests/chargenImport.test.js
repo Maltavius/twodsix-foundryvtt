@@ -65,10 +65,9 @@ describe('what is put in the ledger', () => {
     expect(result.transactions.reduce((sum, entry) => sum + entry.amount, 0)).toBe(26000);
   });
 
-  test('the entries are given the time of generation', () => {
-    const times = plan().transactions.map(entry => entry.timestamp);
-    expect(times[0]).toBe(Date.parse('2026-11-08T10:00:00.000Z'));
-    expect(times).toEqual([...times].sort((a, b) => a - b));
+  test('the entries get no date: not the real date of generation, and no in-game date', () => {
+    const result = plan(FLAG, emptyState(27500));
+    expect(result.transactions.every(entry => entry.timestamp === 0 && entry.gameDate === '')).toBe(true);
   });
 
   test('if the cash was changed before the ledger ran, one entry makes the history add up', () => {

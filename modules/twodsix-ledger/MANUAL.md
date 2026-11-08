@@ -323,7 +323,7 @@ generation the first time it runs for that character (when the world is opened, 
 happens once per character, and the chargen module is not needed for the ledger to work.
 
 - Income and expenses (mustering-out cash, medical care, anagathics, lawyer, ...) become history entries labelled
-  "Character generation". The Cash balance is not changed: it was already set. If the history would not add up to the
+  "Character generation" and no date. The Cash balance is not changed: it was already set. If the history would not add up to the
   balance, one "opening balance" entry makes up the difference.
 - Debt (medical bills) becomes a loan, unless the character already has loans of its own saved.
 - Pension becomes a recurring yearly item in the Pension group, unless one with the same amount already exists.
