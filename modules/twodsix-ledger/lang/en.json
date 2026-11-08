@@ -182,6 +182,8 @@
       "QTY_TOOLTIP": "Number of magazines in the stack. The count is for one of them; the rest are full."
     },
     "PORTRAIT_NAME": "Portrait keeps its aspect ratio",
-    "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut."
+    "PORTRAIT_HINT": "The portrait on the character sheet fits inside its frame instead of being stretched or cut.",
+    "CHARGEN_PREFIX": "Character generation",
+    "CHARGEN_OPENING": "opening balance"
   }
 }

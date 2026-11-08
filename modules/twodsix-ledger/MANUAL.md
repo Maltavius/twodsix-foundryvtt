@@ -316,6 +316,24 @@ rewrites only the text after you press the button. The amounts are never changed
 
 The module also keeps the texts clean from now on, so you only need this once for characters that were already damaged.
 
+### 6.8 Money from character generation
+
+If the character was made with the **Twodsix Chargen MgT2e** module, the ledger picks up the money from character
+generation the first time it runs for that character (when the world is opened, or when the character is created). It
+happens once per character, and the chargen module is not needed for the ledger to work.
+
+- Income and expenses (mustering-out cash, medical care, anagathics, lawyer, ...) become history entries labelled
+  "Character generation". The Cash balance is not changed: it was already set. If the history would not add up to the
+  balance, one "opening balance" entry makes up the difference.
+- Debt (medical bills) becomes a loan, unless the character already has loans of its own saved.
+- Pension becomes a recurring yearly item in the Pension group, unless one with the same amount already exists.
+- Ship shares are not money, so they are added as a line in the financial notes.
+
+Only one client does the import (the GM if one is online, otherwise the owner with the lowest user id). The chargen
+data is never changed, and the character is marked with `flags.twodsix-ledger.chargenImported` so nothing is booked
+twice. Data from a newer chargen format than the ledger understands is skipped and a warning is written to the
+browser console.
+
 ## 7. Data, permissions and compatibility
 
 **Where the data is stored.** Everything the ledger needs is saved on the character as flags (`flags.twodsix-ledger`): the transactions,

@@ -182,6 +182,8 @@
       "QTY_TOOLTIP": "Antal magasin i stapeln. Räknaren gäller ett av dem, resten är fulla."
     },
     "PORTRAIT_NAME": "Porträttet behåller sina proportioner",
-    "PORTRAIT_HINT": "Porträttet på rollformuläret får plats i sin ram i stället för att sträckas ut eller beskäras."
+    "PORTRAIT_HINT": "Porträttet på rollformuläret får plats i sin ram i stället för att sträckas ut eller beskäras.",
+    "CHARGEN_PREFIX": "Karaktärsskapande",
+    "CHARGEN_OPENING": "ingående saldo"
   }
 }

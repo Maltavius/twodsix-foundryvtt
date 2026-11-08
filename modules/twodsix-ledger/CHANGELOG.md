@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- New: money from the Twodsix Chargen MgT2e module is imported into the ledger once per character (history entries,
+  debt as a loan, pension as a yearly recurring item, ship shares as a note). The cash balance is not changed. See
+  the manual, section 6.8.
+
 ## 0.5.1
 
 - Fixed: finance texts (Cash, Debt, ...) no longer fill up with extra groups of digits such as `15,404 419 494 504`.

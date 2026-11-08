@@ -25,6 +25,7 @@ import {
 } from './ledger.js';
 
 import { financeTextToNumber, parseLocaleNumber } from './financeText.js';
+import { CHARGEN_MODULE_ID, planChargenImport, readChargenFinances } from './chargenImport.js';
 import {
   createRecurringItem,
   normalizeRecurringItems,
@@ -526,4 +527,69 @@ export function recordLedgerAdjustments(actor, data, options) {
   if (entries.length) {
     foundry.utils.setProperty(data, `flags.${MODULE_ID}.transactions`, [...getStoredTransactions(actor), ...entries]);
   }
+}
+
+/**
+ * Does the actor have money from character generation that the ledger has not imported yet?
+ * Reads `actor.flags` rather than `getFlag`, which throws for a module that is not active.
+ * @param {TwodsixActor} actor
+ * @returns {boolean}
+ */
+export function hasPendingChargenImport(actor) {
+  return actor.type === "traveller"
+    && actor.flags?.[CHARGEN_MODULE_ID]?.finances !== undefined
+    && !actor.flags?.[MODULE_ID]?.chargenImported;
+}
+
+/**
+ * Import the money from character generation (the flag of the chargen module) into the ledger, once. The cash balance is
+ * not changed: the system already holds it. Nothing happens if there is no flag, if it has been imported before, or if it
+ * is from a newer version than this code understands (then a warning is logged and the flag is left for a later version).
+ * The chargen flag itself is never changed.
+ * @param {TwodsixActor} actor
+ * @returns {Promise<boolean>} true if something was imported
+ */
+export async function importChargenFinances(actor) {
+  if (!hasPendingChargenImport(actor)) {
+    return false;
+  }
+  const read = readChargenFinances(actor.flags[CHARGEN_MODULE_ID].finances);
+  if (!read.ok) {
+    if (read.reason !== "missing") {
+      console.warn(`${MODULE_ID} | Not importing character generation money for ${actor.name}: ${read.reason === "version" ? "the data is from a newer version than this ledger understands" : "the data is not valid"}.`);
+    }
+    return false;
+  }
+  const localize = key => game.i18n.localize(key);
+  const notes = actor.system?._source?.finances?.["financial-notes"] ?? "";
+  const plan = planChargenImport(read.entries, {
+    transactions: getStoredTransactions(actor),
+    balances: getStoredBalances(actor),
+    storedLoans: actor.getFlag(MODULE_ID, "loans") ?? undefined,
+    recurring: getRecurringItems(actor),
+    notes
+  }, {prefix: localize("TWODSIX_LEDGER.CHARGEN_PREFIX"), opening: localize("TWODSIX_LEDGER.CHARGEN_OPENING")}, read.createdAt, () => foundry.utils.randomID());
+
+  const update = {
+    [`flags.${MODULE_ID}.chargenImported`]: true,
+    [`flags.${MODULE_ID}.chargenImportedAt`]: new Date().toISOString()
+  };
+  if (plan.transactions) {
+    update[`flags.${MODULE_ID}.transactions`] = plan.transactions;
+  }
+  if (plan.loans) {
+    // Debt on the sheet beyond what chargen lists stays as a loan of its own
+    const sheetDebt = Number(actor.system?._source?.financeValues?.debt) || 0;
+    const rest = sheetDebt - totalOwed(plan.loans);
+    const loans = rest > 0 ? [...seedLoans(rest, localize("TWODSIX_LEDGER.SEED_DEBT")), ...plan.loans] : plan.loans;
+    update[`flags.${MODULE_ID}.loans`] = loans;
+  }
+  if (plan.recurring) {
+    update[`flags.${MODULE_ID}.recurring`] = plan.recurring;
+  }
+  if (plan.notes !== null) {
+    update["system.finances.financial-notes"] = plan.notes;
+  }
+  await actor.update(update, {twodsixLedger: true});
+  return true;
 }

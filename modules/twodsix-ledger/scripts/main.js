@@ -2,7 +2,8 @@
  * Twodsix Ledger: a transaction ledger for the Finances tab of the Twodsix traveller sheet.
  */
 
-import { MODULE_ID, recordLedgerAdjustments } from "./store.js";
+import { MODULE_ID, hasPendingChargenImport, importChargenFinances, recordLedgerAdjustments } from "./store.js";
+import { CHARGEN_MODULE_ID as CHARGEN_FLAG_SCOPE, chooseImporterId } from "./chargenImport.js";
 import { createLedgerSheet, findSystemTravellerSheet } from "./sheet.js";
 import { applyConfig, registerSettings } from "./settings.js";
 import { getCleanFinanceTexts, getFinanceValueFixes, parseLocaleNumber } from "./financeText.js";
@@ -82,4 +83,37 @@ Hooks.once("ready", async () => {
     }
   }
   await game.settings.set(MODULE_ID, "financeValuesSynced", true);
+});
+
+/**
+ * Money from the MgT2e character generation module is imported into the ledger once. Only one client does it for an
+ * actor: the GM if one is online, otherwise the online owner with the lowest id. The marker flag is checked again just
+ * before importing.
+ */
+async function importChargenFor(actor) {
+  if (!hasPendingChargenImport(actor)) {
+    return;
+  }
+  const owners = game.users.filter(user => user.active && actor.testUserPermission(user, "OWNER")).map(user => user.id);
+  if (chooseImporterId(game.users.activeGM?.id, owners) !== game.user.id) {
+    return;
+  }
+  try {
+    await importChargenFinances(actor);
+  } catch (error) {
+    console.error(`${MODULE_ID} | Could not import character generation money for ${actor.name}`, error);
+  }
+}
+
+Hooks.once("ready", async () => {
+  for (const actor of game.actors.filter(candidate => candidate.type === "traveller")) {
+    await importChargenFor(actor);
+  }
+});
+Hooks.on("createActor", actor => importChargenFor(actor));
+// The chargen module may write its flag after the actor exists
+Hooks.on("updateActor", (actor, change) => {
+  if (change?.flags?.[CHARGEN_FLAG_SCOPE]?.finances !== undefined) {
+    importChargenFor(actor);
+  }
 });
