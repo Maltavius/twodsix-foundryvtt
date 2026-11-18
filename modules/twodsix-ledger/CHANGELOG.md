@@ -1,13 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.6.0
 
 - New: money from the Twodsix Chargen MgT2e module is imported into the ledger once per character (history entries,
   debt as a loan, pension as a yearly recurring item, ship shares as a note). The cash balance is not changed. See
   the manual, section 6.8.
-
-## 0.5.1
-
 - Fixed: finance texts (Cash, Debt, ...) no longer fill up with extra groups of digits such as `15,404 419 494 504`.
   The cause is in twodsix: when a number changes it rewrites the text, but it does not understand a space as thousands
   separator (Swedish, French, Russian, ...). It reads `27 150` as 27 with the units `150`, and adds one more group at
